@@ -38,7 +38,7 @@ public class StatsIntegrationTest {
 	}
 
 	@Test
-	public void shouldCreateArtistNodes() throws Throwable {
+	public void shouldCreateArtistNodes() {
 
 		try (var driver = GraphDatabase.driver(boltURI, driverConfig);
 			var session = driver.session()) {
@@ -52,7 +52,7 @@ public class StatsIntegrationTest {
 	}
 
 	@Test
-	public void shouldCreateAlbumNodesWithRelations() throws Throwable {
+	public void shouldCreateAlbumNodesWithRelations() {
 
 		try (var driver = GraphDatabase.driver(boltURI, driverConfig);
 			var session = driver.session()) {

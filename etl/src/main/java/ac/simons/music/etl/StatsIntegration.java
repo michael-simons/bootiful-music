@@ -7,7 +7,6 @@ import java.util.Map;
 
 import org.jooq.impl.DSL;
 import org.neo4j.graphdb.GraphDatabaseService;
-import org.neo4j.logging.Log;
 import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Mode;
 import org.neo4j.procedure.Name;
@@ -22,16 +21,25 @@ import org.neo4j.procedure.Procedure;
 public class StatsIntegration {
 
 	private static final String CREATE_ARTIST_NODE = "MERGE (a:Artist {name: $artistName}) RETURN a";
+
 	private static final String CREATE_ALBUM_WITH_ARTIST //
-		= "MERGE (artist:Artist {name: $artistName})\n"
-		+ "MERGE (album:Album {name: $albumName, releasedIn: $releasedIn})\n"
-		+ "MERGE (album) - [:RELEASED_BY] -> (artist)";
+		= " MERGE (artist:Artist {name: $artistName})"
+		+ " MERGE (album:Album {name: $albumName, releasedIn: $releasedIn})"
+		+ " MERGE (album) - [:RELEASED_BY] -> (artist)";
+
+	private static final String CREATE_TRACK_IN_ALBUM // Regarding FOREACH see https://stackoverflow.com/a/27578798
+		= " MATCH (album:Album {name: $albumName}) - [:RELEASED_BY] -> (artist:Artist {name: $artistName})"
+		+ " OPTIONAL MATCH (possibleTrack:Track {name: $trackName}) <- [:CONTAINS] - (:Album) - [:RELEASED_BY] -> (artist)"
+		+ " FOREACH( _ IN CASE WHEN possibleTrack IS NULL THEN ['create_track_and_add_relation'] ELSE [] END |"
+		+ "   CREATE (newTrack:Track {name: $trackName})"
+		+ "   MERGE (album) - [:CONTAINS {discNumber: $discNumber, trackNumber: $trackNumber}] -> (newTrack)"
+		+ " ) "
+		+ " FOREACH( _ IN CASE WHEN possibleTrack IS NOT NULL THEN ['add_relation'] ELSE [] END |"
+		+ "   MERGE (album) - [:CONTAINS {discNumber: $discNumber, trackNumber: $trackNumber}] -> (possibleTrack)"
+		+ " )";
 
 	@Context
 	public GraphDatabaseService db;
-
-	@Context
-	public Log log;
 
 	@Procedure(name = "stats.loadArtistData", mode = Mode.WRITE)
 	public void loadArtistData(
@@ -62,10 +70,13 @@ public class StatsIntegration {
 		try (var connection = DriverManager.getConnection(url, userName, password);
 			var neoTransaction = db.beginTx()) {
 
-			DSL.using(connection)
+			var stats = DSL.using(connection);
+			var isNoCompilation = TRACKS.COMPILATION.eq("f");
+
+			stats
 				.selectDistinct(ARTISTS.ARTIST, TRACKS.ALBUM, TRACKS.YEAR)
 				.from(TRACKS).join(ARTISTS).onKey()
-				.where(TRACKS.COMPILATION.eq("f"))
+				.where(isNoCompilation)
 				.forEach(r -> {
 						var parameters = Map.<String, Object>of(
 							"artistName", r.get(ARTISTS.ARTIST),
@@ -74,6 +85,22 @@ public class StatsIntegration {
 						db.execute(CREATE_ALBUM_WITH_ARTIST, parameters);
 					}
 				);
+
+			stats
+				.select(ARTISTS.ARTIST, TRACKS.ALBUM, TRACKS.NAME, TRACKS.DISC_NUMBER, TRACKS.TRACK_NUMBER)
+				.from(TRACKS).join(ARTISTS).onKey()
+				.where(isNoCompilation)
+				.forEach(r -> {
+					var parameters = Map.<String, Object>of(
+						"artistName", r.get(ARTISTS.ARTIST),
+						"albumName", r.get(TRACKS.ALBUM),
+						"trackName", r.get(TRACKS.NAME),
+						"discNumber", r.get(TRACKS.DISC_NUMBER),
+						"trackNumber", r.get(TRACKS.TRACK_NUMBER)
+					);
+					db.execute(CREATE_TRACK_IN_ALBUM, parameters);
+				});
+
 			neoTransaction.success();
 		} catch (Exception e) {
 			e.printStackTrace();
