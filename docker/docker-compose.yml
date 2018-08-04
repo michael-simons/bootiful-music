@@ -1,21 +1,35 @@
 version: '3.7'
 
 services:
-  database:
+  statsdb:
     image: bootiful-music/statsdb
     build: 
-      context: database
+      context: statsdb
     environment:
       - POSTGRES_DB=bootiful-music
       - POSTGRES_USER=root
       - POSTGRES_PASSWORD_FILE=/run/secrets/database_root_password
     volumes:
-      - ./var/database:/var/lib/postgresql/data
+      - ./var/statsdb:/var/lib/postgresql/data
     secrets:
       - database_root_password
       - database_statsdb_password
     ports:
       - "5432:5432"
+  knowledgedb:
+      image: bootiful-music/knowledgedb
+      build:
+        context: knowledgedb
+      environment:
+        - NEO4J_AUTH=neo4j/spring
+      volumes:
+        - ./var/knowledgedb:/data
+        - ./var/knowledgedb/plugins:/var/lib/neo4j/plugins
+      ports:
+        - "7474:7474"
+        - "7687:7687"
+      links:
+        - statsdb
 
 secrets:
   database_root_password:
