@@ -28,3 +28,7 @@ nbbuild/
 dist/
 nbdist/
 .nb-gradle/
+
+# Node and NPM
+node_modules
+node
