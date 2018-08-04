@@ -21,10 +21,12 @@ services:
       build:
         context: knowledgedb
       environment:
-        - NEO4J_AUTH=neo4j/spring
+        - NEO4J_AUTH_FILE=/run/secrets/knowledgedb_root_password
       volumes:
         - ./var/knowledgedb:/data
         - ./var/knowledgedb/plugins:/var/lib/neo4j/plugins
+      secrets:
+        - knowledgedb_root_password
       ports:
         - "7474:7474"
         - "7687:7687"
@@ -36,3 +38,5 @@ secrets:
     file: ./secrets/${PROFILE}/database_root_password
   database_statsdb_password:
     file: ./secrets/${PROFILE}/database_statsdb_password
+  knowledgedb_root_password:
+    file: ./secrets/${PROFILE}/knowledgedb_root_password
