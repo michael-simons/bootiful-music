@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+		 xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+		 xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+
+	<groupId>ac.simons.music</groupId>
+	<artifactId>statsdb</artifactId>
+	<version>0.0.1-SNAPSHOT</version>
+
+	<properties>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+
+		<java.version>10</java.version>
+		<jooq.version>3.11.3</jooq.version>
+		<postgresql.version>42.2.4</postgresql.version>
+		<maven-compiler-plugin.version>3.7.0</maven-compiler-plugin.version>
+		<maven-shade-plugin.version>2.4.3</maven-shade-plugin.version>
+		<maven-surefire-plugin.version>2.22.0</maven-surefire-plugin.version>
+
+		<db.url>jdbc:postgresql://localhost:5432/bootiful-databases</db.url>
+		<db.username>bootiful-databases</db.username>
+		<db.password>bootiful-databases</db.password>
+	</properties>
+
+	<dependencies>
+		<dependency>
+			<groupId>org.postgresql</groupId>
+			<artifactId>postgresql</artifactId>
+			<version>${postgresql.version}</version>
+			<scope>runtime</scope>
+		</dependency>
+
+		<dependency>
+			<groupId>org.jooq</groupId>
+			<artifactId>jooq</artifactId>
+			<version>${jooq.version}</version>
+		</dependency>
+	</dependencies>
+
+	<build>
+		<plugins>
+			<plugin>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<version>${maven-compiler-plugin.version}</version>
+				<configuration>
+					<source>${java.version}</source>
+					<target>${java.version}</target>
+					<compilerArgs>
+						<arg>--add-modules</arg>
+						<arg>java.xml.ws.annotation</arg>
+					</compilerArgs>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.jooq</groupId>
+				<artifactId>jooq-codegen-maven</artifactId>
+				<version>${jooq.version}</version>
+				<!-- The jOOQ code generation plugin is also executed in the generate-sources
+					phase, prior to compilation -->
+				<executions>
+					<execution>
+						<phase>generate-sources</phase>
+						<goals>
+							<goal>generate</goal>
+						</goals>
+					</execution>
+				</executions>
+				<configuration>
+					<jdbc>
+						<driver>org.postgresql.Driver</driver>
+						<url>${db.url}</url>
+						<user>${db.username}</user>
+						<password>${db.password}</password>
+					</jdbc>
+					<generator>
+						<database>
+							<name>org.jooq.meta.postgres.PostgresDatabase</name>
+							<schemaVersionProvider>SELECT :schema_name || '_' || MAX("version") FROM "schema_version"</schemaVersionProvider>
+							<includes>.*</includes>
+							<excludes>schema_version</excludes>
+							<schemata>
+								<schema>
+									<inputSchema>public</inputSchema>
+									<outputSchemaToDefault>true</outputSchemaToDefault>
+								</schema>
+							</schemata>
+						</database>
+						<generate>
+							<deprecated>false</deprecated>
+						</generate>
+						<target>
+							<packageName>ac.simons.music.statsdb</packageName>
+							<directory>target/generated-sources/jooq</directory>
+						</target>
+					</generator>
+				</configuration>
+			</plugin>
+		</plugins>
+	</build>
+
+</project>

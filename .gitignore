@@ -32,3 +32,6 @@ nbdist/
 # Node and NPM
 node_modules
 node
+
+# Shade plugin
+dependency-reduced-pom.xml
