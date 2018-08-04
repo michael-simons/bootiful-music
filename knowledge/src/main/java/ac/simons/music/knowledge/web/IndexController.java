@@ -13,30 +13,22 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package ac.simons.music.knowledge.domain;
+package ac.simons.music.knowledge.web;
 
-import java.time.Year;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Map;
 
-import org.neo4j.ogm.annotation.NodeEntity;
-import org.neo4j.ogm.annotation.Relationship;
+import org.springframework.http.MediaType;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.servlet.ModelAndView;
 
 /**
  * @author Michael J. Simons
  */
-@NodeEntity
-public class SoloArtist extends AbstractArtist {
-
-	@Relationship(type = "PLAYED_IN")
-	private List<PlayedIn> playedIn = new ArrayList<>();
-
-	public SoloArtist(String name) {
-		super(name);
-	}
-
-	public SoloArtist playedIn(Band band, Year from, Year to) {
-		this.playedIn.add(new PlayedIn(this, band, List.of(from + "-" + to)));
-		return this;
+@Controller
+public class IndexController {
+	@GetMapping(value = "/", produces = MediaType.TEXT_HTML_VALUE)
+	public ModelAndView index() {
+		return new ModelAndView("index");
 	}
 }

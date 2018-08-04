@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+<head>
+  <meta name="generator" content="HTML Tidy for HTML5 for Apple macOS version 5.6.0" />
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+  <meta name="description" content="" />
+  <meta name="author" content="" />
+  <title>knowledge | bootiful-music</title>
+  <link th:href="@{/stylesheets/application.css}" rel="stylesheet" data-turbolinks-track="reload" />
+  <script th:src="@{/javascripts/application.js}" data-turbolinks-track="reload"></script>
+</head>
+<body>
+  <nav class="navbar navbar-expand-md navbar-dark bg-dark fixed-top">
+    <a class="navbar-brand" href="#" th:href="@{/}">knowledge</a>
+    <div class="collapse navbar-collapse" id="navbarsExampleDefault">
+      <ul class="navbar-nav mr-auto">
+        <li class="nav-item active">
+          <a class="nav-link" href="#" th:href="@{/artists}">Artists</a>
+        </li>
+      </ul>
+    </div>
+  </nav>
+  <main role="main" class="container">
+    <header class="row intro">
+      <div class="col">
+        <h1>A music knowledge base</h1>
+      </div>
+    </header>
+    <div layout:fragment="content"></div>
+  </main><!-- /.container -->
+</body>
+</html>
