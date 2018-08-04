@@ -20,9 +20,10 @@
 		<maven-shade-plugin.version>2.4.3</maven-shade-plugin.version>
 		<maven-surefire-plugin.version>2.22.0</maven-surefire-plugin.version>
 
-		<db.url>jdbc:postgresql://localhost:5432/bootiful-databases</db.url>
-		<db.username>bootiful-databases</db.username>
-		<db.password>bootiful-databases</db.password>
+		<db.url>jdbc:postgresql://localhost:5432/bootiful-music</db.url>
+		<db.username>statsdb-dev</db.username>
+		<db.password>dev</db.password>
+		<db.schema>gen</db.schema>
 	</properties>
 
 	<dependencies>
@@ -46,8 +47,6 @@
 				<groupId>org.flywaydb</groupId>
 				<artifactId>flyway-maven-plugin</artifactId>
 				<version>${flyway.version}</version>
-				<!-- Note that we're executing the Flyway plugin in the "generate-sources"
-					phase -->
 				<executions>
 					<execution>
 						<phase>generate-sources</phase>
@@ -56,20 +55,19 @@
 						</goals>
 					</execution>
 				</executions>
-				<!-- Note that we need to prefix the db/migration path with filesystem:
-					to prevent Flyway from looking for our migration scripts only on the classpath -->
 				<configuration>
 					<url>${db.url}</url>
 					<user>${db.username}</user>
 					<password>${db.password}</password>
+					<schemas>
+						<schema>${db.schema}</schema>
+					</schemas>
 				</configuration>
 			</plugin>
 			<plugin>
 				<groupId>org.jooq</groupId>
 				<artifactId>jooq-codegen-maven</artifactId>
 				<version>${jooq.version}</version>
-				<!-- The jOOQ code generation plugin is also executed in the generate-sources
-					phase, prior to compilation -->
 				<executions>
 					<execution>
 						<phase>generate-sources</phase>
@@ -88,12 +86,12 @@
 					<generator>
 						<database>
 							<name>org.jooq.meta.postgres.PostgresDatabase</name>
-							<schemaVersionProvider>SELECT :schema_name || '_' || MAX("version") FROM "flyway_schema_history"</schemaVersionProvider>
+							<schemaVersionProvider>SELECT :schema_name || '_' || MAX(version) FROM ${db.schema}.flyway_schema_history</schemaVersionProvider>
 							<includes>.*</includes>
 							<excludes>schema_version</excludes>
 							<schemata>
 								<schema>
-									<inputSchema>public</inputSchema>
+									<inputSchema>${db.schema}</inputSchema>
 									<outputSchemaToDefault>true</outputSchemaToDefault>
 								</schema>
 							</schemata>

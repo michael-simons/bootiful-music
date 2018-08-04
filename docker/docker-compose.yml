@@ -1,0 +1,24 @@
+version: '3.7'
+
+services:
+  database:
+    image: bootiful-music/statsdb
+    build: 
+      context: database
+    environment:
+      - POSTGRES_DB=bootiful-music
+      - POSTGRES_USER=root
+      - POSTGRES_PASSWORD_FILE=/run/secrets/database_root_password
+    volumes:
+      - ./var/database:/var/lib/postgresql/data
+    secrets:
+      - database_root_password
+      - database_statsdb_password
+    ports:
+      - "5432:5432"
+
+secrets:
+  database_root_password:
+    file: ./secrets/${PROFILE}/database_root_password
+  database_statsdb_password:
+    file: ./secrets/${PROFILE}/database_statsdb_password
