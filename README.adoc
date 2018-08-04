@@ -2,5 +2,5 @@
 
 To build the modules of this project, you have to have PostgreSQL database with some defined schemas up and running.
 There's a Docker module and a Docker Compose file to help you with that:
-Please run `(cd docker && docker-compose up)&` from the root of this project.
+Please run `(cd docker && docker-compose up -d)` from the root of this project.
 To stop the processes, use  `(cd docker && docker-compose stop)`.
