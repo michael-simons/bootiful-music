@@ -12,6 +12,7 @@
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 
+		<flyway.version>5.0.7</flyway.version>
 		<java.version>10</java.version>
 		<jooq.version>3.11.3</jooq.version>
 		<postgresql.version>42.2.4</postgresql.version>
@@ -42,15 +43,25 @@
 	<build>
 		<plugins>
 			<plugin>
-				<artifactId>maven-compiler-plugin</artifactId>
-				<version>${maven-compiler-plugin.version}</version>
+				<groupId>org.flywaydb</groupId>
+				<artifactId>flyway-maven-plugin</artifactId>
+				<version>${flyway.version}</version>
+				<!-- Note that we're executing the Flyway plugin in the "generate-sources"
+					phase -->
+				<executions>
+					<execution>
+						<phase>generate-sources</phase>
+						<goals>
+							<goal>migrate</goal>
+						</goals>
+					</execution>
+				</executions>
+				<!-- Note that we need to prefix the db/migration path with filesystem:
+					to prevent Flyway from looking for our migration scripts only on the classpath -->
 				<configuration>
-					<source>${java.version}</source>
-					<target>${java.version}</target>
-					<compilerArgs>
-						<arg>--add-modules</arg>
-						<arg>java.xml.ws.annotation</arg>
-					</compilerArgs>
+					<url>${db.url}</url>
+					<user>${db.username}</user>
+					<password>${db.password}</password>
 				</configuration>
 			</plugin>
 			<plugin>
@@ -77,7 +88,7 @@
 					<generator>
 						<database>
 							<name>org.jooq.meta.postgres.PostgresDatabase</name>
-							<schemaVersionProvider>SELECT :schema_name || '_' || MAX("version") FROM "schema_version"</schemaVersionProvider>
+							<schemaVersionProvider>SELECT :schema_name || '_' || MAX("version") FROM "flyway_schema_history"</schemaVersionProvider>
 							<includes>.*</includes>
 							<excludes>schema_version</excludes>
 							<schemata>
@@ -95,6 +106,18 @@
 							<directory>target/generated-sources/jooq</directory>
 						</target>
 					</generator>
+				</configuration>
+			</plugin>
+			<plugin>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<version>${maven-compiler-plugin.version}</version>
+				<configuration>
+					<source>${java.version}</source>
+					<target>${java.version}</target>
+					<compilerArgs>
+						<arg>--add-modules</arg>
+						<arg>java.xml.ws.annotation</arg>
+					</compilerArgs>
 				</configuration>
 			</plugin>
 		</plugins>
