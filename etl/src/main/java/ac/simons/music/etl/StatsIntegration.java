@@ -23,6 +23,7 @@ import java.util.Map;
 import org.jooq.impl.DSL;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.procedure.Context;
+import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Mode;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
@@ -57,6 +58,7 @@ public class StatsIntegration {
 	public GraphDatabaseService db;
 
 	@Procedure(name = "stats.loadArtistData", mode = Mode.WRITE)
+	@Description("Loads all artist data from the given connection.")
 	public void loadArtistData(
 		@Name("userName") final String userName,
 		@Name("password") final String password,
@@ -77,6 +79,7 @@ public class StatsIntegration {
 	}
 
 	@Procedure(name = "stats.loadAlbumData", mode = Mode.WRITE)
+	@Description("Loads all artist data and also all tracks, generating album nodes in the process.")
 	public void loadAlbumData(
 		@Name("userName") final String userName,
 		@Name("password") final String password,
