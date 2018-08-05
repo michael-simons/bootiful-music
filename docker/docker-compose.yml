@@ -22,9 +22,10 @@ services:
         context: knowledgedb
       environment:
         - NEO4J_AUTH_FILE=/run/secrets/knowledgedb_root_password
+        - EXTENSION_SCRIPT=/tmp/install-apoc.sh
       volumes:
         - ./var/knowledgedb:/data
-        - ./var/knowledgedb/plugins:/var/lib/neo4j/plugins
+        - ./var/knowledgedb/plugins:/plugins
       secrets:
         - knowledgedb_root_password
       ports:
