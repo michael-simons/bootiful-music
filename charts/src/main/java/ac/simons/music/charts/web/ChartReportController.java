@@ -31,21 +31,27 @@ import org.jooq.Field;
 import org.jooq.Record3;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.servlet.ModelAndView;
 
 /**
  * @author Michael J. Simons
  */
 @Controller
-@RequestMapping("/api/charts")
 public class ChartReportController {
 
 	private final DSLContext create;
 
 	public ChartReportController(DSLContext create) {
 		this.create = create;
+	}
+
+	@GetMapping(value = "/", produces = MediaType.TEXT_HTML_VALUE)
+	public ModelAndView index() {
+		return new ModelAndView("index");
 	}
 
 	@RequestMapping("/{year}/{month}")
