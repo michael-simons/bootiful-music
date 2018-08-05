@@ -6,6 +6,12 @@
   <title></title>
 </head>
 <body layout:fragment="content">
+<!-- See https://www.thymeleaf.org/doc/tutorials/3.0/usingthymeleaf.html#javascript-inlining -->
+<script th:inline="javascript">
+
+    var charts = /*[(${charts})]*/ {};
+
+</script>
   <div data-controller="index">
     <button type="button" class="btn btn-primary" data-action="click->index#greet">Hello, Music.</button>
   </div>
