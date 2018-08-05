@@ -16,9 +16,7 @@
 		<java.version>10</java.version>
 		<jooq.version>3.11.3</jooq.version>
 		<postgresql.version>42.2.4</postgresql.version>
-		<maven-compiler-plugin.version>3.7.0</maven-compiler-plugin.version>
-		<maven-shade-plugin.version>2.4.3</maven-shade-plugin.version>
-		<maven-surefire-plugin.version>2.22.0</maven-surefire-plugin.version>
+		<maven-compiler-plugin.version>3.8.0</maven-compiler-plugin.version>
 
 		<db.url>jdbc:postgresql://localhost:5432/bootiful-music</db.url>
 		<db.username>statsdb-dev</db.username>
