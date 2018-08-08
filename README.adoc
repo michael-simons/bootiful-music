@@ -1,6 +1,230 @@
 = bootiful-music
+Michael Simons <michael.simons@neo4j.com>
+:doctype: article
+:lang: en
+:listing-caption: Listing
+:source-highlighter: coderay
+:icons: font
+:sectlink: true
+:sectanchors: true
+:numbered: true
+:xrefstyle: short
+
+[abstract]
+--
+The projects and articles in this repository present a "journey" from a relational database to a database with relations.
+We first have a look at a simple but powerful scheme that represents musical listening habbits.
+This schema lives in a PostgreSQL and its four entities gives us enormous analytical possibilities through applying modern SQLs constructs.
+We will then see how to create a Graph inside Neo4j from the same data and explore which possibilities we gain by using real relationships.
+
+We will use Spring Data Neo4j from within Spring Boot to interact with the Graph.
+--
+
+[[the-business-domain]]
+== The business domain
+
+We're dealing with the tracking of musical habbits, much like https://www.last.fm[LastFM].
+The author has been running a service that does exactly that on a relational database for some time.
+The schema is as follows:
+
+[plantuml, ogm-type-convers, png]
+----
+@startuml
+' see https://gist.github.com/QuantumGhost/0955a45383a0b6c0bc24f9654b3cb561
+
+!define Table(name,desc) class name as "desc" << (T,#FFAAAA) >>
+!define primary_key(x) <b>x</b>
+!define unique(x) <color:green>x</color>
+!define not_null(x) <u>x</u>
+
+hide methods
+hide stereotypes
+
+Table(artists, "artists\n(Artists that have been played)") {
+primary_key(id) INTEGER
+not_null(unique(artist)) VARCHAR[255]
+}
+
+Table(genres, "genres\n(Genres that have been played)") {
+primary_key(id) INTEGER
+not_null(unique(genre)) VARCHAR[255]
+}
+
+Table(tracks, "tracks\n(Partially normalized track data)") {
+primary_key(id) INTEGER
+not_null(artist_id) INTEGER
+not_null(track_id) INTEGER
+name VARCHAR[4000]
+}
+
+Table(plays, "plays\n(The actualy play data)") {
+primary_key(id) INTEGER
+not_null(track_id) INTEGER
+played_on DATETIME
+}
+
+' relationships
+' one-to-one relationship
+artists "1"-->"*" tracks : "A track has been released by an artist"
+' one to may relationship
+genres "1"-->"*" tracks : "A track has a genre"
+' many to many relationship
+' Add mark if you like
+tracks "1" --> "*" plays : "A tracks has been played some times"
+@enduml
+----
+
+The graph looks a bit different:
+
+TODO
+
+=== Questions to be answered:
+
+==== Statistics
+
+* The charts of this month?
+* Which genre has been played the most?
+* Which artists has the highest cumulative play count over time?
+
+==== Knowledge
+
+* Recommend tracks and albums that fits my current top ten?
+* Recommend similiar artists i could like?
+* What have the tracks in common I like the most?
+* Are my favorite artists related and did they feature each other?
+
+== Topics addressed
+
+=== Neo4j
+
+From our getting started guide:
+
+[quote, Neo4j getting started guide]
+____
+http://neo4j.org[Neo4j] is an open-source NoSQL native graph database which provides an ACID-compliant transactional backend for your applications.
+With development starting in 2003, it has been publicly available since 2007.
+____
+
+While a relational database management system (RDBMs) stores relations between tuples (hence the tables itself in a RDBMs are called relations), a graph database is a database designed to treat the relationships between data as a first-class citizen in the data model.
+
+=== Spring Boot
+
+The https://en.wikipedia.org/wiki/Spring_Framework[Spring Framework] has been been around since 2002 and is one of the oldest Enterprise Java Frameworks actively used, maintained and developed.
+https://spring.io/projects/spring-boot[Spring Boot] is ten years younger.
+It dates back to a https://jira.spring.io/browse/SPR-9888[ticket] "Improve support for containerless application" which already describes important goals for the first release in April 2014.
+
+* Fast start for all kind of development wit hSpring
+* No generation of code or configuration
+* Easily configurable from the outside
+* Consistent component model
+* Lots of non-functional feature out of the box, like metrics, health checks and so on
+* Improve the developer experience with other Spring related projects
+
+The deployment scenario most often used with Spring Boot applications are self-contained Jars, including batteries.
+That is: Having all needed libraries with them, including a servlet container or similar when the application is a web-application of some kind.
+
+=== Spring Data
+
+Let's quote the http://projects.spring.io/spring-data/[Spring Data] site:
+
+[quote, What is Spring Data]
+____
+http://projects.spring.io/spring-data/[Spring Data]’s mission is to provide a familiar and consistent, Spring-based programming model for data access while still retaining the special traits of the underlying data store.
+
+It makes it easy to use data access technologies, relational and non-relational databases, map-reduce frameworks, and cloud-based data services.
+____
+
+Spring Data itself is an umbrella project with support for several, quite different datastores, reaching from classic RDBMs-systems over document- and key-value-stores to cloud based services.
+Non-relational datastores certainly include Neo4j.
+
+At the core of Spring Data lives the repository.
+There are several sources for the repository pattern.
+One is from Martin Fowlers https://martinfowler.com/eaaCatalog/repository.html[Patterns of Enterprise Application Architecture].
+
+[quote, Edward Hieatt and Rob Mee, A repository]
+____
+Mediates between the domain and data mapping layers using a collection-like interface for accessing domain objects.
+____
+
+Further down the road we'll see why the distinction between domain and data mapping layer is important:
+When discussing the relationship between Spring Data Neo4j (SDN) and Object Graph Mapping (OGM).
+
+You'll find the repository pattern also prominent in http://dddcommunity.org/learning-ddd/what_is_ddd/[Domain Driven Design (DDD)].
+That reference is very nicely explained by our own https://twitter.com/markhneedham[Mark Needham] here https://markhneedham.com/blog/2009/03/10/ddd-repository-not-only-for-databases/[DDD: Repository pattern].
+
+Regardless whether you're using a relational database or a graph database, you can access your aggregate roots in a consistent way.
+However, you still have to think yourself how build and create those aggregate roots.
+
+Spring Data repositories and the entities defined therein also support events, auditing and more.
+Some people fancy the dynamic query derivation from repository method names a lot.
+
+For nearly every store, Spring Data also provides more low level access patterns, often in the form of a _XXXTemplate_ or _XXXOperations_.
+We will also dive into that.
+
+Spring Data relies on Springs Dependency Injection mechanism and brings in some dependencies.
+It can be used without Spring Boot, but Spring Boot does a lot of useful autoconfiguration.
+
+=== Neo4j OGM
+
+https://github.com/neo4j/neo4j-ogm[Neo4j OGM] stands for _Object Graph Mapping_ and is used to mapped nodes, their properties and relationships return from a graph to Java objects.
+ While it is much easier to map Nodes and their relationships from a graph database to a network of Java objects than mapping rows returned from a relational database to objects (See https://en.wikipedia.org/wiki/Object-relational_impedance_mismatch[Object-relational impedance mismatch]), there are still edge cases:
+
+* Neo4j can be used without a scheme. How to map basically arbitrary nodes to Objects?
+* Cypher and Neo4j provide great means to do all kinds of projections. How to map does?
+* And most important: How to deal with possible endless paths between nodes?
+
+We'll address all of those points.
+
+== Building blocks
+
+=== Modules
+
+* `statsdb`: Plain java module that contains a Java DSL generated by https://www.jooq.org[jOOQ] for the relational schema described <<the-business-domain,here>>.
+* `etl`: Some stored procedures for Neo4j that implement an "extract, transform and load" mechanism, connecting PostgreSQL and Neo4j
+* `charts`: A revised version of https://github.com/michael-simons/bootiful-databases[bootiful-databases].
+For your reference, an https://www.youtube.com/watch?v=4pwTd6NEuN0[english] and a https://www.youtube.com/watch?v=H42boeG5CUI[german talk] on that.
+* `knowledge`: Finally, the Spring Boot and SDN based project that uses Neo4j to explore the relationship between artists, their tracks and albums.
+
+=== Software needed
+
+* Java 10+
+* http://maven.apache.org[Maven] is bundled with our repositories
+* Docker (https://www.docker.com/community-edition[Community edition]) or a version that is bundled with your OS.
+* Java-IDE of your choice
+
+=== Running the databases
 
 To build the modules of this project, you have to have PostgreSQL database with some defined schemas up and running.
 There's a Docker module and a Docker Compose file to help you with that:
 Please run `(cd docker && docker-compose up -d)` from the root of this project.
 To stop the processes, use  `(cd docker && docker-compose stop)`.
+This brings up both a PostgreSQL instance as well as a Neo4j instance with https://neo4j-contrib.github.io/neo4j-apoc-procedures/[APOC] already installed.
+
+== Further reading
+
+* https://neo4j.com/developer/get-started/[Neo4j Getting started guide]
+* https://spring.io/guides/gs/spring-boot/[Spring Boot Getting started guide]
+* http://projects.spring.io/spring-data/[Spring Data]
+* https://neo4j.com/whitepapers/graph-databases-beginners-ebook/[Graph Databases for beginners]
+* https://www.packtpub.com/big-data-and-business-intelligence/learning-neo4j-3x-second-edition[Learning Neo4j 3.x]
+* https://www.packtpub.com/application-development/learning-spring-boot-20-second-edition[Learning Spring Boot 2]
+
+
+== About the author
+
+Michael is a recognized Java Champions with more then 10 years experience with the Spring Framework.
+He has been involed with Spring Boot right from the start.
+Michael works at http://neo4j.org[Neo4j] in the Spring Data Neo4j and OGM.
+Michael did all kinds of stuff with "crazy" SQL at his time before Neo4j.
+That involved time series management for power usage in the deregulated German energy market as well as fascinating analysis of spatial data, especially related to utility network plans, on the physical level as well as the logical level.
+The later would have been a perfect use-case for a Graph database like Neo4j:
+Which electric circuits travel along which power rods? Where do they intersect? Are there single point of failures?
+
+Those engagement are among the background for the first German book on http://springbootbuch.de[Spring Boot] and many SQL related talks (https://speakerdeck.com/michaelsimons/bootiful-database-centric-applications-with-jooq[english version] and https://speakerdeck.com/michaelsimons/bootiful-database-centric-applications-with-jooq[german version], both with video.
+
+The world of Graphs (https://neo4j.com/blog/graphs-are-everywhere-possibilities/["Graphs are everywhere"]) is quite obvious in the real world.
+In code and in a database, new to the author. Therefor this repository and articles may be able to address several things for different people:
+
+* Getting an idea how to work with data stored in Neo4j
+* What modern enterprise development with Spring Boot can look like
+* Where Spring Data Neo4j can help you and where you might want to avoid it
