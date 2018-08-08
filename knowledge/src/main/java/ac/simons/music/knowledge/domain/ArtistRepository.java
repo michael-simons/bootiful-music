@@ -52,12 +52,17 @@ class ArtistRepositoryExtImpl implements ArtistRepositoryExt {
 	@Override
 	public Band markAsBand(Artist artist) {
 		session.query(CYPHER_MARK_AS_BAND, Map.of("id", artist.getId()));
+		// Needs to clear the mapping context at this point because this shared session
+		// will know the node only as class Artist in this transaction otherwise.
+		session.clear();
 		return session.load(Band.class, artist.getId());
 	}
 
 	@Override
 	public SoloArtist markAsSoloArtist(Artist artist) {
 		session.query(CYPHER_MARK_AS_SOLO_ARTIST, Map.of("id", artist.getId()));
+		// See above
+		session.clear();
 		return session.load(SoloArtist.class, artist.getId());
 	}
 }
