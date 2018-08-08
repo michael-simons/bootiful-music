@@ -31,7 +31,7 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
  */
 @ExtendWith(SpringExtension.class)
 @DataNeo4jTest
-public class ArtistRepositoryTest {
+class ArtistRepositoryTest {
 	private final Session session;
 
 	private final ArtistRepository<? super Artist> artistRepository;

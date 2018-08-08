@@ -29,11 +29,13 @@ import org.neo4j.ogm.typeconversion.AttributeConverter;
 public class YearConverter implements AttributeConverter<Year, Long> {
 	@Override
 	public Long toGraphProperty(Year value) {
-		return Optional.ofNullable(value).map(y -> y.getLong(ChronoField.YEAR)).orElse(null);
+		return Optional.ofNullable(value)
+			.map(Year::getValue).map(Integer::longValue).orElse(null);
 	}
 
 	@Override
 	public Year toEntityAttribute(Long value) {
-		return Optional.ofNullable(value).map(v -> Year.of(v.intValue())).orElse(null);
+		return Optional.ofNullable(value)
+			.map(Long::intValue).map(Year::of).orElse(null);
 	}
 }

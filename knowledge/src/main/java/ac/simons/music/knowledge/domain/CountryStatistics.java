@@ -15,8 +15,12 @@
  */
 package ac.simons.music.knowledge.domain;
 
+import ac.simons.music.knowledge.support.YearConverter;
+
+import java.time.Year;
 import java.util.List;
 
+import org.neo4j.ogm.annotation.typeconversion.Convert;
 import org.springframework.data.neo4j.annotation.QueryResult;
 
 /**
@@ -25,13 +29,15 @@ import org.springframework.data.neo4j.annotation.QueryResult;
 @QueryResult
 public class CountryStatistics {
 
-	private Long year;
+	@Convert(YearConverter.class)
+	private Year year;
 
 	private List<String> albums;
 
-	CountryStatistics() {}
+	CountryStatistics() {
+	}
 
-	public Long getYear() {
+	public Year getYear() {
 		return year;
 	}
 
