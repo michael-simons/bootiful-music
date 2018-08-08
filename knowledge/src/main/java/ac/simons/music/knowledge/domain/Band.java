@@ -17,6 +17,7 @@ package ac.simons.music.knowledge.domain;
 
 import org.neo4j.ogm.annotation.NodeEntity;
 import org.neo4j.ogm.annotation.Relationship;
+import org.springframework.data.annotation.PersistenceConstructor;
 
 /**
  * @author Michael J. Simons
@@ -31,6 +32,7 @@ public class Band extends Artist {
 		this(name, null);
 	}
 
+	@PersistenceConstructor
 	public Band(String name, Country foundedIn) {
 		super(name);
 		this.foundedIn = foundedIn;
