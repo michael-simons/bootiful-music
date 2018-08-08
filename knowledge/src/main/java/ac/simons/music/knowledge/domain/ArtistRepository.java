@@ -15,10 +15,49 @@
  */
 package ac.simons.music.knowledge.domain;
 
+import java.util.Map;
+import java.util.Optional;
+
+import org.neo4j.ogm.session.Session;
 import org.springframework.data.neo4j.repository.Neo4jRepository;
 
 /**
  * @author Michael J. Simons
  */
-public interface ArtistRepository<T extends AbstractArtist> extends Neo4jRepository<T, Long> {
+public interface ArtistRepository<T extends Artist> extends Neo4jRepository<T, Long>, ArtistRepositoryExt {
+	Optional<T> findOneByName(String name);
+}
+
+interface ArtistRepositoryExt {
+	Band markAsBand(Artist artist);
+
+	SoloArtist markAsSoloArtist(Artist artist);
+}
+
+class ArtistRepositoryExtImpl implements ArtistRepositoryExt {
+
+	private static final String CYPHER_MARK_AS_BAND = String
+		.format("MATCH (n) WHERE id(n) = $id REMOVE n:%s SET n:%s", SoloArtist.class.getSimpleName(),
+			Band.class.getSimpleName());
+	private static final String CYPHER_MARK_AS_SOLO_ARTIST = String
+		.format("MATCH (n) WHERE id(n) = $id REMOVE n:%s SET n:%s", Band.class.getSimpleName(),
+			SoloArtist.class.getSimpleName());
+
+	private final Session session;
+
+	public ArtistRepositoryExtImpl(Session session) {
+		this.session = session;
+	}
+
+	@Override
+	public Band markAsBand(Artist artist) {
+		session.query(CYPHER_MARK_AS_BAND, Map.of("id", artist.getId()));
+		return session.load(Band.class, artist.getId());
+	}
+
+	@Override
+	public SoloArtist markAsSoloArtist(Artist artist) {
+		session.query(CYPHER_MARK_AS_SOLO_ARTIST, Map.of("id", artist.getId()));
+		return session.load(SoloArtist.class, artist.getId());
+	}
 }

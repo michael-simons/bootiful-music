@@ -15,11 +15,43 @@
  */
 package ac.simons.music.knowledge.domain;
 
+import java.util.Objects;
+
+import org.neo4j.ogm.annotation.NodeEntity;
+
 /**
  * @author Michael J. Simons
  */
-public final class Artist extends AbstractArtist {
+@NodeEntity
+public class Artist {
+	private Long id;
+
+	private String name;
+
 	public Artist(String name) {
-		super(name);
+		this.name = name;
+	}
+
+	public Long getId() {
+		return id;
+	}
+
+	public String getName() {
+		return name;
+	}
+
+	@Override
+	public boolean equals(Object o) {
+		if (this == o)
+			return true;
+		if (o == null || getClass() != o.getClass())
+			return false;
+		Artist that = (Artist) o;
+		return Objects.equals(name, that.name);
+	}
+
+	@Override
+	public int hashCode() {
+		return Objects.hash(name);
 	}
 }

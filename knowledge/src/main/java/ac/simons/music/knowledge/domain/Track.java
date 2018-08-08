@@ -15,8 +15,6 @@
  */
 package ac.simons.music.knowledge.domain;
 
-import static org.neo4j.ogm.annotation.Relationship.*;
-
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
@@ -34,7 +32,7 @@ public class Track {
 	private String name;
 
 	@Relationship("WRITTEN_BY")
-	private Set<AbstractArtist> writtenBy = new HashSet<>();
+	private Set<Artist> writtenBy = new HashSet<>();
 
 	@Relationship(value = "FEATURING")
 	private Set<SoloArtist> featuring = new HashSet<>();
@@ -43,7 +41,7 @@ public class Track {
 		this(name, Set.of());
 	}
 
-	public Track(String name, Set<AbstractArtist> writtenBy) {
+	public Track(String name, Set<Artist> writtenBy) {
 		this.name = name;
 		this.writtenBy = new HashSet<>(writtenBy);
 	}

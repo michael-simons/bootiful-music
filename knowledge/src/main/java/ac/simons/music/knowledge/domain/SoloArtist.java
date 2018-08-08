@@ -26,7 +26,7 @@ import org.neo4j.ogm.annotation.Relationship;
  * @author Michael J. Simons
  */
 @NodeEntity
-public class SoloArtist extends AbstractArtist {
+public class SoloArtist extends Artist {
 
 	@Relationship(type = "PLAYED_IN")
 	private List<PlayedIn> playedIn = new ArrayList<>();

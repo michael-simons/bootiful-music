@@ -22,7 +22,7 @@ import org.neo4j.ogm.annotation.Relationship;
  * @author Michael J. Simons
  */
 @NodeEntity
-public class Band extends AbstractArtist {
+public class Band extends Artist {
 
 	@Relationship("FOUNDED_IN")
 	private Country foundedIn;

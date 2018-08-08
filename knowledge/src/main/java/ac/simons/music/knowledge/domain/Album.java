@@ -40,7 +40,7 @@ public class Album {
 	private Long id;
 
 	@Relationship("RELEASED_BY")
-	private AbstractArtist artist;
+	private Artist artist;
 
 	private String name;
 
@@ -53,13 +53,13 @@ public class Album {
 	private Set<AlbumTrack> tracks = new TreeSet<>(
 		Comparator.comparing(AlbumTrack::getDiscNumber).thenComparing(AlbumTrack::getTrackNumber));
 
-	public Album(AbstractArtist artist, String name, Year releasedIn) {
+	public Album(Artist artist, String name, Year releasedIn) {
 		this.artist = artist;
 		this.name = name;
 		this.releasedIn = releasedIn;
 	}
 
-	public AbstractArtist getArtist() {
+	public Artist getArtist() {
 		return artist;
 	}
 
