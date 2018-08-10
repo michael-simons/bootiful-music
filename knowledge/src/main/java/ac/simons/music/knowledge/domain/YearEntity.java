@@ -15,36 +15,41 @@
  */
 package ac.simons.music.knowledge.domain;
 
-import java.util.List;
+import java.time.Year;
 
-import org.neo4j.ogm.annotation.EndNode;
-import org.neo4j.ogm.annotation.GeneratedValue;
-import org.neo4j.ogm.annotation.Id;
-import org.neo4j.ogm.annotation.Property;
-import org.neo4j.ogm.annotation.RelationshipEntity;
-import org.neo4j.ogm.annotation.StartNode;
+import org.neo4j.ogm.annotation.Index;
+import org.neo4j.ogm.annotation.NodeEntity;
+import org.neo4j.ogm.annotation.Relationship;
+import org.springframework.lang.Nullable;
 
 /**
  * @author Michael J. Simons
  */
-@RelationshipEntity("PLAYED_IN")
-public class PlayedIn {
-	@Id
-	@GeneratedValue
-	private Long relationshipId;
+@NodeEntity("Year")
+public class YearEntity {
 
-	@StartNode
-	private SoloArtist member;
+	private Long id;
 
-	@EndNode
-	private Band band;
+	@Index(unique = true)
+	private long value;
 
-	@Property
-	private List<String> yearsActive;
+	@Relationship("IS_PART_OF")
+	private DecadeEntity decade;
 
-	public PlayedIn(SoloArtist member, Band band, List<String> yearsActive) {
-		this.member = member;
-		this.band = band;
-		this.yearsActive = yearsActive;
+	YearEntity(final DecadeEntity decade, final long value) {
+		this.decade = decade;
+		this.value = value;
+	}
+
+	public Long getId() {
+		return id;
+	}
+
+	public DecadeEntity getDecade() {
+		return decade;
+	}
+
+	public long getValue() {
+		return value;
 	}
 }

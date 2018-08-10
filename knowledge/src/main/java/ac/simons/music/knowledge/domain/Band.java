@@ -15,6 +15,12 @@
  */
 package ac.simons.music.knowledge.domain;
 
+import static java.util.stream.Collectors.toList;
+
+import java.time.Year;
+import java.util.ArrayList;
+import java.util.List;
+
 import org.neo4j.ogm.annotation.NodeEntity;
 import org.neo4j.ogm.annotation.Relationship;
 import org.springframework.data.annotation.PersistenceConstructor;
@@ -27,6 +33,9 @@ public class Band extends Artist {
 
 	@Relationship("FOUNDED_IN")
 	private Country foundedIn;
+
+	@Relationship("HAS")
+	private List<Member> member = new ArrayList<>();
 
 	public Band(String name) {
 		this(name, null);
@@ -44,5 +53,17 @@ public class Band extends Artist {
 
 	public void setFoundedIn(Country foundedIn) {
 		this.foundedIn = foundedIn;
+	}
+
+	Band addMember(final SoloArtist band, final YearEntity joinedIn, final YearEntity leftIn) {
+		this.member.add(new Member(band, joinedIn, leftIn));
+		return this;
+	}
+
+	public List<SoloArtist> getActiveMember() {
+		return member.stream()
+				.filter(Member::isActive)
+				.map(Member::getArtist)
+				.collect(toList());
 	}
 }

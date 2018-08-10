@@ -38,7 +38,7 @@ interface ArtistRepository<T extends Artist> extends Repository<T, Long>, Artist
 	List<T> findAllOrderedByName();
 
 	@Query("MATCH (n:Artist) WHERE id(n) = $id WITH n MATCH p=(n)-[*0..1]-(m) RETURN p")
-	Optional<T> findOneById(@Param("id") Long id);
+	Optional<T> findById(@Param("id") Long id);
 
 	<S extends T> S save(S artist);
 }

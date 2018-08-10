@@ -15,9 +15,7 @@
  */
 package ac.simons.music.knowledge.domain;
 
-import java.time.Year;
-import java.util.ArrayList;
-import java.util.List;
+import static org.neo4j.ogm.annotation.Relationship.INCOMING;
 
 import org.neo4j.ogm.annotation.NodeEntity;
 import org.neo4j.ogm.annotation.Relationship;
@@ -27,26 +25,47 @@ import org.springframework.data.annotation.PersistenceConstructor;
  * @author Michael J. Simons
  */
 @NodeEntity
-public class SoloArtist extends Artist {
+public class Member {
 
-	@Relationship("BORN_IN")
-	private Country bornIn;
+	private Long id;
 
-	public SoloArtist(String name) {
-		super(name);
-	}
+	@Relationship(value = "IS_A", direction = INCOMING)
+	private SoloArtist value;
+
+	@Relationship("JOINED_IN")
+	private YearEntity joinedIn;
+
+	@Relationship("LEFT_IN")
+	private YearEntity leftIn;
 
 	@PersistenceConstructor
-	public SoloArtist(String name, Country bornIn) {
-		super(name);
-		this.bornIn = bornIn;
+	Member(final SoloArtist artist, final YearEntity joinedIn, final YearEntity leftIn) {
+		this.value = artist;
+		this.joinedIn = joinedIn;
+		this.leftIn = leftIn;
 	}
 
-	public Country getBornIn() {
-		return bornIn;
+	public Long getId() {
+		return id;
 	}
 
-	public void setBornIn(Country bornIn) {
-		this.bornIn = bornIn;
+	public SoloArtist getArtist() {
+		return value;
+	}
+
+	public YearEntity getJoinedIn() {
+		return joinedIn;
+	}
+
+	public YearEntity getLeftIn() {
+		return leftIn;
+	}
+
+	public void setLeftIn(YearEntity leftIn) {
+		this.leftIn = leftIn;
+	}
+
+	public boolean isActive() {
+		return this.leftIn == null;
 	}
 }

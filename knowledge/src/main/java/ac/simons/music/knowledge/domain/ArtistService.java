@@ -15,9 +15,11 @@
  */
 package ac.simons.music.knowledge.domain;
 
+import java.time.Year;
 import java.util.List;
 import java.util.Optional;
 
+import org.springframework.data.domain.Sort;
 import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -33,21 +35,36 @@ public class ArtistService {
 
 	private final SoloArtistRepository soloArtists;
 
+	private final YearRepository yearRepository;
+
 	private final CountryRepository countryRepository;
 
-	public ArtistService(ArtistRepository<Artist> allArtists, BandRepository bands, SoloArtistRepository soloArtists, CountryRepository countryRepository) {
+	public ArtistService(ArtistRepository<Artist> allArtists, BandRepository bands, SoloArtistRepository soloArtists, YearRepository yearRepository, CountryRepository countryRepository) {
 		this.allArtists = allArtists;
 		this.bands = bands;
 		this.soloArtists = soloArtists;
+		this.yearRepository = yearRepository;
 		this.countryRepository = countryRepository;
 	}
 
-	public List<Artist> findAllOrderedByName() {
+	public Optional<Artist> findArtistById(Long id) {
+		return allArtists.findById(id);
+	}
+
+	public Optional<Band> findBandById(Long id) {
+		return bands.findById(id);
+	}
+
+	public Optional<SoloArtist> findSoloArtistById(Long id) {
+		return soloArtists.findById(id);
+	}
+
+	public List<Artist> findAllArtists() {
 		return allArtists.findAllOrderedByName();
 	}
 
-	public Optional<Artist> findOneById(Long id) {
-		return allArtists.findOneById(id);
+	public List<SoloArtist> findAllSoloArtists() {
+		return this.soloArtists.findAll(Sort.by("name").ascending());
 	}
 
 	@Transactional
@@ -82,7 +99,17 @@ public class ArtistService {
 		return type.cast(rv);
 	}
 
-	@Nullable Country determineCountry(final @Nullable String code) {
+	@Transactional
+	public Band addMember(final Band band, final SoloArtist newMember, final Year joinedIn, @Nullable final Year leftIn) {
+
+		final YearEntity joinedInEntity = this.yearRepository.findOneByValue(joinedIn).orElseGet(() -> yearRepository.createYear(joinedIn));
+		final YearEntity leftInEntity = leftIn == null ? null : this.yearRepository.findOneByValue(leftIn).orElseGet(() -> yearRepository.createYear(leftIn));
+
+		return this.bands.save(band.addMember(newMember, joinedInEntity, leftInEntity));
+	}
+
+	@Nullable
+	Country determineCountry(@Nullable final String code) {
 		return code == null || code.trim().isEmpty() ? null :
 			countryRepository.findByCode(code).orElseGet(() -> countryRepository.save(new Country(code)));
 	}

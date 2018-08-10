@@ -15,15 +15,29 @@
  */
 package ac.simons.music.knowledge.domain;
 
-import java.util.List;
-
-import org.springframework.data.domain.Sort;
-import org.springframework.data.neo4j.repository.Neo4jRepository;
-import org.springframework.data.repository.Repository;
+import org.neo4j.ogm.annotation.Index;
+import org.neo4j.ogm.annotation.NodeEntity;
 
 /**
  * @author Michael J. Simons
  */
-interface SoloArtistRepository extends Neo4jRepository<SoloArtist, Long> {
-	List<SoloArtist> findAll(Sort sort);
+@NodeEntity("Decade")
+public class DecadeEntity {
+
+	private Long id;
+
+	@Index(unique = true)
+	private long value;
+
+	public DecadeEntity(long value) {
+		this.value = value;
+	}
+
+	public Long getId() {
+		return id;
+	}
+
+	public long getValue() {
+		return value;
+	}
 }

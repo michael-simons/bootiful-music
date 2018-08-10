@@ -9,8 +9,8 @@
 </head>
 <body layout:fragment="content">
 
-<form method="post" action="#" th:action="@{/artists}" th:object="${artistForm}" >
-    <input type="hidden" th:field="*{id}" />
+<form method="post" action="#" th:action="@{/artists}" th:object="${artistForm}">
+    <input type="hidden" th:field="*{id}"/>
     <div class="form-group">
         <label for="artist.name" th:text="#{artist.name}">Placeholder</label>
         <input type="text" class="form-control" id="artist.name" aria-describedby="artist.name.help" th:field="*{name}"
@@ -22,22 +22,44 @@
         <select class="form-control" id="artist.type" th:field="*{type}">
             <option th:each="type : ${T(ac.simons.music.knowledge.web.ArtistController.ArtistType).values()}"
                     th:value="${type}"
-                    th:text="#{${'artist.type.' + type.implementingClass.name}}">Placeholder</option>
+                    th:text="#{${'artist.type.' + type.implementingClass.name}}">Placeholder
+            </option>
         </select>
     </div>
     <div class="form-group">
         <label for="artist.foundedIn" th:text="#{artist.origin}">Placeholder</label>
-        <select class="form-control" id="artist.foundedIn" th:field="*{origin}" >
+        <select class="form-control" id="artist.foundedIn" th:field="*{origin}">
             <option value=""></option>
             <option th:each="country : ${countries}"
                     th:value="${country.code}"
-                    th:text="${country.label}">Placeholder</option>
+                    th:text="${country.label}">Placeholder
+            </option>
         </select>
     </div>
     <button type="submit" class="btn btn-primary" th:text="#{common.save}">Submit</button>
 </form>
 
-
+<form th:if="${soloArtists != null}" method="post" action="#" th:action="@{/artists/{bandId}/member(bandId=${artistForm.id})}" th:object="${newMemberForm}">
+    <div class="form-group">
+        <label for="new-membership.artist" th:text="#{artist.name}">Placeholder</label>
+        <select class="form-control" id="new-membership.artist" th:field="*{artistId}">
+            <option value=""></option>
+            <option th:each="soloArtist : ${soloArtists}"
+                    th:value="${soloArtist.id}"
+                    th:text="${soloArtist.name}">Placeholder
+            </option>
+        </select>
+    </div>
+    <div class="form-group">
+        <label for="new-membership.joined-in" th:text="#{member.joined-in}">Placeholder</label>
+        <input type="number" step="1" class="form-control" id="new-membership.joined-in" th:field="*{joinedIn}">
+    </div>
+    <div class="form-group">
+        <label for="new-membership.left-in" th:text="#{member.left-in}">Placeholder</label>
+        <input type="number" step="1" class="form-control" id="new-membership.left-in" th:field="*{leftIn}">
+    </div>
+    <button type="submit" class="btn btn-primary" th:text="#{common.save}">Submit</button>
+</form>
 
 </body>
 </html>
