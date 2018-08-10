@@ -16,17 +16,21 @@
 package ac.simons.music.knowledge.support;
 
 import java.time.Year;
-import java.time.temporal.ChronoField;
-import java.time.temporal.TemporalAccessor;
-import java.time.temporal.TemporalField;
 import java.util.Optional;
 
 import org.neo4j.ogm.typeconversion.AttributeConverter;
+import org.springframework.core.convert.converter.Converter;
+import org.springframework.stereotype.Component;
 
 /**
+ * TODO: Fix converter usage
+ * Reuse OGM converter for Spring. ATM it's necessary to have this converter both as SDN and OGM converter
+ * when I want to have a persistence constructor for the album class for example
+ *
  * @author Michael J. Simons
  */
-public class YearConverter implements AttributeConverter<Year, Long> {
+@Component
+public class YearConverter implements AttributeConverter<Year, Long>, Converter<Long, Year> {
 	@Override
 	public Long toGraphProperty(Year value) {
 		return Optional.ofNullable(value)
@@ -37,5 +41,10 @@ public class YearConverter implements AttributeConverter<Year, Long> {
 	public Year toEntityAttribute(Long value) {
 		return Optional.ofNullable(value)
 			.map(Long::intValue).map(Year::of).orElse(null);
+	}
+
+	@Override
+	public Year convert(Long source) {
+		return toEntityAttribute(source);
 	}
 }
