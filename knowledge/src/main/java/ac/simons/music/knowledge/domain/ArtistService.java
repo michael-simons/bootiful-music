@@ -27,23 +27,27 @@ import org.springframework.transaction.annotation.Transactional;
  */
 @Service
 public class ArtistService {
-	private final ArtistRepository<Artist> artistRepository;
+	private final ArtistRepository<Artist> allArtists;
+
+	private final BandRepository bands;
+
+	private final SoloArtistRepository soloArtists;
 
 	private final CountryRepository countryRepository;
 
-	ArtistService(
-		ArtistRepository<Artist> artistRepository,
-		CountryRepository countryRepository) {
-		this.artistRepository = artistRepository;
+	public ArtistService(ArtistRepository<Artist> allArtists, BandRepository bands, SoloArtistRepository soloArtists, CountryRepository countryRepository) {
+		this.allArtists = allArtists;
+		this.bands = bands;
+		this.soloArtists = soloArtists;
 		this.countryRepository = countryRepository;
 	}
 
 	public List<Artist> findAllOrderedByName() {
-		return artistRepository.findAllOrderedByName();
+		return allArtists.findAllOrderedByName();
 	}
 
 	public Optional<Artist> findOneById(Long id) {
-		return artistRepository.findOneById(id);
+		return allArtists.findOneById(id);
 	}
 
 	@Transactional
@@ -51,11 +55,11 @@ public class ArtistService {
 		Artist rv;
 		final Country country = determineCountry(countryOfOrigin);
 		if (type == Band.class) {
-			rv = this.artistRepository.save(new Band(name, country));
+			rv = this.allArtists.save(new Band(name, country));
 		} else if (type == SoloArtist.class) {
-			rv = this.artistRepository.save(new SoloArtist(name, country));
+			rv = this.allArtists.save(new SoloArtist(name, country));
 		} else {
-			rv = this.artistRepository.save(new Artist(name));
+			rv = this.allArtists.save(new Artist(name));
 		}
 		return type.cast(rv);
 	}
@@ -64,16 +68,16 @@ public class ArtistService {
 	public <T extends Artist> T updateArtist(final Artist artist, final String countryOfOrigin, final Class<T> type) {
 		Artist rv;
 		if (type == Band.class) {
-			var band = artistRepository.markAsBand(artist);
+			var band = allArtists.markAsBand(artist);
 			band.setFoundedIn(determineCountry(countryOfOrigin));
 			// TODO this is weird... Or at least I wonder if we are doing dirty tracking at all?! Or is it because of the cleared session?
-			rv = artistRepository.save(band);
+			rv = this.allArtists.save(band);
 		} else if (type == SoloArtist.class) {
-			var soloArtist = artistRepository.markAsSoloArtist(artist);
+			var soloArtist = allArtists.markAsSoloArtist(artist);
 			soloArtist.setBornIn(determineCountry(countryOfOrigin));
-			rv = this.artistRepository.save(soloArtist);
+			rv = this.allArtists.save(soloArtist);
 		} else {
-			rv = artistRepository.removeQualification(artist);
+			rv = allArtists.removeQualification(artist);
 		}
 		return type.cast(rv);
 	}

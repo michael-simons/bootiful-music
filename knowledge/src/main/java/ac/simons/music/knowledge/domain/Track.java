@@ -17,14 +17,18 @@ package ac.simons.music.knowledge.domain;
 
 import java.util.HashSet;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 
 import org.neo4j.ogm.annotation.Index;
+import org.neo4j.ogm.annotation.NodeEntity;
 import org.neo4j.ogm.annotation.Relationship;
+import org.springframework.data.annotation.PersistenceConstructor;
 
 /**
  * @author Michael J. Simons
  */
+@NodeEntity
 public class Track {
 	private Long id;
 
@@ -41,9 +45,11 @@ public class Track {
 		this(name, Set.of());
 	}
 
+	@PersistenceConstructor
 	public Track(String name, Set<Artist> writtenBy) {
 		this.name = name;
-		this.writtenBy = new HashSet<>(writtenBy);
+		this.writtenBy = Optional.ofNullable(writtenBy)
+				.map(HashSet::new).orElseGet(HashSet::new);
 	}
 
 	public Track featuring(final SoloArtist artist) {
