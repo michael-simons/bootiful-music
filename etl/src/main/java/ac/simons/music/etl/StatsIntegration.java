@@ -38,10 +38,16 @@ public class StatsIntegration {
 
 	private static final String CREATE_ARTIST_NODE = "MERGE (a:Artist {name: $artistName}) RETURN a";
 
-	private static final String CREATE_ALBUM_WITH_ARTIST //
+	private static final String CREATE_YEAR_AND_DECADE //
+			= " MERGE (decade:Decade {value: $yearValue-$yearValue%10})"
+			+ " MERGE (year:Year {value: $yearValue})"
+			+ " MERGE (year) - [:PART_OF] -> (decade)";
+
+	private static final String CREATE_ALBUM_WITH_ARTIST // Statement is to be used with CREATE_YEAR_AND_DECADE
 		= " MERGE (artist:Artist {name: $artistName})"
-		+ " MERGE (album:Album {name: $albumName, releasedIn: $releasedIn})"
-		+ " MERGE (album) - [:RELEASED_BY] -> (artist)";
+		+ " MERGE (album:Album {name: $albumName})"
+		+ " MERGE (album) - [:RELEASED_BY] -> (artist)"
+		+ " MERGE (album) - [:RELEASED_IN] -> (year)";
 
 	private static final String CREATE_TRACK_IN_ALBUM // Regarding FOREACH see https://stackoverflow.com/a/27578798
 		= " MATCH (album:Album {name: $albumName}) - [:RELEASED_BY] -> (artist:Artist {name: $artistName})"
@@ -99,8 +105,8 @@ public class StatsIntegration {
 						var parameters = Map.<String, Object>of(
 							"artistName", r.get(ARTISTS.ARTIST),
 							"albumName", r.get(TRACKS.ALBUM),
-							"releasedIn", Long.valueOf(r.get(TRACKS.YEAR)));
-						db.execute(CREATE_ALBUM_WITH_ARTIST, parameters);
+							"yearValue", Long.valueOf(r.get(TRACKS.YEAR)));
+						db.execute(CREATE_YEAR_AND_DECADE + CREATE_ALBUM_WITH_ARTIST, parameters);
 					}
 				);
 

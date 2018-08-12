@@ -44,8 +44,8 @@ public class Album {
 
 	private String name;
 
-	@Convert(YearConverter.class)
-	private Year releasedIn;
+	@Relationship("RELEASED_IN")
+	private YearEntity releasedIn;
 
 	private boolean live = false;
 
@@ -53,7 +53,7 @@ public class Album {
 	private Set<AlbumTrack> tracks = new TreeSet<>(
 		Comparator.comparing(AlbumTrack::getDiscNumber).thenComparing(AlbumTrack::getTrackNumber));
 
-	public Album(Artist artist, String name, Year releasedIn) {
+	public Album(Artist artist, String name, YearEntity releasedIn) {
 		this.artist = artist;
 		this.name = name;
 		this.releasedIn = releasedIn;
@@ -67,7 +67,7 @@ public class Album {
 		return name;
 	}
 
-	public Year getReleasedIn() {
+	public YearEntity getReleasedIn() {
 		return releasedIn;
 	}
 

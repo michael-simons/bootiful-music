@@ -33,7 +33,7 @@ public class YearEntity {
 	@Index(unique = true)
 	private long value;
 
-	@Relationship("IS_PART_OF")
+	@Relationship("PART_OF")
 	private DecadeEntity decade;
 
 	YearEntity(final DecadeEntity decade, final long value) {
