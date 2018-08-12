@@ -12,3 +12,6 @@ MATCH (a:Album) - [:RELEASED_IN] - (year) - [:PART_OF] -> (:Decade {value: 1970}
 
 
 MATCH(:SoloArtist {name: 'Bela B.'}) - [:IS_A] -> (:Member) -- (b:Band) RETURN b.name
+
+call stats.loadPlayCounts('bootiful-databases', 'bootiful-databases', 'jdbc:postgresql://localhost:5432/bootiful-databases')
+

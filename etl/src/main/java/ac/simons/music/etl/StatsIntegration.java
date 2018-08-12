@@ -15,11 +15,16 @@
  */
 package ac.simons.music.etl;
 
-import static ac.simons.music.statsdb.Tables.*;
+import static ac.simons.music.statsdb.Tables.ARTISTS;
+import static ac.simons.music.statsdb.Tables.PLAYS;
+import static ac.simons.music.statsdb.Tables.TRACKS;
+import static org.jooq.impl.DSL.count;
+import static org.jooq.impl.DSL.extract;
 
 import java.sql.DriverManager;
 import java.util.Map;
 
+import org.jooq.DatePart;
 import org.jooq.impl.DSL;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.procedure.Context;
@@ -44,21 +49,28 @@ public class StatsIntegration {
 			+ " MERGE (year) - [:PART_OF] -> (decade)";
 
 	private static final String CREATE_ALBUM_WITH_ARTIST // Statement is to be used with CREATE_YEAR_AND_DECADE
-		= " MERGE (artist:Artist {name: $artistName})"
-		+ " MERGE (album:Album {name: $albumName})"
-		+ " MERGE (album) - [:RELEASED_BY] -> (artist)"
-		+ " MERGE (album) - [:RELEASED_IN] -> (year)";
+			= " MERGE (artist:Artist {name: $artistName})"
+			+ " MERGE (album:Album {name: $albumName})"
+			+ " MERGE (album) - [:RELEASED_BY] -> (artist)"
+			+ " MERGE (album) - [:RELEASED_IN] -> (year)";
 
 	private static final String CREATE_TRACK_IN_ALBUM // Regarding FOREACH see https://stackoverflow.com/a/27578798
-		= " MATCH (album:Album {name: $albumName}) - [:RELEASED_BY] -> (artist:Artist {name: $artistName})"
-		+ " OPTIONAL MATCH (possibleTrack:Track {name: $trackName}) <- [:CONTAINS] - (:Album) - [:RELEASED_BY] -> (artist)"
-		+ " FOREACH( _ IN CASE WHEN possibleTrack IS NULL THEN ['create_track_and_add_relation'] ELSE [] END |"
-		+ "   CREATE (newTrack:Track {name: $trackName})"
-		+ "   MERGE (album) - [:CONTAINS {discNumber: $discNumber, trackNumber: $trackNumber}] -> (newTrack)"
-		+ " ) "
-		+ " FOREACH( _ IN CASE WHEN possibleTrack IS NOT NULL THEN ['add_relation'] ELSE [] END |"
-		+ "   MERGE (album) - [:CONTAINS {discNumber: $discNumber, trackNumber: $trackNumber}] -> (possibleTrack)"
-		+ " )";
+			= " MATCH (album:Album {name: $albumName}) - [:RELEASED_BY] -> (artist:Artist {name: $artistName})"
+			+ " OPTIONAL MATCH (possibleTrack:Track {name: $trackName}) <- [:CONTAINS] - (:Album) - [:RELEASED_BY] -> (artist)"
+			+ " FOREACH( _ IN CASE WHEN possibleTrack IS NULL THEN ['create_track_and_add_relation'] ELSE [] END |"
+			+ "   CREATE (newTrack:Track {name: $trackName})"
+			+ "   MERGE (album) - [:CONTAINS {discNumber: $discNumber, trackNumber: $trackNumber}] -> (newTrack)"
+			+ " ) "
+			+ " FOREACH( _ IN CASE WHEN possibleTrack IS NOT NULL THEN ['add_relation'] ELSE [] END |"
+			+ "   MERGE (album) - [:CONTAINS {discNumber: $discNumber, trackNumber: $trackNumber}] -> (possibleTrack)"
+			+ " )";
+
+	private static final String CREATE_PLAY_COUNTS
+			= " MATCH (track:Track {name: $trackName}) <- [:CONTAINS] - (:Album) - [:RELEASED_BY] -> (artist:Artist {name: $artistName})"
+			+ CREATE_YEAR_AND_DECADE
+			+ " MERGE (month:Month {value: $monthValue}) - [:OF] -> (year)"
+			+ " WITH track, month "
+			+ " MERGE (track) - [:HAS_BEEN_PLAYED] -> (p:PlayCount) - [:IN] -> (month) ON CREATE set p.value = $newPlayCount ON MATCH SET p.value = $newPlayCount";
 
 	@Context
 	public GraphDatabaseService db;
@@ -66,18 +78,18 @@ public class StatsIntegration {
 	@Procedure(name = "stats.loadArtistData", mode = Mode.WRITE)
 	@Description("Loads all artist data from the given connection.")
 	public void loadArtistData(
-		@Name("userName") final String userName,
-		@Name("password") final String password,
-		@Name("url") final String url) {
+			@Name("userName") final String userName,
+			@Name("password") final String password,
+			@Name("url") final String url) {
 
 		try (var connection = DriverManager.getConnection(url, userName, password);
-			var neoTransaction = db.beginTx()) {
+			 var neoTransaction = db.beginTx()) {
 
 			DSL.using(connection)
-				.selectFrom(ARTISTS)
-				.forEach(a ->
-					db.execute(CREATE_ARTIST_NODE, Map.of("artistName", a.getArtist()))
-				);
+					.selectFrom(ARTISTS)
+					.forEach(a ->
+							db.execute(CREATE_ARTIST_NODE, Map.of("artistName", a.getArtist()))
+					);
 			neoTransaction.success();
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -87,43 +99,93 @@ public class StatsIntegration {
 	@Procedure(name = "stats.loadAlbumData", mode = Mode.WRITE)
 	@Description("Loads all artist data and also all tracks, generating album nodes in the process.")
 	public void loadAlbumData(
-		@Name("userName") final String userName,
-		@Name("password") final String password,
-		@Name("url") final String url) {
+			@Name("userName") final String userName,
+			@Name("password") final String password,
+			@Name("url") final String url) {
 
 		try (var connection = DriverManager.getConnection(url, userName, password);
-			var neoTransaction = db.beginTx()) {
+			 var neoTransaction = db.beginTx()) {
 
 			var stats = DSL.using(connection);
 			var isNoCompilation = TRACKS.COMPILATION.eq("f");
 
 			stats
-				.selectDistinct(ARTISTS.ARTIST, TRACKS.ALBUM, TRACKS.YEAR)
-				.from(TRACKS).join(ARTISTS).onKey()
-				.where(isNoCompilation)
-				.forEach(r -> {
-						var parameters = Map.<String, Object>of(
-							"artistName", r.get(ARTISTS.ARTIST),
-							"albumName", r.get(TRACKS.ALBUM),
-							"yearValue", Long.valueOf(r.get(TRACKS.YEAR)));
-						db.execute(CREATE_YEAR_AND_DECADE + CREATE_ALBUM_WITH_ARTIST, parameters);
-					}
-				);
+					.selectDistinct(ARTISTS.ARTIST, TRACKS.ALBUM, TRACKS.YEAR)
+					.from(TRACKS).join(ARTISTS).onKey()
+					.where(isNoCompilation)
+					.forEach(r -> {
+								var parameters = Map.<String, Object>of(
+										"artistName", r.get(ARTISTS.ARTIST),
+										"albumName", r.get(TRACKS.ALBUM),
+										"yearValue", Long.valueOf(r.get(TRACKS.YEAR)));
+								db.execute(CREATE_YEAR_AND_DECADE + CREATE_ALBUM_WITH_ARTIST, parameters);
+							}
+					);
 
 			stats
-				.select(ARTISTS.ARTIST, TRACKS.ALBUM, TRACKS.NAME, TRACKS.DISC_NUMBER, TRACKS.TRACK_NUMBER)
-				.from(TRACKS).join(ARTISTS).onKey()
-				.where(isNoCompilation)
-				.forEach(r -> {
-					var parameters = Map.<String, Object>of(
-						"artistName", r.get(ARTISTS.ARTIST),
-						"albumName", r.get(TRACKS.ALBUM),
-						"trackName", r.get(TRACKS.NAME),
-						"discNumber", r.get(TRACKS.DISC_NUMBER),
-						"trackNumber", r.get(TRACKS.TRACK_NUMBER)
-					);
-					db.execute(CREATE_TRACK_IN_ALBUM, parameters);
-				});
+					.select(ARTISTS.ARTIST, TRACKS.ALBUM, TRACKS.NAME, TRACKS.DISC_NUMBER, TRACKS.TRACK_NUMBER)
+					.from(TRACKS)
+					.join(ARTISTS).onKey()
+					.where(isNoCompilation)
+					.forEach(r -> {
+						var parameters = Map.<String, Object>of(
+								"artistName", r.get(ARTISTS.ARTIST),
+								"albumName", r.get(TRACKS.ALBUM),
+								"trackName", r.get(TRACKS.NAME),
+								"discNumber", r.get(TRACKS.DISC_NUMBER),
+								"trackNumber", r.get(TRACKS.TRACK_NUMBER)
+						);
+						db.execute(CREATE_TRACK_IN_ALBUM, parameters);
+					});
+
+			neoTransaction.success();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+
+	@Procedure(name = "stats.loadPlayCounts", mode = Mode.WRITE)
+	@Description("Loads the play counts for tracks. Note: All the tracks and albums need to be there, use loadAlbumData before.")
+	public void loadPlayCounts(
+			@Name("userName") final String userName,
+			@Name("password") final String password,
+			@Name("url") final String url) {
+
+		try (var connection = DriverManager.getConnection(url, userName, password);
+			 var neoTransaction = db.beginTx()) {
+
+			var stats = DSL.using(connection);
+			var isNoCompilation = TRACKS.COMPILATION.eq("f");
+
+			final String columnNameYear = "yearValue";
+			final String columnNameMonth = "monthValue";
+			final String columnNameNewPlayCount = "newPlayCount";
+
+			var year = extract(PLAYS.PLAYED_ON, DatePart.YEAR).as(columnNameYear);
+			var month = extract(PLAYS.PLAYED_ON, DatePart.MONTH).as(columnNameMonth);
+
+			stats
+					.select(
+							ARTISTS.ARTIST,
+							TRACKS.NAME,
+							year, month,
+							count().as("newPlayCount")
+					)
+					.from(PLAYS)
+					.join(TRACKS).onKey()
+					.join(ARTISTS).onKey()
+					.where(isNoCompilation)
+					.groupBy(ARTISTS.ARTIST, TRACKS.ALBUM, TRACKS.NAME, year, month)
+					.forEach(r -> {
+						var parameters = Map.of(
+								"artistName", r.get(ARTISTS.ARTIST),
+								"trackName", r.get(TRACKS.NAME),
+								columnNameYear, r.get(columnNameYear),
+								columnNameMonth, r.get(columnNameMonth),
+								columnNameNewPlayCount, r.get(columnNameNewPlayCount)
+						);
+						db.execute(CREATE_PLAY_COUNTS, parameters);
+					});
 
 			neoTransaction.success();
 		} catch (Exception e) {
