@@ -51,6 +51,14 @@
 			<artifactId>thymeleaf-layout-dialect</artifactId>
 		</dependency>
 		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-actuator</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>io.micrometer</groupId>
+			<artifactId>micrometer-registry-prometheus</artifactId>
+		</dependency>
+		<dependency>
 			<groupId>org.faucet-pipeline</groupId>
 			<artifactId>faucet-pipeline-spring-boot-starter</artifactId>
 			<version>${faucet-pipeline.version}</version>
