@@ -30,6 +30,7 @@ import org.neo4j.driver.v1.Config;
 import org.neo4j.driver.v1.GraphDatabase;
 import org.neo4j.harness.ServerControls;
 import org.neo4j.harness.TestServerBuilders;
+import org.testcontainers.containers.PostgreSQLContainer;
 
 /**
  * @author Michael J. Simons
@@ -39,31 +40,35 @@ public class StatsIntegrationTest {
 
 	private static final Config driverConfig = Config.build().withoutEncryption().toConfig();
 
-	private static final String STATSDB_USER_NAME = "statsdb-dev";
-	private static final String STATSDB_PASSWORD = "dev";
-	private static final String STATSDB_URL = "jdbc:postgresql://localhost:5432/bootiful-music?currentSchema=test";
-	private static final Map<String, Object> CREDENTIALS = Map.of(
-		"userName", STATSDB_USER_NAME,
-		"password", STATSDB_PASSWORD,
-		"url", STATSDB_URL);
+	private PostgreSQLContainer statsDb;
+	private Map<String, Object> statsDbCredentials;
 
-	private ServerControls serverControls;
+	private ServerControls knowledgeDbControls;
 	private URI boltURI;
 
 	@BeforeAll
-	void initializeStatsdb() throws IOException {
+	void initializeStatsdb() {
+
+		this.statsDb = new PostgreSQLContainer<>();
+		this.statsDb.start();
+
+		statsDbCredentials = Map.of(
+			"userName", this.statsDb.getUsername(),
+			"password", this.statsDb.getPassword(),
+			"url", this.statsDb.getJdbcUrl());
 
 		final Flyway flyway = new Flyway();
-		flyway.setDataSource(STATSDB_URL, STATSDB_USER_NAME, STATSDB_PASSWORD);
+		flyway.setDataSource(this.statsDb.getJdbcUrl(), this.statsDb.getUsername(),
+			this.statsDb.getPassword());
 		flyway.migrate();
 	}
 
 	@BeforeAll
 	void initializeNeo4j() throws IOException {
 
-		this.serverControls = TestServerBuilders.newInProcessBuilder().withProcedure(StatsIntegration.class)
+		this.knowledgeDbControls = TestServerBuilders.newInProcessBuilder().withProcedure(StatsIntegration.class)
 			.newServer();
-		this.boltURI = serverControls.boltURI();
+		this.boltURI = knowledgeDbControls.boltURI();
 	}
 
 	@Test
@@ -72,7 +77,7 @@ public class StatsIntegrationTest {
 		try (var driver = GraphDatabase.driver(boltURI, driverConfig);
 			var session = driver.session()) {
 
-			session.run("CALL stats.loadArtistData({userName}, {password}, {url})", CREDENTIALS);
+			session.run("CALL stats.loadArtistData({userName}, {password}, {url})", statsDbCredentials);
 
 			var result = session.run("MATCH (a:Artist {name: 'Die Ärzte'}) RETURN a").single();
 			assertTrue(result.containsKey("a"));
@@ -86,7 +91,7 @@ public class StatsIntegrationTest {
 		try (var driver = GraphDatabase.driver(boltURI, driverConfig);
 			var session = driver.session()) {
 
-			session.run("CALL stats.loadAlbumData({userName}, {password}, {url})", CREDENTIALS);
+			session.run("CALL stats.loadAlbumData({userName}, {password}, {url})", statsDbCredentials);
 
 			var result = session
 				.run("MATCH (r:Album {name: 'Hot Space'}) - [:RELEASED_BY] -> (a:Artist {name: 'Queen'}) RETURN r, a")
@@ -99,6 +104,11 @@ public class StatsIntegrationTest {
 
 	@AfterAll
 	void tearDownNeo4j() {
-		this.serverControls.close();
+		this.knowledgeDbControls.close();
+	}
+
+	@AfterAll
+	void tearDownStatsdb() {
+		this.statsDb.stop();
 	}
 }

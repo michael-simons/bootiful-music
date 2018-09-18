@@ -35,7 +35,7 @@ import org.neo4j.procedure.Procedure;
 
 /**
  * This extensions integrates the music graph database with the music statistics database. The music statistics
- * database is a relational database containing all the "nacked" artist data, track data and each individual play of a track.
+ * database is a relational database containing all the "naked" artist data, track data and each individual play of a track.
  *
  * @author Michael J. Simons, 2018-08-02
  */
