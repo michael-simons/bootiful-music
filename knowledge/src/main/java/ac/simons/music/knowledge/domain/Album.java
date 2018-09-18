@@ -15,9 +15,6 @@
  */
 package ac.simons.music.knowledge.domain;
 
-import ac.simons.music.knowledge.support.YearConverter;
-
-import java.time.Year;
 import java.util.Comparator;
 import java.util.Objects;
 import java.util.Set;
@@ -30,7 +27,6 @@ import org.neo4j.ogm.annotation.NodeEntity;
 import org.neo4j.ogm.annotation.Relationship;
 import org.neo4j.ogm.annotation.RelationshipEntity;
 import org.neo4j.ogm.annotation.StartNode;
-import org.neo4j.ogm.annotation.typeconversion.Convert;
 
 /**
  * @author Michael J. Simons

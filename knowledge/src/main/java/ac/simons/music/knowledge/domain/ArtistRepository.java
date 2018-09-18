@@ -32,7 +32,7 @@ interface ArtistRepository<T extends Artist> extends Repository<T, Long>, Artist
 	Optional<T> findOneByName(String name);
 
 	// Specifying the relationships is necessary here because the generic queries won't recognize that
-	// Band has a relationship to country that _should_ be louded with default depth of 1.
+	// Band has a relationship to country that _should_ be loaded with default depth of 1.
 
 	@Query("MATCH (n:Artist) WITH n MATCH p=(n)-[*0..1]-(m) RETURN p ORDER BY n.name")
 	List<T> findAllOrderedByName();
@@ -98,7 +98,8 @@ class ArtistRepositoryExtImpl implements ArtistRepositoryExt {
 		return session.load(SoloArtist.class, artist.getId());
 	}
 
-	@Override public Artist removeQualification(Artist artist) {
+	@Override
+	public Artist removeQualification(Artist artist) {
 		session.query(CYPHER_REMOVE_QUALIFICATION, Map.of("id", artist.getId()));
 		// See above
 		session.clear();
