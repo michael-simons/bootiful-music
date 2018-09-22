@@ -50,8 +50,9 @@ public class ChartReportController {
 			@RequestParam(defaultValue = "10") final int n
 	) {
 
-		final String charts = this.chartService.getCharts(getYearMonth(year, month), n).formatJSON();
-		return new ModelAndView("index", Map.of("charts", charts));
+		final YearMonth yearMonth = getYearMonth(year, month);
+		final String charts = this.chartService.getCharts(yearMonth, n).formatJSON();
+		return new ModelAndView("index", Map.of("charts", charts, "yearMonth", yearMonth));
 	}
 
 	@GetMapping(value = {"/", "/charts/{year}/{month}"}, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)

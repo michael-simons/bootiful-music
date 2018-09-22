@@ -14,7 +14,7 @@
   },
   "dependencies": {
     "bootstrap": "^4.1.3",
-    "faucet-pipeline-images": "0.0.5",
+    "faucet-pipeline-images": "0.1.0",
     "faucet-pipeline-js": "^1.0.0-rc.9",
     "faucet-pipeline-sass": "^1.0.0-rc.6",
     "faucet-pipeline-static": "^1.0.0-rc.7",

@@ -1,13 +1,16 @@
 <!DOCTYPE html>
-<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorate="~{layout}">
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout}">
 <head>
-  <meta name="generator" content="HTML Tidy for HTML5 for Apple macOS version 5.6.0" />
-  <meta charset="utf-8" />
-  <title></title>
 </head>
-<body layout:fragment="content">
-  <div data-controller="index">
+<body>
+<div layout:fragment="content" class="container" data-controller="index">
+    <header class="row intro">
+        <div class="col">
+            <h1>A music knowledge base</h1>
+        </div>
+    </header>
     <button type="button" class="btn btn-primary" data-action="click->index#greet">Hello, Music.</button>
-  </div>
+</div>
 </body>
 </html>

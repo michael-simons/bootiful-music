@@ -1,19 +1,25 @@
 <!DOCTYPE html>
-<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorate="~{layout}">
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorate="~{layout}">
 <head>
-  <meta name="generator" content="HTML Tidy for HTML5 for Apple macOS version 5.6.0" />
-  <meta charset="utf-8" />
-  <title></title>
+    <!-- See https://www.thymeleaf.org/doc/tutorials/3.0/usingthymeleaf.html#javascript-inlining -->
+    <script th:inline="javascript">
+        var charts = /*[(${charts})]*/ {};
+    </script>
 </head>
-<body layout:fragment="content">
-<!-- See https://www.thymeleaf.org/doc/tutorials/3.0/usingthymeleaf.html#javascript-inlining -->
-<script th:inline="javascript">
-
-    var charts = /*[(${charts})]*/ {};
-
-</script>
-  <div data-controller="index">
-    <button type="button" class="btn btn-primary" data-action="click->index#greet">Hello, Music.</button>
-  </div>
+<body>
+<div layout:fragment="content" class="container" data-controller="index">
+    <header class="row intro">
+        <div class="col">
+            <h1 th:text="#{charts.title(${#temporals.format(yearMonth, 'MMM yyyy', locale)})}">The charts</h1>
+        </div>
+    </header>
+    <div class="row">
+        <div class="col">
+            <div id="container" style="width:100%; height:600px;"></div>
+            <button type="button" class="btn btn-primary" data-action="click->index#greet">Hello, Music.</button>
+        </div>
+    </div>
+</div>
 </body>
 </html>
