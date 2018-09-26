@@ -27,7 +27,7 @@ import org.springframework.data.repository.query.Param;
 /**
  * @author Michael J. Simons
  */
-interface ArtistRepository<T extends Artist> extends Repository<T, Long>, ArtistRepositoryExt {
+interface ArtistRepository<T extends ArtistEntity> extends Repository<T, Long>, ArtistRepositoryExt {
 
 	Optional<T> findOneByName(String name);
 
@@ -44,11 +44,11 @@ interface ArtistRepository<T extends Artist> extends Repository<T, Long>, Artist
 }
 
 interface ArtistRepositoryExt {
-	Band markAsBand(Artist artist);
+	BandEntity markAsBand(ArtistEntity artist);
 
-	SoloArtist markAsSoloArtist(Artist artist);
+	SoloArtistEntity markAsSoloArtist(ArtistEntity artist);
 
-	Artist removeQualification(Artist artist);
+	ArtistEntity removeQualification(ArtistEntity artist);
 }
 
 class ArtistRepositoryExtImpl implements ArtistRepositoryExt {
@@ -58,22 +58,22 @@ class ArtistRepositoryExtImpl implements ArtistRepositoryExt {
 			"OPTIONAL MATCH (n) - [f:BORN_IN] -> (:Country)\n" +
 			"REMOVE n:%s SET n:%s\n" +
 			"DELETE f",
-		SoloArtist.class.getSimpleName(),
-		Band.class.getSimpleName());
+		getLabel(SoloArtistEntity.class),
+		getLabel(BandEntity.class));
 	private static final String CYPHER_MARK_AS_SOLO_ARTIST = String.format(
 		"MATCH (n) WHERE id(n) = $id\n" +
 			"OPTIONAL MATCH (n) - [f:FOUNDED_IN] -> (:Country)\n" +
 			"REMOVE n:%s SET n:%s\n" +
 			"DELETE f",
-		Band.class.getSimpleName(),
-		SoloArtist.class.getSimpleName());
+		getLabel(BandEntity.class),
+		getLabel(SoloArtistEntity.class));
 	private static final String CYPHER_REMOVE_QUALIFICATION = String.format(
 		"MATCH (n) WHERE id(n) = $id\n" +
 			"OPTIONAL MATCH (n) - [f] -> (:Country)\n" +
 			"REMOVE n:%s, n:%s\n" +
 			"DELETE f",
-		Band.class.getSimpleName(),
-		SoloArtist.class.getSimpleName());
+		getLabel(BandEntity.class),
+		getLabel(SoloArtistEntity.class));
 
 	private final Session session;
 
@@ -82,27 +82,31 @@ class ArtistRepositoryExtImpl implements ArtistRepositoryExt {
 	}
 
 	@Override
-	public Band markAsBand(Artist artist) {
+	public BandEntity markAsBand(ArtistEntity artist) {
 		session.query(CYPHER_MARK_AS_BAND, Map.of("id", artist.getId()));
 		// Needs to clear the mapping context at this point because this shared session
 		// will know the node only as class Artist in this transaction otherwise.
 		session.clear();
-		return session.load(Band.class, artist.getId());
+		return session.load(BandEntity.class, artist.getId());
 	}
 
 	@Override
-	public SoloArtist markAsSoloArtist(Artist artist) {
+	public SoloArtistEntity markAsSoloArtist(ArtistEntity artist) {
 		session.query(CYPHER_MARK_AS_SOLO_ARTIST, Map.of("id", artist.getId()));
 		// See above
 		session.clear();
-		return session.load(SoloArtist.class, artist.getId());
+		return session.load(SoloArtistEntity.class, artist.getId());
 	}
 
 	@Override
-	public Artist removeQualification(Artist artist) {
+	public ArtistEntity removeQualification(ArtistEntity artist) {
 		session.query(CYPHER_REMOVE_QUALIFICATION, Map.of("id", artist.getId()));
 		// See above
 		session.clear();
-		return session.load(Artist.class, artist.getId());
+		return session.load(ArtistEntity.class, artist.getId());
+	}
+
+	private static String getLabel(Class<? extends AbstractAuditableBaseEntity> clazz) {
+		return clazz.getSimpleName().replaceAll("Entity$", "");
 	}
 }

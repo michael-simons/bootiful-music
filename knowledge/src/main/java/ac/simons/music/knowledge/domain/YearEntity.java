@@ -15,12 +15,11 @@
  */
 package ac.simons.music.knowledge.domain;
 
-import java.time.Year;
-
+import org.neo4j.ogm.annotation.GeneratedValue;
+import org.neo4j.ogm.annotation.Id;
 import org.neo4j.ogm.annotation.Index;
 import org.neo4j.ogm.annotation.NodeEntity;
 import org.neo4j.ogm.annotation.Relationship;
-import org.springframework.lang.Nullable;
 
 /**
  * @author Michael J. Simons
@@ -28,6 +27,8 @@ import org.springframework.lang.Nullable;
 @NodeEntity("Year")
 public class YearEntity {
 
+	@Id
+	@GeneratedValue
 	private Long id;
 
 	@Index(unique = true)

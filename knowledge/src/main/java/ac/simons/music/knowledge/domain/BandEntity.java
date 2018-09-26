@@ -15,7 +15,8 @@
  */
 package ac.simons.music.knowledge.domain;
 
-import java.time.Year;
+import static java.util.stream.Collectors.toList;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -26,27 +27,42 @@ import org.springframework.data.annotation.PersistenceConstructor;
 /**
  * @author Michael J. Simons
  */
-@NodeEntity
-public class SoloArtist extends Artist {
+@NodeEntity("Band")
+public class BandEntity extends ArtistEntity {
 
-	@Relationship("BORN_IN")
-	private Country bornIn;
+	@Relationship("FOUNDED_IN")
+	private CountryEntity foundedIn;
 
-	public SoloArtist(String name) {
-		super(name);
+	@Relationship("HAS")
+	private List<MemberEntity> member = new ArrayList<>();
+
+	public BandEntity(String name) {
+		this(name, null);
 	}
 
 	@PersistenceConstructor
-	public SoloArtist(String name, Country bornIn) {
+	public BandEntity(String name, CountryEntity foundedIn) {
 		super(name);
-		this.bornIn = bornIn;
+		this.foundedIn = foundedIn;
 	}
 
-	public Country getBornIn() {
-		return bornIn;
+	public CountryEntity getFoundedIn() {
+		return foundedIn;
 	}
 
-	public void setBornIn(Country bornIn) {
-		this.bornIn = bornIn;
+	public void setFoundedIn(CountryEntity foundedIn) {
+		this.foundedIn = foundedIn;
+	}
+
+	BandEntity addMember(final SoloArtistEntity band, final YearEntity joinedIn, final YearEntity leftIn) {
+		this.member.add(new MemberEntity(band, joinedIn, leftIn));
+		return this;
+	}
+
+	public List<SoloArtistEntity> getActiveMember() {
+		return member.stream()
+				.filter(MemberEntity::isActive)
+				.map(MemberEntity::getArtist)
+				.collect(toList());
 	}
 }

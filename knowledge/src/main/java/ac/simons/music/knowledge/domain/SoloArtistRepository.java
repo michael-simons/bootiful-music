@@ -19,11 +19,10 @@ import java.util.List;
 
 import org.springframework.data.domain.Sort;
 import org.springframework.data.neo4j.repository.Neo4jRepository;
-import org.springframework.data.repository.Repository;
 
 /**
  * @author Michael J. Simons
  */
-interface SoloArtistRepository extends Neo4jRepository<SoloArtist, Long> {
-	List<SoloArtist> findAll(Sort sort);
+interface SoloArtistRepository extends Neo4jRepository<SoloArtistEntity, Long> {
+	List<SoloArtistEntity> findAll(Sort sort);
 }

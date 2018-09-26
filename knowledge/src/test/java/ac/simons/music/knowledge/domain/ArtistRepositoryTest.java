@@ -34,10 +34,10 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 class ArtistRepositoryTest {
 	private final Session session;
 
-	private final ArtistRepository<? super Artist> artistRepository;
+	private final ArtistRepository<? super ArtistEntity> artistRepository;
 
 	@Autowired
-	public ArtistRepositoryTest(Session session, ArtistRepository<? super Artist> artistRepository) {
+	public ArtistRepositoryTest(Session session, ArtistRepository<? super ArtistEntity> artistRepository) {
 		this.session = session;
 		this.artistRepository = artistRepository;
 	}
@@ -46,15 +46,15 @@ class ArtistRepositoryTest {
 	void markAsSpecificKindOfArtistShouldWork() {
 
 		String artistName = "Queen";
-		Artist unspecified = this.artistRepository.save(new Artist(artistName));
-		Band queen = this.artistRepository.markAsBand(unspecified);
+		ArtistEntity unspecified = this.artistRepository.save(new ArtistEntity(artistName));
+		BandEntity queen = this.artistRepository.markAsBand(unspecified);
 
 		assertThat(queen).isNotNull();
 		assertThat(this.artistRepository.findOneByName(artistName))
 			.isPresent()
-			.containsInstanceOf(Band.class);
+			.containsInstanceOf(BandEntity.class);
 		assertThat(
-			this.session.query(Artist.class, "MATCH (a:Artist {name: $name}) WHERE not a:Band  RETURN a",
+			this.session.query(ArtistEntity.class, "MATCH (a:ArtistEntity {name: $name}) WHERE not a:BandEntity  RETURN a",
 				Map.of("name", artistName))
 				.iterator().hasNext()).isFalse();
 	}
@@ -63,15 +63,16 @@ class ArtistRepositoryTest {
 	void changeKindShouldWork() {
 
 		String artistName = "Jon Bon Jovi";
-		Band bonJovi = this.artistRepository.save(new Band(artistName));
-		SoloArtist jonBonJovi = this.artistRepository.markAsSoloArtist(bonJovi);
+		BandEntity bonJovi = this.artistRepository.save(new BandEntity(artistName));
+		SoloArtistEntity jonBonJovi = this.artistRepository.markAsSoloArtist(bonJovi);
 
 		assertThat(jonBonJovi).isNotNull();
 		assertThat(this.artistRepository.findOneByName(artistName))
 			.isPresent()
-			.containsInstanceOf(SoloArtist.class);
+			.containsInstanceOf(SoloArtistEntity.class);
 		assertThat(
-			this.session.query(Artist.class, "MATCH (a:Artist:Band {name: $name}) RETURN a", Map.of("name", artistName))
+			this.session.query(
+				ArtistEntity.class, "MATCH (a:ArtistEntity:BandEntity {name: $name}) RETURN a", Map.of("name", artistName))
 				.iterator().hasNext()).isFalse();
 	}
 }

@@ -17,6 +17,8 @@ package ac.simons.music.knowledge.domain;
 
 import static org.neo4j.ogm.annotation.Relationship.INCOMING;
 
+import org.neo4j.ogm.annotation.GeneratedValue;
+import org.neo4j.ogm.annotation.Id;
 import org.neo4j.ogm.annotation.NodeEntity;
 import org.neo4j.ogm.annotation.Relationship;
 import org.springframework.data.annotation.PersistenceConstructor;
@@ -24,13 +26,14 @@ import org.springframework.data.annotation.PersistenceConstructor;
 /**
  * @author Michael J. Simons
  */
-@NodeEntity
-public class Member {
-
+@NodeEntity("Member")
+public class MemberEntity {
+	@Id
+	@GeneratedValue
 	private Long id;
 
 	@Relationship(value = "IS_A", direction = INCOMING)
-	private SoloArtist value;
+	private SoloArtistEntity value;
 
 	@Relationship("JOINED_IN")
 	private YearEntity joinedIn;
@@ -38,8 +41,7 @@ public class Member {
 	@Relationship("LEFT_IN")
 	private YearEntity leftIn;
 
-	@PersistenceConstructor
-	Member(final SoloArtist artist, final YearEntity joinedIn, final YearEntity leftIn) {
+	@PersistenceConstructor MemberEntity(final SoloArtistEntity artist, final YearEntity joinedIn, final YearEntity leftIn) {
 		this.value = artist;
 		this.joinedIn = joinedIn;
 		this.leftIn = leftIn;
@@ -49,7 +51,7 @@ public class Member {
 		return id;
 	}
 
-	public SoloArtist getArtist() {
+	public SoloArtistEntity getArtist() {
 		return value;
 	}
 

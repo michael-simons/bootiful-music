@@ -29,7 +29,7 @@ import org.springframework.transaction.annotation.Transactional;
  */
 @Service
 public class ArtistService {
-	private final ArtistRepository<Artist> allArtists;
+	private final ArtistRepository<ArtistEntity> allArtists;
 
 	private final BandRepository bands;
 
@@ -39,7 +39,7 @@ public class ArtistService {
 
 	private final CountryRepository countryRepository;
 
-	public ArtistService(ArtistRepository<Artist> allArtists, BandRepository bands, SoloArtistRepository soloArtists, YearRepository yearRepository, CountryRepository countryRepository) {
+	public ArtistService(ArtistRepository<ArtistEntity> allArtists, BandRepository bands, SoloArtistRepository soloArtists, YearRepository yearRepository, CountryRepository countryRepository) {
 		this.allArtists = allArtists;
 		this.bands = bands;
 		this.soloArtists = soloArtists;
@@ -47,49 +47,49 @@ public class ArtistService {
 		this.countryRepository = countryRepository;
 	}
 
-	public Optional<Artist> findArtistById(Long id) {
+	public Optional<ArtistEntity> findArtistById(Long id) {
 		return allArtists.findById(id);
 	}
 
-	public Optional<Band> findBandById(Long id) {
+	public Optional<BandEntity> findBandById(Long id) {
 		return bands.findById(id);
 	}
 
-	public Optional<SoloArtist> findSoloArtistById(Long id) {
+	public Optional<SoloArtistEntity> findSoloArtistById(Long id) {
 		return soloArtists.findById(id);
 	}
 
-	public List<Artist> findAllArtists() {
+	public List<ArtistEntity> findAllArtists() {
 		return allArtists.findAllOrderedByName();
 	}
 
-	public List<SoloArtist> findAllSoloArtists() {
+	public List<SoloArtistEntity> findAllSoloArtists() {
 		return this.soloArtists.findAll(Sort.by("name").ascending());
 	}
 
 	@Transactional
-	public <T extends Artist> T createNewArtist(final String name, final String countryOfOrigin, final Class<T> type) {
-		Artist rv;
-		final Country country = determineCountry(countryOfOrigin);
-		if (type == Band.class) {
-			rv = this.allArtists.save(new Band(name, country));
-		} else if (type == SoloArtist.class) {
-			rv = this.allArtists.save(new SoloArtist(name, country));
+	public <T extends ArtistEntity> T createNewArtist(final String name, final String countryOfOrigin, final Class<T> type) {
+		ArtistEntity rv;
+		final CountryEntity country = determineCountry(countryOfOrigin);
+		if (type == BandEntity.class) {
+			rv = this.allArtists.save(new BandEntity(name, country));
+		} else if (type == SoloArtistEntity.class) {
+			rv = this.allArtists.save(new SoloArtistEntity(name, country));
 		} else {
-			rv = this.allArtists.save(new Artist(name));
+			rv = this.allArtists.save(new ArtistEntity(name));
 		}
 		return type.cast(rv);
 	}
 
 	@Transactional
-	public <T extends Artist> T updateArtist(final Artist artist, final String countryOfOrigin, final Class<T> type) {
-		Artist rv;
-		if (type == Band.class) {
+	public <T extends ArtistEntity> T updateArtist(final ArtistEntity artist, final String countryOfOrigin, final Class<T> type) {
+		ArtistEntity rv;
+		if (type == BandEntity.class) {
 			var band = allArtists.markAsBand(artist);
 			band.setFoundedIn(determineCountry(countryOfOrigin));
 			// TODO this is weird... Or at least I wonder if we are doing dirty tracking at all?! Or is it because of the cleared session?
 			rv = this.allArtists.save(band);
-		} else if (type == SoloArtist.class) {
+		} else if (type == SoloArtistEntity.class) {
 			var soloArtist = allArtists.markAsSoloArtist(artist);
 			soloArtist.setBornIn(determineCountry(countryOfOrigin));
 			rv = this.allArtists.save(soloArtist);
@@ -100,7 +100,7 @@ public class ArtistService {
 	}
 
 	@Transactional
-	public Band addMember(final Band band, final SoloArtist newMember, final Year joinedIn, @Nullable final Year leftIn) {
+	public BandEntity addMember(final BandEntity band, final SoloArtistEntity newMember, final Year joinedIn, @Nullable final Year leftIn) {
 
 		final YearEntity joinedInEntity = this.yearRepository.findOneByValue(joinedIn).orElseGet(() -> yearRepository.createYear(joinedIn));
 		final YearEntity leftInEntity = leftIn == null ? null : this.yearRepository.findOneByValue(leftIn).orElseGet(() -> yearRepository.createYear(leftIn));
@@ -109,8 +109,8 @@ public class ArtistService {
 	}
 
 	@Nullable
-	Country determineCountry(@Nullable final String code) {
+	CountryEntity determineCountry(@Nullable final String code) {
 		return code == null || code.trim().isEmpty() ? null :
-			countryRepository.findByCode(code).orElseGet(() -> countryRepository.save(new Country(code)));
+			countryRepository.findByCode(code).orElseGet(() -> countryRepository.save(new CountryEntity(code)));
 	}
 }

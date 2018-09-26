@@ -20,5 +20,5 @@ import org.springframework.data.neo4j.repository.Neo4jRepository;
 /**
  * @author Michael J. Simons
  */
-interface BandRepository extends Neo4jRepository<Band, Long> {
+interface BandRepository extends Neo4jRepository<BandEntity, Long> {
 }

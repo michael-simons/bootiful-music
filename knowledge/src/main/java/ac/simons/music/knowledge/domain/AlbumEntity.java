@@ -31,12 +31,11 @@ import org.neo4j.ogm.annotation.StartNode;
 /**
  * @author Michael J. Simons
  */
-@NodeEntity
-public class Album {
-	private Long id;
+@NodeEntity("Album")
+public class AlbumEntity extends AbstractAuditableBaseEntity {
 
 	@Relationship("RELEASED_BY")
-	private Artist artist;
+	private ArtistEntity artist;
 
 	private String name;
 
@@ -49,13 +48,13 @@ public class Album {
 	private Set<AlbumTrack> tracks = new TreeSet<>(
 		Comparator.comparing(AlbumTrack::getDiscNumber).thenComparing(AlbumTrack::getTrackNumber));
 
-	public Album(Artist artist, String name, YearEntity releasedIn) {
+	public AlbumEntity(ArtistEntity artist, String name, YearEntity releasedIn) {
 		this.artist = artist;
 		this.name = name;
 		this.releasedIn = releasedIn;
 	}
 
-	public Artist getArtist() {
+	public ArtistEntity getArtist() {
 		return artist;
 	}
 
@@ -75,7 +74,7 @@ public class Album {
 		this.live = live;
 	}
 
-	public Album addTrack(final Track track, final Integer discNumber, final Integer trackNumber) {
+	public AlbumEntity addTrack(final TrackEntity track, final Integer discNumber, final Integer trackNumber) {
 		this.tracks.add(new AlbumTrack(this, track, discNumber, trackNumber));
 		return this;
 	}
@@ -84,9 +83,9 @@ public class Album {
 	public boolean equals(Object o) {
 		if (this == o)
 			return true;
-		if (!(o instanceof Album))
+		if (!(o instanceof AlbumEntity))
 			return false;
-		Album album = (Album) o;
+		AlbumEntity album = (AlbumEntity) o;
 		return Objects.equals(artist, album.artist) && Objects.equals(name, album.name)
 			&& Objects.equals(releasedIn, album.releasedIn);
 	}
@@ -103,20 +102,20 @@ public class Album {
 		private Long trackID;
 
 		@StartNode
-		private Album album;
+		private AlbumEntity album;
 		@EndNode
-		private Track track;
+		private TrackEntity track;
 		private Integer discNumber;
 		private Integer trackNumber;
 
-		public AlbumTrack(Album album, Track track, Integer discNumber, Integer trackNumber) {
+		public AlbumTrack(AlbumEntity album, TrackEntity track, Integer discNumber, Integer trackNumber) {
 			this.album = album;
 			this.track = track;
 			this.discNumber = discNumber;
 			this.trackNumber = trackNumber;
 		}
 
-		public Track getTrack() {
+		public TrackEntity getTrack() {
 			return track;
 		}
 

@@ -18,22 +18,21 @@ package ac.simons.music.knowledge.domain;
 import java.util.Locale;
 import java.util.Objects;
 
+import org.neo4j.ogm.annotation.Index;
 import org.neo4j.ogm.annotation.NodeEntity;
-import org.neo4j.ogm.annotation.PostLoad;
-import org.neo4j.ogm.annotation.Transient;
 
 /**
  * @author Michael J. Simons
  */
-@NodeEntity
-public class Country {
-	private Long id;
+@NodeEntity("Country")
+public class CountryEntity extends AbstractAuditableBaseEntity {
 
+	@Index(unique = true)
 	private String code;
 
 	private String name;
 
-	public Country(String code) {
+	public CountryEntity(String code) {
 		this.code = code;
 		this.name = new Locale("", this.code).getDisplayCountry(Locale.ENGLISH);
 	}
@@ -50,9 +49,9 @@ public class Country {
 	public boolean equals(Object o) {
 		if (this == o)
 			return true;
-		if (!(o instanceof Country))
+		if (!(o instanceof CountryEntity))
 			return false;
-		Country country = (Country) o;
+		CountryEntity country = (CountryEntity) o;
 		return Objects.equals(code, country.code);
 	}
 

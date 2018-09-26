@@ -24,11 +24,11 @@ import org.springframework.data.neo4j.repository.Neo4jRepository;
 /**
  * @author Michael J. Simons
  */
-public interface CountryRepository extends Neo4jRepository<Country, Long> {
-	Optional<Country> findByCode(String code);
+public interface CountryRepository extends Neo4jRepository<CountryEntity, Long> {
+	Optional<CountryEntity> findByCode(String code);
 
 	@Query("MATCH (a:Album) - [:RELEASED_BY] -> (b:Band) - [:FOUNDED_IN] -> (:Country {code: :#{#country.code}}) "
 			+ "WITH a AS album ORDER BY album.name "
 			+ "RETURN album.releasedIn AS year, COLLECT(album.name) AS albums ORDER BY year ")
-	List<CountryStatistics> getStatisticsFor(Country country);
+	List<CountryStatistics> getStatisticsFor(CountryEntity country);
 }

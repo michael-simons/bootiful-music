@@ -40,11 +40,11 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.servlet.ModelAndView;
 
-import ac.simons.music.knowledge.domain.Artist;
+import ac.simons.music.knowledge.domain.ArtistEntity;
 import ac.simons.music.knowledge.domain.ArtistService;
-import ac.simons.music.knowledge.domain.Band;
-import ac.simons.music.knowledge.domain.Country;
-import ac.simons.music.knowledge.domain.SoloArtist;
+import ac.simons.music.knowledge.domain.BandEntity;
+import ac.simons.music.knowledge.domain.CountryEntity;
+import ac.simons.music.knowledge.domain.SoloArtistEntity;
 
 /**
  * @author Michael J. Simons
@@ -81,7 +81,7 @@ public class ArtistController {
 	public ModelAndView artist(@PathVariable final Long artistId) {
 
 		var artist = this.artistService.findArtistById(artistId)
-				.orElseThrow(() -> new NodeNotFoundException(Artist.class, artistId));
+				.orElseThrow(() -> new NodeNotFoundException(ArtistEntity.class, artistId));
 
 		var soloArtists = this.artistService.findAllSoloArtists();
 		var model = Map.of(
@@ -98,7 +98,7 @@ public class ArtistController {
 			return "artist";
 		}
 
-		final Class<? extends Artist> targetType = artistCmd.getType().getImplementingClass();
+		final Class<? extends ArtistEntity> targetType = artistCmd.getType().getImplementingClass();
 		Optional.ofNullable(artistCmd.getId())
 				.flatMap(this.artistService::findArtistById)
 				.ifPresentOrElse(
@@ -112,30 +112,30 @@ public class ArtistController {
 	@PostMapping(value = "/{bandId}/member", produces = MediaType.TEXT_HTML_VALUE)
 	public String member(@PathVariable final Long bandId, @Valid final NewMemberCmd newMemberCmd, final BindingResult newMemberBindingResult) {
 		var band = this.artistService.findBandById(bandId)
-				.orElseThrow(() -> new NodeNotFoundException(Band.class, bandId));
+				.orElseThrow(() -> new NodeNotFoundException(BandEntity.class, bandId));
 
 		if (!newMemberBindingResult.hasErrors()) {
 			var soloArtist = this.artistService.findSoloArtistById(newMemberCmd.artistId)
-					.orElseThrow(() -> new NodeNotFoundException(SoloArtist.class, bandId));
+					.orElseThrow(() -> new NodeNotFoundException(SoloArtistEntity.class, bandId));
 			band = this.artistService.addMember(band, soloArtist, newMemberCmd.joinedIn, newMemberCmd.leftIn);
 		}
 		return String.format("redirect:/artists/%d", band.getId());
 	}
 
 	enum ArtistType {
-		ARTIST(Artist.class), BAND(Band.class), SOLO_ARTIST(SoloArtist.class);
+		ARTIST(ArtistEntity.class), BAND(BandEntity.class), SOLO_ARTIST(SoloArtistEntity.class);
 
-		private final Class<? extends Artist> implementingClass;
+		private final Class<? extends ArtistEntity> implementingClass;
 
-		ArtistType(Class<? extends Artist> implementingClass) {
+		ArtistType(Class<? extends ArtistEntity> implementingClass) {
 			this.implementingClass = implementingClass;
 		}
 
-		public Class<? extends Artist> getImplementingClass() {
+		public Class<? extends ArtistEntity> getImplementingClass() {
 			return implementingClass;
 		}
 
-		static ArtistType determineFrom(final Artist artist) {
+		static ArtistType determineFrom(final ArtistEntity artist) {
 			return Stream.of(BAND, SOLO_ARTIST)
 					.filter(t -> t.implementingClass.isInstance(artist))
 					.findFirst().orElse(ARTIST);
@@ -182,17 +182,17 @@ public class ArtistController {
 		public ArtistCmd() {
 		}
 
-		private ArtistCmd(final Artist artist) {
+		private ArtistCmd(final ArtistEntity artist) {
 			this.id = artist.getId();
 			this.name = artist.getName();
 			this.type = ArtistType.determineFrom(artist);
-			Country origin = null;
-			if (artist instanceof Band) {
-				origin = ((Band) artist).getFoundedIn();
-			} else if (artist instanceof SoloArtist) {
-				origin = ((SoloArtist) artist).getBornIn();
+			CountryEntity origin = null;
+			if (artist instanceof BandEntity) {
+				origin = ((BandEntity) artist).getFoundedIn();
+			} else if (artist instanceof SoloArtistEntity) {
+				origin = ((SoloArtistEntity) artist).getBornIn();
 			}
-			this.origin = Optional.ofNullable(origin).map(Country::getCode).orElse(null);
+			this.origin = Optional.ofNullable(origin).map(CountryEntity::getCode).orElse(null);
 		}
 
 		public Long getId() {

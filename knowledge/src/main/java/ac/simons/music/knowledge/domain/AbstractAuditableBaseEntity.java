@@ -15,43 +15,38 @@
  */
 package ac.simons.music.knowledge.domain;
 
-import java.util.Objects;
+import java.time.LocalDate;
 
-import org.neo4j.ogm.annotation.NodeEntity;
+import org.neo4j.ogm.annotation.GeneratedValue;
+import org.neo4j.ogm.annotation.Id;
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.annotation.LastModifiedDate;
 
 /**
+ * Base class for our entities.
+ *
  * @author Michael J. Simons
  */
-@NodeEntity
-public class Artist {
+abstract class AbstractAuditableBaseEntity {
+	@Id
+	@GeneratedValue
 	private Long id;
 
-	private String name;
+	@CreatedDate
+	private LocalDate createdAt;
 
-	public Artist(String name) {
-		this.name = name;
-	}
+	@LastModifiedDate
+	private LocalDate updatedAt;
 
 	public Long getId() {
 		return id;
 	}
 
-	public String getName() {
-		return name;
+	public LocalDate getCreatedAt() {
+		return createdAt;
 	}
 
-	@Override
-	public boolean equals(Object o) {
-		if (this == o)
-			return true;
-		if (o == null || getClass() != o.getClass())
-			return false;
-		Artist that = (Artist) o;
-		return Objects.equals(name, that.name);
-	}
-
-	@Override
-	public int hashCode() {
-		return Objects.hash(name);
+	public LocalDate getUpdatedAt() {
+		return updatedAt;
 	}
 }

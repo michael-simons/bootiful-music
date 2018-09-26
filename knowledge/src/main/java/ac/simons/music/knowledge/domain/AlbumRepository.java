@@ -20,5 +20,5 @@ import org.springframework.data.neo4j.repository.Neo4jRepository;
 /**
  * @author Michael J. Simons
  */
-public interface AlbumRepository extends Neo4jRepository<Album, Long> {
+public interface AlbumRepository extends Neo4jRepository<AlbumEntity, Long> {
 }

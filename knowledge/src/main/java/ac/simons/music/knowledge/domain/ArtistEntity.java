@@ -15,60 +15,40 @@
  */
 package ac.simons.music.knowledge.domain;
 
-import java.util.HashSet;
 import java.util.Objects;
-import java.util.Optional;
-import java.util.Set;
 
 import org.neo4j.ogm.annotation.Index;
 import org.neo4j.ogm.annotation.NodeEntity;
-import org.neo4j.ogm.annotation.Relationship;
-import org.springframework.data.annotation.PersistenceConstructor;
 
 /**
  * @author Michael J. Simons
  */
-@NodeEntity
-public class Track {
-	private Long id;
+@NodeEntity("Artist")
+public class ArtistEntity extends AbstractAuditableBaseEntity {
 
 	@Index(unique = true)
 	private String name;
 
-	@Relationship("WRITTEN_BY")
-	private Set<Artist> writtenBy = new HashSet<>();
-
-	@Relationship(value = "FEATURING")
-	private Set<SoloArtist> featuring = new HashSet<>();
-
-	public Track(String name) {
-		this(name, Set.of());
-	}
-
-	@PersistenceConstructor
-	public Track(String name, Set<Artist> writtenBy) {
+	public ArtistEntity(String name) {
 		this.name = name;
-		this.writtenBy = Optional.ofNullable(writtenBy)
-				.map(HashSet::new).orElseGet(HashSet::new);
 	}
 
-	public Track featuring(final SoloArtist artist) {
-		this.featuring.add(artist);
-		return this;
+	public String getName() {
+		return name;
 	}
 
 	@Override
 	public boolean equals(Object o) {
 		if (this == o)
 			return true;
-		if (!(o instanceof Track))
+		if (o == null || getClass() != o.getClass())
 			return false;
-		Track track = (Track) o;
-		return Objects.equals(name, track.name) && Objects.equals(writtenBy, track.writtenBy);
+		ArtistEntity that = (ArtistEntity) o;
+		return Objects.equals(name, that.name);
 	}
 
 	@Override
 	public int hashCode() {
-		return Objects.hash(name, writtenBy);
+		return Objects.hash(name);
 	}
 }
