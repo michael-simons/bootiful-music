@@ -28,6 +28,7 @@ import org.springframework.data.neo4j.repository.Neo4jRepository;
  */
 public interface YearRepository extends Neo4jRepository<YearEntity, Long>, YearRepositoryExt {
 	// TODO Why isn't the year converter picked up here?
+	// Answer, see: https://stackoverflow.com/questions/52431160/spring-data-neo4j-filter-by-localdate-doesnt-work/52475719#52475719
 	@Query("MATCH (y:Year {value: :#{#year.value}}) RETURN y")
 	Optional<YearEntity> findOneByValue(Year year);
 }
