@@ -20,50 +20,38 @@ import static org.neo4j.ogm.annotation.Relationship.INCOMING;
 import org.neo4j.ogm.annotation.GeneratedValue;
 import org.neo4j.ogm.annotation.Id;
 import org.neo4j.ogm.annotation.NodeEntity;
+import org.neo4j.ogm.annotation.Property;
 import org.neo4j.ogm.annotation.Relationship;
 import org.springframework.data.annotation.PersistenceConstructor;
+
+import lombok.Getter;
+import lombok.Setter;
 
 /**
  * @author Michael J. Simons
  */
 @NodeEntity("Member")
+@Getter
 public class MemberEntity {
 	@Id
 	@GeneratedValue
 	private Long id;
 
 	@Relationship(value = "IS_A", direction = INCOMING)
-	private SoloArtistEntity value;
+	@Property(name = "value")
+	private SoloArtistEntity artist;
 
 	@Relationship("JOINED_IN")
 	private YearEntity joinedIn;
 
 	@Relationship("LEFT_IN")
+	@Setter
 	private YearEntity leftIn;
 
-	@PersistenceConstructor MemberEntity(final SoloArtistEntity artist, final YearEntity joinedIn, final YearEntity leftIn) {
-		this.value = artist;
+	@PersistenceConstructor
+	MemberEntity(final SoloArtistEntity artist, final YearEntity joinedIn, final YearEntity leftIn) {
+		this.artist = artist;
 		this.joinedIn = joinedIn;
-		this.leftIn = leftIn;
-	}
-
-	public Long getId() {
-		return id;
-	}
-
-	public SoloArtistEntity getArtist() {
-		return value;
-	}
-
-	public YearEntity getJoinedIn() {
-		return joinedIn;
-	}
-
-	public YearEntity getLeftIn() {
-		return leftIn;
-	}
-
-	public void setLeftIn(YearEntity leftIn) {
 		this.leftIn = leftIn;
 	}
 

@@ -16,7 +16,6 @@
 package ac.simons.music.knowledge.domain;
 
 import java.util.Comparator;
-import java.util.Objects;
 import java.util.Set;
 import java.util.TreeSet;
 
@@ -28,10 +27,17 @@ import org.neo4j.ogm.annotation.Relationship;
 import org.neo4j.ogm.annotation.RelationshipEntity;
 import org.neo4j.ogm.annotation.StartNode;
 
+import lombok.AccessLevel;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.Setter;
+
 /**
  * @author Michael J. Simons
  */
 @NodeEntity("Album")
+@Getter
+@EqualsAndHashCode(of = {"artist", "name", "releasedIn"}, callSuper = false)
 public class AlbumEntity extends AbstractAuditableBaseEntity {
 
 	@Relationship("RELEASED_BY")
@@ -42,11 +48,13 @@ public class AlbumEntity extends AbstractAuditableBaseEntity {
 	@Relationship("RELEASED_IN")
 	private YearEntity releasedIn;
 
+	@Setter
 	private boolean live = false;
 
 	@Relationship("CONTAINS")
+	@Getter(AccessLevel.NONE)
 	private Set<AlbumTrack> tracks = new TreeSet<>(
-		Comparator.comparing(AlbumTrack::getDiscNumber).thenComparing(AlbumTrack::getTrackNumber));
+			Comparator.comparing(AlbumTrack::getDiscNumber).thenComparing(AlbumTrack::getTrackNumber));
 
 	public AlbumEntity(ArtistEntity artist, String name, YearEntity releasedIn) {
 		this.artist = artist;
@@ -54,57 +62,26 @@ public class AlbumEntity extends AbstractAuditableBaseEntity {
 		this.releasedIn = releasedIn;
 	}
 
-	public ArtistEntity getArtist() {
-		return artist;
-	}
-
-	public String getName() {
-		return name;
-	}
-
-	public YearEntity getReleasedIn() {
-		return releasedIn;
-	}
-
-	public boolean isLive() {
-		return live;
-	}
-
-	public void setLive(boolean live) {
-		this.live = live;
-	}
-
 	public AlbumEntity addTrack(final TrackEntity track, final Integer discNumber, final Integer trackNumber) {
 		this.tracks.add(new AlbumTrack(this, track, discNumber, trackNumber));
 		return this;
 	}
 
-	@Override
-	public boolean equals(Object o) {
-		if (this == o)
-			return true;
-		if (!(o instanceof AlbumEntity))
-			return false;
-		AlbumEntity album = (AlbumEntity) o;
-		return Objects.equals(artist, album.artist) && Objects.equals(name, album.name)
-			&& Objects.equals(releasedIn, album.releasedIn);
-	}
-
-	@Override
-	public int hashCode() {
-		return Objects.hash(artist, name, releasedIn);
-	}
-
 	@RelationshipEntity("CONTAINS")
+	@Getter
 	static class AlbumTrack {
 		@Id
 		@GeneratedValue
+		@Getter(AccessLevel.NONE)
 		private Long trackID;
 
 		@StartNode
+		@Getter(AccessLevel.NONE)
 		private AlbumEntity album;
+
 		@EndNode
 		private TrackEntity track;
+
 		private Integer discNumber;
 		private Integer trackNumber;
 
@@ -113,18 +90,6 @@ public class AlbumEntity extends AbstractAuditableBaseEntity {
 			this.track = track;
 			this.discNumber = discNumber;
 			this.trackNumber = trackNumber;
-		}
-
-		public TrackEntity getTrack() {
-			return track;
-		}
-
-		public Integer getDiscNumber() {
-			return discNumber;
-		}
-
-		public Integer getTrackNumber() {
-			return trackNumber;
 		}
 	}
 }

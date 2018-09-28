@@ -16,7 +16,6 @@
 package ac.simons.music.knowledge.domain;
 
 import java.util.HashSet;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 
@@ -25,13 +24,18 @@ import org.neo4j.ogm.annotation.NodeEntity;
 import org.neo4j.ogm.annotation.Relationship;
 import org.springframework.data.annotation.PersistenceConstructor;
 
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+
 /**
  * @author Michael J. Simons
  */
 @NodeEntity("Track")
+@EqualsAndHashCode(of = {"name", "writtenBy"}, callSuper = false)
 public class TrackEntity extends AbstractAuditableBaseEntity {
 
 	@Index(unique = true)
+	@Getter
 	private String name;
 
 	@Relationship("WRITTEN_BY")
@@ -54,20 +58,5 @@ public class TrackEntity extends AbstractAuditableBaseEntity {
 	public TrackEntity featuring(final SoloArtistEntity artist) {
 		this.featuring.add(artist);
 		return this;
-	}
-
-	@Override
-	public boolean equals(Object o) {
-		if (this == o)
-			return true;
-		if (!(o instanceof TrackEntity))
-			return false;
-		TrackEntity track = (TrackEntity) o;
-		return Objects.equals(name, track.name) && Objects.equals(writtenBy, track.writtenBy);
-	}
-
-	@Override
-	public int hashCode() {
-		return Objects.hash(name, writtenBy);
 	}
 }

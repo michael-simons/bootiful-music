@@ -24,6 +24,9 @@ import org.neo4j.ogm.annotation.NodeEntity;
 import org.neo4j.ogm.annotation.Relationship;
 import org.springframework.data.annotation.PersistenceConstructor;
 
+import lombok.Getter;
+import lombok.Setter;
+
 /**
  * @author Michael J. Simons
  */
@@ -31,6 +34,8 @@ import org.springframework.data.annotation.PersistenceConstructor;
 public class BandEntity extends ArtistEntity {
 
 	@Relationship("FOUNDED_IN")
+	@Getter
+	@Setter
 	private CountryEntity foundedIn;
 
 	@Relationship("HAS")
@@ -43,14 +48,6 @@ public class BandEntity extends ArtistEntity {
 	@PersistenceConstructor
 	public BandEntity(String name, CountryEntity foundedIn) {
 		super(name);
-		this.foundedIn = foundedIn;
-	}
-
-	public CountryEntity getFoundedIn() {
-		return foundedIn;
-	}
-
-	public void setFoundedIn(CountryEntity foundedIn) {
 		this.foundedIn = foundedIn;
 	}
 

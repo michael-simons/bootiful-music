@@ -20,10 +20,13 @@ import org.neo4j.ogm.annotation.Id;
 import org.neo4j.ogm.annotation.Index;
 import org.neo4j.ogm.annotation.NodeEntity;
 
+import lombok.Getter;
+
 /**
  * @author Michael J. Simons
  */
 @NodeEntity("Decade")
+@Getter
 public class DecadeEntity {
 
 	@Id
@@ -35,13 +38,5 @@ public class DecadeEntity {
 
 	public DecadeEntity(long value) {
 		this.value = value;
-	}
-
-	public Long getId() {
-		return id;
-	}
-
-	public long getValue() {
-		return value;
 	}
 }

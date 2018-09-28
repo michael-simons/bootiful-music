@@ -15,15 +15,18 @@
  */
 package ac.simons.music.knowledge.domain;
 
-import java.util.Objects;
-
 import org.neo4j.ogm.annotation.Index;
 import org.neo4j.ogm.annotation.NodeEntity;
+
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
 
 /**
  * @author Michael J. Simons
  */
 @NodeEntity("Artist")
+@Getter
+@EqualsAndHashCode(of = "name", callSuper = false)
 public class ArtistEntity extends AbstractAuditableBaseEntity {
 
 	@Index(unique = true)
@@ -31,24 +34,5 @@ public class ArtistEntity extends AbstractAuditableBaseEntity {
 
 	public ArtistEntity(String name) {
 		this.name = name;
-	}
-
-	public String getName() {
-		return name;
-	}
-
-	@Override
-	public boolean equals(Object o) {
-		if (this == o)
-			return true;
-		if (o == null || getClass() != o.getClass())
-			return false;
-		ArtistEntity that = (ArtistEntity) o;
-		return Objects.equals(name, that.name);
-	}
-
-	@Override
-	public int hashCode() {
-		return Objects.hash(name);
 	}
 }

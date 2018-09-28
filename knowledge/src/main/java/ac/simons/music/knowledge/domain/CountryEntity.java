@@ -16,15 +16,19 @@
 package ac.simons.music.knowledge.domain;
 
 import java.util.Locale;
-import java.util.Objects;
 
 import org.neo4j.ogm.annotation.Index;
 import org.neo4j.ogm.annotation.NodeEntity;
+
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
 
 /**
  * @author Michael J. Simons
  */
 @NodeEntity("Country")
+@Getter
+@EqualsAndHashCode(of = "code", callSuper = false)
 public class CountryEntity extends AbstractAuditableBaseEntity {
 
 	@Index(unique = true)
@@ -35,28 +39,5 @@ public class CountryEntity extends AbstractAuditableBaseEntity {
 	public CountryEntity(String code) {
 		this.code = code;
 		this.name = new Locale("", this.code).getDisplayCountry(Locale.ENGLISH);
-	}
-
-	public String getCode() {
-		return code;
-	}
-
-	public String getName() {
-		return name;
-	}
-
-	@Override
-	public boolean equals(Object o) {
-		if (this == o)
-			return true;
-		if (!(o instanceof CountryEntity))
-			return false;
-		CountryEntity country = (CountryEntity) o;
-		return Objects.equals(code, country.code);
-	}
-
-	@Override
-	public int hashCode() {
-		return Objects.hash(code);
 	}
 }

@@ -19,13 +19,18 @@ import org.neo4j.ogm.annotation.NodeEntity;
 import org.neo4j.ogm.annotation.Relationship;
 import org.springframework.data.annotation.PersistenceConstructor;
 
+import lombok.Getter;
+import lombok.Setter;
+
 /**
  * @author Michael J. Simons
  */
 @NodeEntity("SoloArtist")
+@Getter
 public class SoloArtistEntity extends ArtistEntity {
 
 	@Relationship("BORN_IN")
+	@Setter
 	private CountryEntity bornIn;
 
 	public SoloArtistEntity(String name) {
@@ -35,14 +40,6 @@ public class SoloArtistEntity extends ArtistEntity {
 	@PersistenceConstructor
 	public SoloArtistEntity(String name, CountryEntity bornIn) {
 		super(name);
-		this.bornIn = bornIn;
-	}
-
-	public CountryEntity getBornIn() {
-		return bornIn;
-	}
-
-	public void setBornIn(CountryEntity bornIn) {
 		this.bornIn = bornIn;
 	}
 }

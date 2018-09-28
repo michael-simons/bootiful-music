@@ -22,11 +22,14 @@ import org.neo4j.ogm.annotation.Id;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 
+import lombok.Getter;
+
 /**
  * Base class for our entities.
  *
  * @author Michael J. Simons
  */
+@Getter
 abstract class AbstractAuditableBaseEntity {
 	@Id
 	@GeneratedValue
@@ -37,16 +40,4 @@ abstract class AbstractAuditableBaseEntity {
 
 	@LastModifiedDate
 	private LocalDate updatedAt;
-
-	public Long getId() {
-		return id;
-	}
-
-	public LocalDate getCreatedAt() {
-		return createdAt;
-	}
-
-	public LocalDate getUpdatedAt() {
-		return updatedAt;
-	}
 }

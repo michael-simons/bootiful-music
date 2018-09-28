@@ -21,10 +21,13 @@ import org.neo4j.ogm.annotation.Index;
 import org.neo4j.ogm.annotation.NodeEntity;
 import org.neo4j.ogm.annotation.Relationship;
 
+import lombok.Getter;
+
 /**
  * @author Michael J. Simons
  */
 @NodeEntity("Year")
+@Getter
 public class YearEntity {
 
 	@Id
@@ -40,17 +43,5 @@ public class YearEntity {
 	YearEntity(final DecadeEntity decade, final long value) {
 		this.decade = decade;
 		this.value = value;
-	}
-
-	public Long getId() {
-		return id;
-	}
-
-	public DecadeEntity getDecade() {
-		return decade;
-	}
-
-	public long getValue() {
-		return value;
 	}
 }
