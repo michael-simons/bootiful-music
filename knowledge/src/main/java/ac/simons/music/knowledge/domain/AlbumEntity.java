@@ -48,6 +48,10 @@ public class AlbumEntity extends AbstractAuditableBaseEntity {
 	@Relationship("RELEASED_IN")
 	private YearEntity releasedIn;
 
+	@Relationship("HAS")
+	@Setter
+	private GenreEntity genre;
+
 	@Setter
 	private boolean live = false;
 
