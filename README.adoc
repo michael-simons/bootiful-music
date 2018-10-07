@@ -13,7 +13,7 @@ Michael Simons <michael.simons@neo4j.com>
 [abstract]
 --
 The projects and articles in this repository present a "journey" from a relational database to a database with relations.
-We first have a look at a simple but powerful scheme that represents musical listening habbits.
+We first have a look at a simple but powerful scheme that represents musical listening habits.
 This schema lives in a PostgreSQL and its four entities gives us enormous analytical possibilities through applying modern SQLs constructs.
 We will then see how to create a Graph inside Neo4j from the same data and explore which possibilities we gain by using real relationships.
 
@@ -23,7 +23,7 @@ We will use Spring Data Neo4j from within Spring Boot to interact with the Graph
 [[the-business-domain]]
 == The business domain
 
-We're dealing with the tracking of musical habbits, much like https://www.last.fm[LastFM].
+We're dealing with the tracking of musical habits, much like https://www.last.fm[LastFM].
 The author has been running a service that does exactly that on a relational database for some time.
 The schema is as follows:
 
@@ -42,12 +42,12 @@ hide stereotypes
 
 Table(artists, "artists\n(Artists that have been played)") {
 primary_key(id) INTEGER
-not_null(unique(artist)) VARCHAR[255]
+not_null(unique(name)) VARCHAR[255]
 }
 
 Table(genres, "genres\n(Genres that have been played)") {
 primary_key(id) INTEGER
-not_null(unique(genre)) VARCHAR[255]
+not_null(unique(name)) VARCHAR[255]
 }
 
 Table(tracks, "tracks\n(Partially normalized track data)") {
@@ -194,11 +194,15 @@ For your reference, an https://www.youtube.com/watch?v=4pwTd6NEuN0[english] and 
 
 === Running the databases
 
-To build the modules of this project, you have to have PostgreSQL database with some defined schemas up and running.
+To run the modules of this project, you have to have PostgreSQL database with some defined schemas up and running.
 There's a Docker module and a Docker Compose file to help you with that:
 Please run `(cd docker && docker-compose up -d)` from the root of this project.
 To stop the processes, use  `(cd docker && docker-compose stop)`.
 This brings up both a PostgreSQL instance as well as a Neo4j instance with https://neo4j-contrib.github.io/neo4j-apoc-procedures/[APOC] already installed.
+The modules itself can be build without running databases.
+`statsdb` uses https://github.com/fabric8io/docker-maven-plugin[docker-maven-plugin] to bring up PostgreSQL for generating jOOOQ-Classes,
+`etl` uses https://www.testcontainers.org[Testcontainers] to do the same for PostgresSQL during integration tests.
+In addition it uses Neo4j test harness for an in-memory Neo4j instance.
 
 == Further reading
 

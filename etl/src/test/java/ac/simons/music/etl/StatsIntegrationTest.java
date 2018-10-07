@@ -49,7 +49,7 @@ public class StatsIntegrationTest {
 	@BeforeAll
 	void initializeStatsdb() {
 
-		this.statsDb = new PostgreSQLContainer<>();
+		this.statsDb = new PostgreSQLContainer<>("postgres:9.6-alpine");
 		this.statsDb.start();
 
 		statsDbCredentials = Map.of(
