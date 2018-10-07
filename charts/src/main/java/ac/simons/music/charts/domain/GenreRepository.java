@@ -41,11 +41,11 @@ public class GenreRepository {
 	public List<GenreWithPlaycount> findAllWithPlaycount() {
 		final Field<Integer> cnt = count().as("cnt");
 		return this.create
-			.select(GENRES.GENRE, cnt)
+			.select(GENRES.NAME, cnt)
 			.from(PLAYS)
 			.join(TRACKS).onKey()
 			.join(GENRES).onKey()
-			.groupBy(GENRES.GENRE)
+			.groupBy(GENRES.NAME)
 			.orderBy(cnt)
 			.fetchInto(GenreWithPlaycount.class);
 	}

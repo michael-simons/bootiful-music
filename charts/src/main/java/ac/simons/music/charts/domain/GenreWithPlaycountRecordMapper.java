@@ -30,6 +30,6 @@ public class GenreWithPlaycountRecordMapper implements RecordMapper<Record, Genr
 
 	@Override
 	public GenreWithPlaycount map(Record record) {
-		return new GenreWithPlaycount(record.get(Genres.GENRES.GENRE), record.get("cnt", Integer.class));
+		return new GenreWithPlaycount(record.get(Genres.GENRES.NAME), record.get("cnt", Integer.class));
 	}
 }

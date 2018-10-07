@@ -19,13 +19,13 @@ DELETE FROM tracks;
 DELETE FROM artists;
 DELETE FROM genres;
 
-INSERT INTO artists(artist) VALUES('Queen');
-INSERT INTO artists(artist) VALUES('Die Ärzte');
+INSERT INTO artists(name) VALUES('Queen');
+INSERT INTO artists(name) VALUES('Die Ärzte');
 
-INSERT INTO genres (genre) VALUES ('Pop');
+INSERT INTO genres (name) VALUES ('Pop');
 
 INSERT INTO tracks (artist_id,genre_id,album,name,year,compilation,disc_count,disc_number,track_count,track_number)
 SELECT a.id,g.id,'Hot Space','Under Pressure','1982','f','2','1','11','11'
   FROM artists a, genres g
- WHERE a.artist = 'Queen'
-   AND g.genre = 'Pop';
+ WHERE a.name = 'Queen'
+   AND g.name = 'Pop';

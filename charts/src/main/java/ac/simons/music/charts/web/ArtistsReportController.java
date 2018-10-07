@@ -59,7 +59,7 @@ public class ArtistsReportController {
 		this.create
 			.select()
 			.from(ARTISTS)
-			.orderBy(ARTISTS.ARTIST.asc())
+			.orderBy(ARTISTS.NAME.asc())
 			.fetch()
 			.formatJSON(response.getOutputStream());
 	}
@@ -76,8 +76,8 @@ public class ArtistsReportController {
 		response.setContentType(MediaType.APPLICATION_JSON_UTF8_VALUE);
 		this.create
 			.select(PLAYED_ON_TRUNCATED_TO_DAY,
-				ARTISTS.ARTIST,
-				sum(count()).over(partitionBy(ARTISTS.ARTIST).orderBy(PLAYED_ON_TRUNCATED_TO_DAY)).as("cumulativePlays")
+				ARTISTS.NAME,
+				sum(count()).over(partitionBy(ARTISTS.NAME).orderBy(PLAYED_ON_TRUNCATED_TO_DAY)).as("cumulativePlays")
 			)
 			.from(PLAYS)
 			.join(TRACKS).onKey()
@@ -92,10 +92,10 @@ public class ArtistsReportController {
 				.orElseGet(DSL::trueCondition)
 			)
 			.groupBy(PLAYED_ON_TRUNCATED_TO_DAY,
-				ARTISTS.ARTIST
+				ARTISTS.NAME
 			)
 			.orderBy(PLAYED_ON_TRUNCATED_TO_DAY,
-				ARTISTS.ARTIST
+				ARTISTS.NAME
 			)
 			.fetch()
 			.formatJSON(response.getOutputStream());

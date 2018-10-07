@@ -88,7 +88,7 @@ public class StatsIntegration {
 			DSL.using(connection)
 					.selectFrom(ARTISTS)
 					.forEach(a ->
-							db.execute(CREATE_ARTIST_NODE, Map.of("artistName", a.getArtist()))
+							db.execute(CREATE_ARTIST_NODE, Map.of("artistName", a.getName()))
 					);
 			neoTransaction.success();
 		} catch (Exception e) {
@@ -110,12 +110,12 @@ public class StatsIntegration {
 			var isNoCompilation = TRACKS.COMPILATION.eq("f");
 
 			stats
-					.selectDistinct(ARTISTS.ARTIST, TRACKS.ALBUM, TRACKS.YEAR)
+					.selectDistinct(ARTISTS.NAME, TRACKS.ALBUM, TRACKS.YEAR)
 					.from(TRACKS).join(ARTISTS).onKey()
 					.where(isNoCompilation)
 					.forEach(r -> {
 								var parameters = Map.<String, Object>of(
-										"artistName", r.get(ARTISTS.ARTIST),
+										"artistName", r.get(ARTISTS.NAME),
 										"albumName", r.get(TRACKS.ALBUM),
 										"yearValue", Long.valueOf(r.get(TRACKS.YEAR)));
 								db.execute(CREATE_YEAR_AND_DECADE + CREATE_ALBUM_WITH_ARTIST, parameters);
@@ -123,13 +123,13 @@ public class StatsIntegration {
 					);
 
 			stats
-					.select(ARTISTS.ARTIST, TRACKS.ALBUM, TRACKS.NAME, TRACKS.DISC_NUMBER, TRACKS.TRACK_NUMBER)
+					.select(ARTISTS.NAME, TRACKS.ALBUM, TRACKS.NAME, TRACKS.DISC_NUMBER, TRACKS.TRACK_NUMBER)
 					.from(TRACKS)
 					.join(ARTISTS).onKey()
 					.where(isNoCompilation)
 					.forEach(r -> {
 						var parameters = Map.<String, Object>of(
-								"artistName", r.get(ARTISTS.ARTIST),
+								"artistName", r.get(ARTISTS.NAME),
 								"albumName", r.get(TRACKS.ALBUM),
 								"trackName", r.get(TRACKS.NAME),
 								"discNumber", r.get(TRACKS.DISC_NUMBER),
@@ -166,7 +166,7 @@ public class StatsIntegration {
 
 			stats
 					.select(
-							ARTISTS.ARTIST,
+							ARTISTS.NAME,
 							TRACKS.NAME,
 							year, month,
 							count().as("newPlayCount")
@@ -175,10 +175,10 @@ public class StatsIntegration {
 					.join(TRACKS).onKey()
 					.join(ARTISTS).onKey()
 					.where(isNoCompilation)
-					.groupBy(ARTISTS.ARTIST, TRACKS.ALBUM, TRACKS.NAME, year, month)
+					.groupBy(ARTISTS.NAME, TRACKS.ALBUM, TRACKS.NAME, year, month)
 					.forEach(r -> {
 						var parameters = Map.of(
-								"artistName", r.get(ARTISTS.ARTIST),
+								"artistName", r.get(ARTISTS.NAME),
 								"trackName", r.get(TRACKS.NAME),
 								columnNameYear, r.get(columnNameYear),
 								columnNameMonth, r.get(columnNameMonth),

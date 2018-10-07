@@ -72,7 +72,7 @@ public class ChartService {
 						.where(playedOnTruncatedToDay.between(Date.valueOf(previousMonthOfYear.atDay(1)), Date.valueOf(previousMonthOfYear.atEndOfMonth())))
 						.groupBy(PLAYS.TRACK_ID));
 
-		final Field<String> label = concat(ARTISTS.ARTIST, val(" - "), TRACKS.NAME, val(" ("), TRACKS.ALBUM, val(")"))
+		final Field<String> label = concat(ARTISTS.NAME, val(" - "), TRACKS.NAME, val(" ("), TRACKS.ALBUM, val(")"))
 				.as("label");
 		return this.statsDb
 				.with(currentMonth)
