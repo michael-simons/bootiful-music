@@ -14,7 +14,7 @@
 	<parent>
 		<groupId>org.springframework.boot</groupId>
 		<artifactId>spring-boot-starter-parent</artifactId>
-		<version>2.0.4.RELEASE</version>
+		<version>2.0.5.RELEASE</version>
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
 
@@ -22,7 +22,7 @@
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 
-		<faucet-pipeline.version>1.0.0-rc.4</faucet-pipeline.version>
+		<faucet-pipeline.version>1.0.0</faucet-pipeline.version>
 		<flyway.version>5.2.0</flyway.version>
 		<java.version>10</java.version>
 		<jooq.version>3.11.3</jooq.version>
