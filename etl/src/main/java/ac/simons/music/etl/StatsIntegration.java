@@ -50,8 +50,7 @@ public class StatsIntegration {
 
 	private static final String CREATE_ALBUM_WITH_ARTIST // Statement is to be used with CREATE_YEAR_AND_DECADE
 			= " MERGE (artist:Artist {name: $artistName})"
-			+ " MERGE (album:Album {name: $albumName})"
-			+ " MERGE (album) - [:RELEASED_BY] -> (artist)"
+			+ " MERGE (album:Album {name: $albumName}) - [:RELEASED_BY] -> (artist)"
 			+ " MERGE (album) - [:RELEASED_IN] -> (year)";
 
 	private static final String CREATE_TRACK_IN_ALBUM // Regarding FOREACH see https://stackoverflow.com/a/27578798
