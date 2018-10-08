@@ -15,17 +15,18 @@
  */
 package ac.simons.music.knowledge.domain;
 
-import static java.util.stream.Collectors.toList;
+import static java.util.stream.Collectors.*;
+
+import lombok.Getter;
+import lombok.Setter;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import org.neo4j.ogm.annotation.NodeEntity;
 import org.neo4j.ogm.annotation.Relationship;
 import org.springframework.data.annotation.PersistenceConstructor;
-
-import lombok.Getter;
-import lombok.Setter;
 
 /**
  * @author Michael J. Simons
@@ -52,14 +53,19 @@ public class BandEntity extends ArtistEntity {
 	}
 
 	BandEntity addMember(final SoloArtistEntity soloArtist, final YearEntity joinedIn, final YearEntity leftIn) {
-		this.member.add(new MemberEntity(soloArtist, joinedIn, leftIn));
+		Optional<MemberEntity> existingMember = this.member.stream()
+			.filter(m -> m.getArtist().equals(soloArtist) && m.getJoinedIn().equals(joinedIn)).findFirst();
+		existingMember.ifPresentOrElse(m -> m.setLeftIn(leftIn), () -> {
+			this.member.add(new MemberEntity(soloArtist, joinedIn, leftIn));
+		});
+
 		return this;
 	}
 
 	public List<SoloArtistEntity> getActiveMember() {
 		return member.stream()
-				.filter(MemberEntity::isActive)
-				.map(MemberEntity::getArtist)
-				.collect(toList());
+			.filter(MemberEntity::isActive)
+			.map(MemberEntity::getArtist)
+			.collect(toList());
 	}
 }

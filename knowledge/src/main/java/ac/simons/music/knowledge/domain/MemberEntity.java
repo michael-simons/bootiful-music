@@ -38,7 +38,6 @@ public class MemberEntity {
 	private Long id;
 
 	@Relationship(value = "IS_A", direction = INCOMING)
-	@Property(name = "value")
 	private SoloArtistEntity artist;
 
 	@Relationship("JOINED_IN")

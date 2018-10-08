@@ -52,7 +52,7 @@ public class ArtistService {
 	}
 
 	public Optional<BandEntity> findBandById(Long id) {
-		return bands.findById(id);
+		return bands.findById(id, 2);
 	}
 
 	public Optional<SoloArtistEntity> findSoloArtistById(Long id) {
