@@ -15,14 +15,16 @@
  */
 package ac.simons.music.knowledge.domain;
 
-import java.time.LocalDate;
+import ac.simons.music.knowledge.support.NoOpLocalDateTimeConversion;
+import lombok.Getter;
+
+import java.time.LocalDateTime;
 
 import org.neo4j.ogm.annotation.GeneratedValue;
 import org.neo4j.ogm.annotation.Id;
+import org.neo4j.ogm.annotation.typeconversion.Convert;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
-
-import lombok.Getter;
 
 /**
  * Base class for our entities.
@@ -36,8 +38,10 @@ abstract class AbstractAuditableBaseEntity {
 	private Long id;
 
 	@CreatedDate
-	private LocalDate createdAt;
+	@Convert(NoOpLocalDateTimeConversion.class)
+	private LocalDateTime createdAt;
 
 	@LastModifiedDate
-	private LocalDate updatedAt;
+	@Convert(NoOpLocalDateTimeConversion.class)
+	private LocalDateTime updatedAt;
 }
