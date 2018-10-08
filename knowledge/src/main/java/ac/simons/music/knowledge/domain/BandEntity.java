@@ -51,8 +51,8 @@ public class BandEntity extends ArtistEntity {
 		this.foundedIn = foundedIn;
 	}
 
-	BandEntity addMember(final SoloArtistEntity band, final YearEntity joinedIn, final YearEntity leftIn) {
-		this.member.add(new MemberEntity(band, joinedIn, leftIn));
+	BandEntity addMember(final SoloArtistEntity soloArtist, final YearEntity joinedIn, final YearEntity leftIn) {
+		this.member.add(new MemberEntity(soloArtist, joinedIn, leftIn));
 		return this;
 	}
 
