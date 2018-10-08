@@ -12,7 +12,7 @@
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 
-		<flyway.version>5.0.7</flyway.version>
+		<flyway.version>5.2.0</flyway.version>
 		<java.version>10</java.version>
 		<jooq.version>3.11.3</jooq.version>
 		<postgresql.version>42.2.4</postgresql.version>

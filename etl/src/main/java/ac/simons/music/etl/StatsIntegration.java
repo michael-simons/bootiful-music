@@ -15,9 +15,7 @@
  */
 package ac.simons.music.etl;
 
-import static ac.simons.music.statsdb.Tables.ARTISTS;
-import static ac.simons.music.statsdb.Tables.PLAYS;
-import static ac.simons.music.statsdb.Tables.TRACKS;
+import static ac.simons.music.statsdb.Tables.*;
 import static org.jooq.impl.DSL.count;
 import static org.jooq.impl.DSL.extract;
 
@@ -41,23 +39,31 @@ import org.neo4j.procedure.Procedure;
  */
 public class StatsIntegration {
 
-	private static final String CREATE_ARTIST_NODE = "MERGE (a:Artist {name: $artistName}) RETURN a";
+	private static final String CREATE_ARTIST //
+			= " MERGE (artist:Artist {name: $artistName}) "
+			+ "    ON CREATE SET artist.createdAt = localdatetime()"
+			+ "    ON MATCH SET artist.updatedAt = localdatetime()";
 
 	private static final String CREATE_YEAR_AND_DECADE //
 			= " MERGE (decade:Decade {value: $yearValue-$yearValue%10})"
 			+ " MERGE (year:Year {value: $yearValue})"
 			+ " MERGE (year) - [:PART_OF] -> (decade)";
 
-	private static final String CREATE_ALBUM_WITH_ARTIST // Statement is to be used with CREATE_YEAR_AND_DECADE
-			= " MERGE (artist:Artist {name: $artistName})"
-			+ " MERGE (album:Album {name: $albumName}) - [:RELEASED_BY] -> (artist)"
+	private static final String CREATE_ALBUM_WITH_ARTIST // Statement is to be used with CREATE_ARTIST_NODE and  CREATE_YEAR_AND_DECADE
+			= " MERGE (album:Album {name: $albumName}) - [:RELEASED_BY] -> (artist) "
+		    + "    ON CREATE SET album.createdAt = localdatetime()"
+		    + "    ON MATCH SET album.updatedAt = localdatetime()"
+			+ " MERGE (genre:Genre {name: $genreName}) "
+		    + "    ON CREATE SET genre.createdAt = localdatetime()"
+		    + "    ON MATCH SET genre.updatedAt = localdatetime()"
+		    + " MERGE (album) - [:HAS] -> (genre)"
 			+ " MERGE (album) - [:RELEASED_IN] -> (year)";
 
 	private static final String CREATE_TRACK_IN_ALBUM // Regarding FOREACH see https://stackoverflow.com/a/27578798
 			= " MATCH (album:Album {name: $albumName}) - [:RELEASED_BY] -> (artist:Artist {name: $artistName})"
 			+ " OPTIONAL MATCH (possibleTrack:Track {name: $trackName}) <- [:CONTAINS] - (:Album) - [:RELEASED_BY] -> (artist)"
 			+ " FOREACH( _ IN CASE WHEN possibleTrack IS NULL THEN ['create_track_and_add_relation'] ELSE [] END |"
-			+ "   CREATE (newTrack:Track {name: $trackName})"
+			+ "   CREATE (newTrack:Track {name: $trackName, createdAt: localdatetime()})"
 			+ "   MERGE (album) - [:CONTAINS {discNumber: $discNumber, trackNumber: $trackNumber}] -> (newTrack)"
 			+ " ) "
 			+ " FOREACH( _ IN CASE WHEN possibleTrack IS NOT NULL THEN ['add_relation'] ELSE [] END |"
@@ -87,7 +93,7 @@ public class StatsIntegration {
 			DSL.using(connection)
 					.selectFrom(ARTISTS)
 					.forEach(a ->
-							db.execute(CREATE_ARTIST_NODE, Map.of("artistName", a.getName()))
+							db.execute(CREATE_ARTIST, Map.of("artistName", a.getName()))
 					);
 			neoTransaction.success();
 		} catch (Exception e) {
@@ -109,15 +115,18 @@ public class StatsIntegration {
 			var isNoCompilation = TRACKS.COMPILATION.eq("f");
 
 			stats
-					.selectDistinct(ARTISTS.NAME, TRACKS.ALBUM, TRACKS.YEAR)
-					.from(TRACKS).join(ARTISTS).onKey()
+					.selectDistinct(ARTISTS.NAME, TRACKS.ALBUM, GENRES.NAME, TRACKS.YEAR)
+					.from(TRACKS)
+					.join(ARTISTS).onKey()
+					.join(GENRES).onKey()
 					.where(isNoCompilation)
 					.forEach(r -> {
 								var parameters = Map.<String, Object>of(
 										"artistName", r.get(ARTISTS.NAME),
 										"albumName", r.get(TRACKS.ALBUM),
+										"genreName", r.get(GENRES.NAME),
 										"yearValue", Long.valueOf(r.get(TRACKS.YEAR)));
-								db.execute(CREATE_YEAR_AND_DECADE + CREATE_ALBUM_WITH_ARTIST, parameters);
+								db.execute(CREATE_YEAR_AND_DECADE + CREATE_ARTIST +  CREATE_ALBUM_WITH_ARTIST, parameters);
 							}
 					);
 
