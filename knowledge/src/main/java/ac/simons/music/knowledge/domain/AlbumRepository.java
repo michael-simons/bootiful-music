@@ -15,10 +15,13 @@
  */
 package ac.simons.music.knowledge.domain;
 
+import java.util.Optional;
+
 import org.springframework.data.neo4j.repository.Neo4jRepository;
 
 /**
  * @author Michael J. Simons
  */
 public interface AlbumRepository extends Neo4jRepository<AlbumEntity, Long> {
+	Optional<AlbumEntity> findOneByArtistNameAndName(String artistName, String name);
 }
