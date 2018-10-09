@@ -75,15 +75,15 @@ public class StatsIntegration {
 			+ CREATE_YEAR_AND_DECADE
 			+ " MERGE (month:Month {value: $monthValue}) - [:OF] -> (year)"
 			+ " WITH track, month "
-		    + " MERGE (track) - [:HAS_BEEN_PLAYED] -> (p:PlayCount {value: $newPlayCount}) - [:IN] -> (month)";
+		    + " MERGE (track) - [:HAS_BEEN_PLAYED_IN {value: $newPlayCount}] -> (month)";
 
 	private static final String WEIGHT_ARTISTS_BY_PLAYCOUNT
-			= " MATCH (playCount:PlayCount) WITH sum(playCount.value) as totalPlays"
+			= " MATCH (:Track) - [playCount:HAS_BEEN_PLAYED_IN] -> () WITH sum(playCount.value) as totalPlays"
 			+ " MATCH (artist:Artist) <- [:RELEASED_BY] - () - [:CONTAINS] -> (track:Track)"
 			+ " WITH DISTINCT artist, track, totalPlays"
-			+ " MATCH (track) - [:HAS_BEEN_PLAYED] -> (playCount:PlayCount)"
+			+ " MATCH (track) - [playCount:HAS_BEEN_PLAYED_IN] -> ()"
 			+ " WITH artist, sum(playCount.value) as artistPlays, totalPlays"
-			+ " SET artist.percentageOfAllPlays = 100.0/totalPlays * artistPlays"
+			+ " SET artist.percentageOfAllPlays = 100.0/totalPlays * artistPlays, artist.updatedAt = localdatetime()"
 			+ " RETURN artist";
 
 	@Context
@@ -190,7 +190,7 @@ public class StatsIntegration {
 			var month = extract(PLAYS.PLAYED_ON, DatePart.MONTH).as(columnNameMonth);
 
 			log.info("Deleting existing playcounts");
-			executeQueryAndLogResults("MATCH (playCount:PlayCount) DETACH DELETE playCount", Map.of());
+			executeQueryAndLogResults("MATCH (:Track) - [playCount:HAS_BEEN_PLAYED_IN] -> () DETACH DELETE playCount", Map.of());
 
 			log.info("Loading playcounts from statsdb");
 			statsDb
