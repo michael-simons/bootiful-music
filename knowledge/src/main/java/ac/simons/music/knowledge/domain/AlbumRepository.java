@@ -15,13 +15,18 @@
  */
 package ac.simons.music.knowledge.domain;
 
+import java.util.List;
 import java.util.Optional;
 
+import org.springframework.data.domain.Sort;
+import org.springframework.data.neo4j.annotation.Depth;
 import org.springframework.data.neo4j.repository.Neo4jRepository;
 
 /**
  * @author Michael J. Simons
  */
-public interface AlbumRepository extends Neo4jRepository<AlbumEntity, Long> {
+interface AlbumRepository extends Neo4jRepository<AlbumEntity, Long> {
 	Optional<AlbumEntity> findOneByArtistNameAndName(String artistName, String name);
+
+	List<AlbumEntity> findAllByArtistNameLike(String artistName, Sort sort, @Depth int depth);
 }

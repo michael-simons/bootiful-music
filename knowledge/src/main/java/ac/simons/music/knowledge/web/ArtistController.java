@@ -47,19 +47,17 @@ import ac.simons.music.knowledge.domain.CountryEntity;
 import ac.simons.music.knowledge.domain.SoloArtistEntity;
 import lombok.Data;
 import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 
 /**
  * @author Michael J. Simons
  */
 @Controller
 @RequestMapping("/artists")
+@RequiredArgsConstructor
 public class ArtistController {
 
 	private final ArtistService artistService;
-
-	public ArtistController(ArtistService artistService) {
-		this.artistService = artistService;
-	}
 
 	@ModelAttribute("countries")
 	public List<CountryValue> countries(final Locale locale) {

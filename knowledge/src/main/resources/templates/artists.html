@@ -21,6 +21,7 @@
                     <th scope="col" th:text="#{artist.type}">Placeholder</th>
                     <th scope="col" th:text="#{artist.origin}">Placeholder</th>
                     <th scope="col"></th>
+                    <th scope="col"></th>
                 </tr>
                 </thead>
                 <tbody>
@@ -33,8 +34,8 @@
                         </td>
                         <td th:case="*" th:text="${artist.getLocalizedOrigin(#locale)}">Placeholder</td>
                     </div>
-                    <td><a href="#" th:href="@{/artists/{artistId}(artistId=${artist.id})}" th:text="#{artists.edit}">Placeholder</a>
-                    </td>
+                    <td><a href="#" th:href="@{/albums/by-artist(artist=${artist.name})}" th:text="#{albums}">Placeholder</a></td>
+                    <td><a href="#" th:href="@{/artists/{artistId}(artistId=${artist.id})}" th:text="#{artists.edit}">Placeholder</a></td>
                 </tr>
                 </tbody>
             </table>

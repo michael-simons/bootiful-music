@@ -23,6 +23,8 @@ import org.neo4j.ogm.annotation.Relationship;
 
 import lombok.Getter;
 
+import java.time.Year;
+
 /**
  * @author Michael J. Simons
  */
@@ -43,5 +45,9 @@ public class YearEntity {
 	YearEntity(final DecadeEntity decade, final long value) {
 		this.decade = decade;
 		this.value = value;
+	}
+
+	public Year asYear() {
+		return Year.of(Math.toIntExact(this.value));
 	}
 }
