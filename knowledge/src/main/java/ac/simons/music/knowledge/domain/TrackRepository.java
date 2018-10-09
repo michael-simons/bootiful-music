@@ -20,5 +20,5 @@ import org.springframework.data.neo4j.repository.Neo4jRepository;
 /**
  * @author Michael J. Simons
  */
-public interface TrackRepository extends Neo4jRepository<TrackRepository, Long> {
+interface TrackRepository extends Neo4jRepository<TrackEntity, Long> {
 }

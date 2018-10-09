@@ -15,25 +15,27 @@
  */
 package ac.simons.music.knowledge.domain;
 
-import ac.simons.music.knowledge.support.AbstractAuditableBaseEntity;
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
+import lombok.Data;
+import lombok.ToString;
 
-import org.neo4j.ogm.annotation.Index;
-import org.neo4j.ogm.annotation.NodeEntity;
+import org.springframework.data.neo4j.annotation.QueryResult;
 
 /**
+ * This is a value object, representing a {@link TrackEntity track} contained on an {@link AlbumEntity album}.
+ * The relationship is expressed inside the database as <pre>(:Album) - [:CONTAINS] -> (:Track)</pre>.
+ *
  * @author Michael J. Simons
  */
-@NodeEntity("Artist")
-@Getter
-@EqualsAndHashCode(of = "name", callSuper = false)
-public class ArtistEntity extends AbstractAuditableBaseEntity {
+@QueryResult
+@Data
+@ToString(of = { "discNumber", "trackNumber", "track" })
+public class AlbumTrack {
 
-	@Index(unique = true)
+	private Long id;
+
 	private String name;
 
-	public ArtistEntity(String name) {
-		this.name = name;
-	}
+	private Long discNumber;
+
+	private Long trackNumber;
 }

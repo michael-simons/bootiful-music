@@ -15,25 +15,27 @@
  */
 package ac.simons.music.knowledge.domain;
 
-import ac.simons.music.knowledge.support.AbstractAuditableBaseEntity;
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 
-import org.neo4j.ogm.annotation.Index;
-import org.neo4j.ogm.annotation.NodeEntity;
+import java.util.Optional;
+
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  * @author Michael J. Simons
  */
-@NodeEntity("Artist")
-@Getter
-@EqualsAndHashCode(of = "name", callSuper = false)
-public class ArtistEntity extends AbstractAuditableBaseEntity {
+@Service
+@RequiredArgsConstructor
+public class TrackService {
+	private final TrackRepository trackRepository;
 
-	@Index(unique = true)
-	private String name;
+	public Optional<TrackEntity> findById(Long aLong) {
+		return trackRepository.findById(aLong);
+	}
 
-	public ArtistEntity(String name) {
-		this.name = name;
+	@Transactional
+	public TrackEntity addAuthor(final TrackEntity track, final SoloArtistEntity newMember) {
+		return this.trackRepository.save(track.addAuthor(newMember));
 	}
 }

@@ -15,6 +15,7 @@
  */
 package ac.simons.music.knowledge.domain;
 
+import ac.simons.music.knowledge.support.AbstractAuditableBaseEntity;
 import lombok.RequiredArgsConstructor;
 
 import java.time.Year;
@@ -24,9 +25,7 @@ import java.util.Map;
 import java.util.Optional;
 
 import org.neo4j.ogm.session.Session;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
-import org.springframework.lang.NonNull;
 import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -71,7 +70,7 @@ public class ArtistService {
 			.forEach(allArtists::add);
 		return allArtists;
 	}
-	
+
 	@Transactional(readOnly = true)
 	public List<SoloArtistEntity> findAllSoloArtists() {
 		return this.soloArtists.findAll(Sort.by("name").ascending());

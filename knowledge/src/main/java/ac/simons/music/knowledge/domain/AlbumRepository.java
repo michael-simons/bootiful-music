@@ -20,7 +20,9 @@ import java.util.Optional;
 
 import org.springframework.data.domain.Sort;
 import org.springframework.data.neo4j.annotation.Depth;
+import org.springframework.data.neo4j.annotation.Query;
 import org.springframework.data.neo4j.repository.Neo4jRepository;
+import org.springframework.data.repository.query.Param;
 
 /**
  * @author Michael J. Simons
@@ -28,5 +30,23 @@ import org.springframework.data.neo4j.repository.Neo4jRepository;
 interface AlbumRepository extends Neo4jRepository<AlbumEntity, Long> {
 	Optional<AlbumEntity> findOneByArtistNameAndName(String artistName, String name);
 
-	List<AlbumEntity> findAllByArtistNameLike(String artistName, Sort sort, @Depth int depth);
+	List<AlbumEntity> findAllByArtistNameMatchesRegex(String artistName, Sort sort, @Depth int depth);
+
+	List<AlbumEntity> findAllByNameMatchesRegex(String name, Sort sort, @Depth int depth);
+
+	@Query(value
+		= " MATCH (album:Album) - [c:CONTAINS] -> (track:Track) WHERE id(album) = $albumId"
+		+ " RETURN id(track) as id, track.name as name, c.discNumber as discNumber, c.trackNumber as trackNumber"
+		+ " ORDER BY c.discNumber ASC, c.trackNumber ASC"
+	)
+	List<AlbumTrack> findAllAlbumTracks(@Param("albumId") Long albumId);
+
+	@Query(value
+		= " MATCH (track:Track) <- [:CONTAINS] - (album:Album)"
+		+ " MATCH p=(album) - [*1] - ()"
+		+ " WHERE id(track) = $trackId"
+		+ "   AND ALL(relationship IN relationships(p) WHERE type(relationship) <> 'CONTAINS')"
+		+ " RETURN p"
+	)
+	List<AlbumEntity> findAllByTrack(@Param("trackId") Long trackId);
 }

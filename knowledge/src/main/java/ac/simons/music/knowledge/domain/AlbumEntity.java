@@ -15,23 +15,14 @@
  */
 package ac.simons.music.knowledge.domain;
 
-import java.util.Comparator;
-import java.util.Set;
-import java.util.TreeSet;
+import ac.simons.music.knowledge.support.AbstractAuditableBaseEntity;
 
-import org.neo4j.ogm.annotation.EndNode;
-import org.neo4j.ogm.annotation.GeneratedValue;
-import org.neo4j.ogm.annotation.Id;
 import org.neo4j.ogm.annotation.NodeEntity;
 import org.neo4j.ogm.annotation.Relationship;
-import org.neo4j.ogm.annotation.RelationshipEntity;
-import org.neo4j.ogm.annotation.StartNode;
 
-import lombok.AccessLevel;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
-import lombok.ToString;
 
 /**
  * @author Michael J. Simons
@@ -56,46 +47,10 @@ public class AlbumEntity extends AbstractAuditableBaseEntity {
 	@Setter
 	private boolean live = false;
 
-	@Relationship("CONTAINS")
-	@Getter(AccessLevel.NONE)
-	private Set<AlbumTrack> tracks = new TreeSet<>(
-		Comparator.comparing(AlbumTrack::getDiscNumber).thenComparing(AlbumTrack::getTrackNumber));
-
 	public AlbumEntity(ArtistEntity artist, String name, YearEntity releasedIn) {
 		this.artist = artist;
 		this.name = name;
 		this.releasedIn = releasedIn;
 	}
 
-	public AlbumEntity addTrack(final TrackEntity track, final Integer discNumber, final Integer trackNumber) {
-		this.tracks.add(new AlbumTrack(this, track, discNumber, trackNumber));
-		return this;
-	}
-
-	@RelationshipEntity("CONTAINS")
-	@Getter
-	@ToString(of = { "discNumber", "trackNumber", "track" })
-	public static class AlbumTrack {
-		@Id
-		@GeneratedValue
-		@Getter(AccessLevel.NONE)
-		private Long trackID;
-
-		@StartNode
-		@Getter(AccessLevel.NONE)
-		private AlbumEntity album;
-
-		@EndNode
-		private TrackEntity track;
-
-		private Integer discNumber;
-		private Integer trackNumber;
-
-		public AlbumTrack(AlbumEntity album, TrackEntity track, Integer discNumber, Integer trackNumber) {
-			this.album = album;
-			this.track = track;
-			this.discNumber = discNumber;
-			this.trackNumber = trackNumber;
-		}
-	}
 }

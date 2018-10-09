@@ -15,6 +15,12 @@
  */
 package ac.simons.music.knowledge.domain;
 
+import ac.simons.music.knowledge.support.AbstractAuditableBaseEntity;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.ToString;
+
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
@@ -24,15 +30,11 @@ import org.neo4j.ogm.annotation.NodeEntity;
 import org.neo4j.ogm.annotation.Relationship;
 import org.springframework.data.annotation.PersistenceConstructor;
 
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
-import lombok.ToString;
-
 /**
  * @author Michael J. Simons
  */
 @NodeEntity("Track")
-@EqualsAndHashCode(of = {"name", "writtenBy"}, callSuper = false)
+@EqualsAndHashCode(of = { "name", "writtenBy" }, callSuper = false)
 @ToString(of = "name")
 public class TrackEntity extends AbstractAuditableBaseEntity {
 
@@ -54,11 +56,22 @@ public class TrackEntity extends AbstractAuditableBaseEntity {
 	public TrackEntity(String name, Set<ArtistEntity> writtenBy) {
 		this.name = name;
 		this.writtenBy = Optional.ofNullable(writtenBy)
-				.map(HashSet::new).orElseGet(HashSet::new);
+			.map(HashSet::new).orElseGet(HashSet::new);
 	}
 
 	public TrackEntity featuring(final SoloArtistEntity artist) {
 		this.featuring.add(artist);
+		return this;
+	}
+
+	public Set<ArtistEntity> getWrittenBy() {
+		return Collections.unmodifiableSet(this.writtenBy);
+	}
+
+	TrackEntity addAuthor(final SoloArtistEntity soloArtist) {
+		if (!this.writtenBy.contains(soloArtist)) {
+			this.writtenBy.add(soloArtist);
+		}
 		return this;
 	}
 }

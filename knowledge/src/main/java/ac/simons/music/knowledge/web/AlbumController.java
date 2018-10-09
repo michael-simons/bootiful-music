@@ -19,6 +19,8 @@ import static java.util.stream.Collectors.*;
 
 import ac.simons.music.knowledge.domain.AlbumEntity;
 import ac.simons.music.knowledge.domain.AlbumService;
+import ac.simons.music.knowledge.domain.ArtistEntity;
+import ac.simons.music.knowledge.domain.BandEntity;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
 
@@ -32,6 +34,7 @@ import javax.validation.constraints.NotBlank;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.ModelAndView;
@@ -54,13 +57,38 @@ public class AlbumController {
 	}
 
 	@GetMapping(value = { "/by-artist" }, produces = MediaType.TEXT_HTML_VALUE)
-	public ModelAndView albumsByArtist(@RequestParam final String artist) {
+	public ModelAndView byArtist(@RequestParam final String artist) {
 
-		var albums = this.albumService.findAllByArtistNameLike(artist)
-			.stream().map(AlbumCmd::new)
+		var albums = mapAlbumEntities(this.albumService.findAllAlbumsByArtist(artist));
+		return new ModelAndView("albums", Map.of("artist", artist, "albums", albums));
+	}
+
+	@GetMapping(value = { "/by-name" }, produces = MediaType.TEXT_HTML_VALUE)
+	public ModelAndView byName(@RequestParam final String name) {
+
+		var albums = mapAlbumEntities(this.albumService.findAllAlbumsByName(name));
+		return new ModelAndView("albums", Map.of("name", name, "albums", albums));
+	}
+
+	@GetMapping(value = "/{albumId}", produces = MediaType.TEXT_HTML_VALUE)
+	public ModelAndView album(@PathVariable final Long albumId) {
+
+		var album = this.albumService.findAlbumById(albumId)
+			.orElseThrow(() -> new NodeNotFoundException(AlbumEntity.class, albumId));
+
+		var model = Map.of(
+			"albumForm", new AlbumCmd(album),
+			"tracks", this.albumService.findAllTracksContainedOn(album)
+		);
+		return new ModelAndView("album", model);
+	}
+
+	static List<AlbumCmd> mapAlbumEntities(List<AlbumEntity> albums) {
+
+		return albums.stream()
+			.map(AlbumCmd::new)
 			.sorted(ALBUM_COMPARATOR)
 			.collect(toList());
-		return new ModelAndView("albums", Map.of("artist", artist, "albums", albums));
 	}
 
 	@Data
@@ -86,7 +114,7 @@ public class AlbumController {
 		public AlbumCmd() {
 		}
 
-		private AlbumCmd(final AlbumEntity album) {
+		AlbumCmd(final AlbumEntity album) {
 			this.id = album.getId();
 			this.name = album.getName();
 			this.artistId = album.getArtist().getId();

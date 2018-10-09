@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package ac.simons.music.knowledge.domain;
+package ac.simons.music.knowledge.support;
 
 import ac.simons.music.knowledge.support.NoOpLocalDateTimeConversion;
 import lombok.Getter;
@@ -32,7 +32,7 @@ import org.springframework.data.annotation.LastModifiedDate;
  * @author Michael J. Simons
  */
 @Getter
-abstract class AbstractAuditableBaseEntity {
+public abstract class AbstractAuditableBaseEntity {
 	@Id
 	@GeneratedValue
 	private Long id;

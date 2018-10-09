@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      xmlns:th="http://www.thymeleaf.org"
+      layout:decorate="~{layout}">
+<head>
+    <title th:text="${track.name}">Placeholder</title>
+</head>
+<body>
+<div layout:fragment="content" class="container">
+    <header class="row intro">
+        <div class="col">
+            <h1 th:text="${track.name}">Placeholder</h1>
+        </div>
+    </header>
+
+    <div class="row">
+        <div class="col">
+            <h2 th:text="#{track.containedOn}">Placeholder</h2>
+            <div th:replace="albums :: listOfAlbums(${containedOn})"></div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col">
+            <h2 th:text="#{track.writtenBy}">Placeholder</h2>
+            <div th:replace="artists.html :: listOfArtists(${writtenBy})"></div>
+
+            <form method="post" action="#"
+                  th:action="@{/tracks/{track}/author(track=${track.id})}" th:object="${newAuthorForm}">
+                <div class="form-group">
+                    <label for="new-author.artist" th:text="#{artist.name}">Placeholder</label>
+                    <select class="form-control" id="new-author.artist" th:field="*{artistId}">
+                        <option value=""></option>
+                        <option th:each="soloArtist : ${soloArtists}"
+                                th:value="${soloArtist.id}"
+                                th:text="${soloArtist.name}">Placeholder
+                        </option>
+                    </select>
+                </div>
+                <button type="submit" class="btn btn-primary" th:text="#{common.save}">Submit</button>
+            </form>
+        </div>
+    </div>
+</div>
+</body>
+</html>

@@ -14,33 +14,41 @@
     </header>
     <div class="row">
         <div class="col">
-            <table class="table table-sm table-striped table-hover">
-                <thead class="thead-dark">
-                <tr>
-                    <th scope="col" th:text="#{artist.name}">Placeholder</th>
-                    <th scope="col" th:text="#{artist.type}">Placeholder</th>
-                    <th scope="col" th:text="#{artist.origin}">Placeholder</th>
-                    <th scope="col"></th>
-                    <th scope="col"></th>
-                </tr>
-                </thead>
-                <tbody>
-                <tr th:each="artist : ${artists}">
-                    <th scope="row" th:text="${artist.name}">Placeholder</th>
-                    <td th:text="#{${'artist.type.' + artist.type.implementingClass.name}}">Placeholder</td>
-                    <div th:switch="${artist.type}" th:remove="tag">
-                        <td th:case="${T(ac.simons.music.knowledge.web.ArtistController.ArtistType).ARTIST}"
-                            th:text="#{artist.origin.na}">Placeholder
-                        </td>
-                        <td th:case="*" th:text="${artist.getLocalizedOrigin(#locale)}">Placeholder</td>
-                    </div>
-                    <td><a href="#" th:href="@{/albums/by-artist(artist=${artist.name})}" th:text="#{albums}">Placeholder</a></td>
-                    <td><a href="#" th:href="@{/artists/{artistId}(artistId=${artist.id})}" th:text="#{artists.edit}">Placeholder</a></td>
-                </tr>
-                </tbody>
-            </table>
             <a class="btn btn-primary" href="#" role="button" th:href="@{/artists/new}"
                th:text="#{artists.new}">Placeholder</a>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col">
+            <div th:fragment="listOfArtists(theArtists)" th:with="theArtists=${theArtists} ?: ${artists}" th:remove="tag">
+                <table class="table table-sm table-striped table-hover">
+                    <thead class="thead-dark">
+                    <tr>
+                        <th scope="col" th:text="#{artist.name}">Placeholder</th>
+                        <th scope="col" th:text="#{artist.type}">Placeholder</th>
+                        <th scope="col" th:text="#{artist.origin}">Placeholder</th>
+                        <th scope="col"></th>
+                        <th scope="col"></th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="artist : ${theArtists}">
+                        <th scope="row" th:text="${artist.name}">Placeholder</th>
+                        <td th:text="#{${'artist.type.' + artist.type.implementingClass.name}}">Placeholder</td>
+                        <div th:switch="${artist.type}" th:remove="tag">
+                            <td th:case="${T(ac.simons.music.knowledge.web.ArtistController.ArtistType).ARTIST}"
+                                th:text="#{artist.origin.na}">Placeholder
+                            </td>
+                            <td th:case="*" th:text="${artist.getLocalizedOrigin(#locale)}">Placeholder</td>
+                        </div>
+                        <td><a href="#" th:href="@{/albums/by-artist(artist=${artist.name})}" th:text="#{albums}">Placeholder</a>
+                        </td>
+                        <td><a href="#" th:href="@{/artists/{artistId}(artistId=${artist.id})}"
+                               th:text="#{artists.edit}">Placeholder</a></td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
         </div>
     </div>
 </div>

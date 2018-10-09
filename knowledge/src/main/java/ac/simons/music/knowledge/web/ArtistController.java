@@ -86,7 +86,7 @@ public class ArtistController {
 		var soloArtists = this.artistService.findAllSoloArtists();
 		var model = Map.of(
 				"artistForm", new ArtistCmd(artist),
-				"newMemberForm", new NewMemberCmd(), // TODO move add members to it's own page, so that the redirect in #member is not that ugly
+				"newMemberForm", new NewMemberCmd(),
 				"soloArtists", soloArtists
 		);
 		return new ModelAndView("artist", model);
@@ -118,7 +118,7 @@ public class ArtistController {
 
 		if (!newMemberBindingResult.hasErrors()) {
 			var soloArtist = this.artistService.findSoloArtistById(newMemberCmd.artistId)
-					.orElseThrow(() -> new NodeNotFoundException(SoloArtistEntity.class, bandId));
+					.orElseThrow(() -> new NodeNotFoundException(SoloArtistEntity.class, newMemberCmd.artistId));
 			band = this.artistService.addMember(band, soloArtist, newMemberCmd.joinedIn, newMemberCmd.leftIn);
 		}
 		return String.format("redirect:/artists/%d", band.getId());
@@ -185,7 +185,7 @@ public class ArtistController {
 		public ArtistCmd() {
 		}
 
-		private ArtistCmd(final ArtistEntity artist) {
+		ArtistCmd(final ArtistEntity artist) {
 			this.id = artist.getId();
 			this.name = artist.getName();
 			this.type = ArtistType.determineFrom(artist);
