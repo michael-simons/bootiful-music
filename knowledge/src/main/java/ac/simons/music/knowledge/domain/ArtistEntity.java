@@ -15,11 +15,11 @@
  */
 package ac.simons.music.knowledge.domain;
 
-import org.neo4j.ogm.annotation.Index;
-import org.neo4j.ogm.annotation.NodeEntity;
-
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
+
+import org.neo4j.ogm.annotation.Index;
+import org.neo4j.ogm.annotation.NodeEntity;
 
 /**
  * @author Michael J. Simons

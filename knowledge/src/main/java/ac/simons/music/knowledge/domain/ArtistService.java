@@ -15,11 +15,18 @@
  */
 package ac.simons.music.knowledge.domain;
 
+import lombok.RequiredArgsConstructor;
+
 import java.time.Year;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
+import org.neo4j.ogm.session.Session;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
+import org.springframework.lang.NonNull;
 import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -28,89 +35,149 @@ import org.springframework.transaction.annotation.Transactional;
  * @author Michael J. Simons
  */
 @Service
+@RequiredArgsConstructor
 public class ArtistService {
-	private final ArtistRepository<ArtistEntity> allArtists;
+
+	private final Session session;
 
 	private final BandRepository bands;
 
 	private final SoloArtistRepository soloArtists;
 
-	private final YearRepository yearRepository;
-
 	private final CountryRepository countryRepository;
 
-	public ArtistService(ArtistRepository<ArtistEntity> allArtists, BandRepository bands, SoloArtistRepository soloArtists, YearRepository yearRepository, CountryRepository countryRepository) {
-		this.allArtists = allArtists;
-		this.bands = bands;
-		this.soloArtists = soloArtists;
-		this.yearRepository = yearRepository;
-		this.countryRepository = countryRepository;
-	}
-
 	public Optional<ArtistEntity> findArtistById(Long id) {
-		return allArtists.findById(id);
+
+		return Optional.ofNullable(session.load(ArtistEntity.class, id))
+			.flatMap(this::loadArtistsDetails);
 	}
 
+	@Transactional(readOnly = true)
 	public Optional<BandEntity> findBandById(Long id) {
 		return bands.findById(id, 2);
 	}
 
+	@Transactional(readOnly = true)
 	public Optional<SoloArtistEntity> findSoloArtistById(Long id) {
 		return soloArtists.findById(id);
 	}
 
+	@Transactional(readOnly = true)
 	public List<ArtistEntity> findAllArtists() {
-		return allArtists.findAllOrderedByName();
-	}
+		var cypher = "MATCH (a:Artist) WITH a OPTIONAL MATCH p=(a)-[*0..1]-(c:Country) RETURN a, p ORDER BY a.name";
 
+		final List<ArtistEntity> allArtists = new ArrayList<>();
+		session.query(ArtistEntity.class, cypher, Map.of())
+			.forEach(allArtists::add);
+		return allArtists;
+	}
+	
+	@Transactional(readOnly = true)
 	public List<SoloArtistEntity> findAllSoloArtists() {
 		return this.soloArtists.findAll(Sort.by("name").ascending());
 	}
 
 	@Transactional
 	public <T extends ArtistEntity> T createNewArtist(final String name, final String countryOfOrigin, final Class<T> type) {
+
 		ArtistEntity rv;
 		final CountryEntity country = determineCountry(countryOfOrigin);
 		if (type == BandEntity.class) {
-			rv = this.allArtists.save(new BandEntity(name, country));
+			rv = this.bands.save(new BandEntity(name, country));
 		} else if (type == SoloArtistEntity.class) {
-			rv = this.allArtists.save(new SoloArtistEntity(name, country));
+			rv = this.soloArtists.save(new SoloArtistEntity(name, country));
 		} else {
-			rv = this.allArtists.save(new ArtistEntity(name));
+			rv = new ArtistEntity(name);
+			this.session.save(rv);
 		}
 		return type.cast(rv);
 	}
 
 	@Transactional
 	public <T extends ArtistEntity> T updateArtist(final ArtistEntity artist, final String countryOfOrigin, final Class<T> type) {
+
 		ArtistEntity rv;
 		if (type == BandEntity.class) {
-			var band = allArtists.markAsBand(artist);
+			var band = this.markAsBand(artist);
 			band.setFoundedIn(determineCountry(countryOfOrigin));
-			// TODO this is weird... Or at least I wonder if we are doing dirty tracking at all?! Or is it because of the cleared session?
-			rv = this.allArtists.save(band);
+			rv = this.bands.save(band);
 		} else if (type == SoloArtistEntity.class) {
-			var soloArtist = allArtists.markAsSoloArtist(artist);
+			var soloArtist = this.markAsSoloArtist(artist);
 			soloArtist.setBornIn(determineCountry(countryOfOrigin));
-			rv = this.allArtists.save(soloArtist);
+			rv = this.soloArtists.save(soloArtist);
 		} else {
-			rv = allArtists.removeQualification(artist);
+			rv = this.removeQualification(artist);
 		}
 		return type.cast(rv);
 	}
 
 	@Transactional
 	public BandEntity addMember(final BandEntity band, final SoloArtistEntity newMember, final Year joinedIn, @Nullable final Year leftIn) {
+		return this.bands.save(band.addMember(newMember, joinedIn, leftIn));
+	}
 
-		final YearEntity joinedInEntity = this.yearRepository.findOneByValue(joinedIn).orElseGet(() -> yearRepository.createYear(joinedIn));
-		final YearEntity leftInEntity = leftIn == null ? null : this.yearRepository.findOneByValue(leftIn).orElseGet(() -> yearRepository.createYear(leftIn));
+	private BandEntity markAsBand(ArtistEntity artist) {
+		var cypher = String.format(
+			"MATCH (n) WHERE id(n) = $id\n" +
+				"OPTIONAL MATCH (n) - [f:BORN_IN] -> (:Country)\n" +
+				"REMOVE n:%s SET n:%s\n" +
+				"DELETE f",
+			getLabel(SoloArtistEntity.class),
+			getLabel(BandEntity.class));
 
-		return this.bands.save(band.addMember(newMember, joinedInEntity, leftInEntity));
+		session.query(cypher, Map.of("id", artist.getId()));
+		// Needs to clear the mapping context at this point because this shared session
+		// will know the node only as class Artist in this transaction otherwise.
+		session.clear();
+		return session.load(BandEntity.class, artist.getId());
+	}
+
+	private SoloArtistEntity markAsSoloArtist(ArtistEntity artist) {
+		var cypher = String.format(
+			"MATCH (n) WHERE id(n) = $id\n" +
+				"OPTIONAL MATCH (n) - [f:FOUNDED_IN] -> (:Country)\n" +
+				"REMOVE n:%s SET n:%s\n" +
+				"DELETE f",
+			getLabel(BandEntity.class),
+			getLabel(SoloArtistEntity.class));
+
+		session.query(cypher, Map.of("id", artist.getId()));
+		session.clear();
+		return session.load(SoloArtistEntity.class, artist.getId());
+	}
+
+	private ArtistEntity removeQualification(ArtistEntity artist) {
+		var cypher = String.format(
+			"MATCH (n) WHERE id(n) = $id\n" +
+				"OPTIONAL MATCH (n) - [f] -> (:Country)\n" +
+				"REMOVE n:%s, n:%s\n" +
+				"DELETE f",
+			getLabel(BandEntity.class),
+			getLabel(SoloArtistEntity.class));
+
+		session.query(cypher, Map.of("id", artist.getId()));
+		session.clear();
+		return session.load(ArtistEntity.class, artist.getId());
+	}
+
+	private Optional<? extends ArtistEntity> loadArtistsDetails(final ArtistEntity base) {
+
+		if (base instanceof BandEntity) {
+			return this.findBandById(base.getId());
+		} else if (base instanceof SoloArtistEntity) {
+			return this.findSoloArtistById(base.getId());
+		} else {
+			return Optional.of(base);
+		}
 	}
 
 	@Nullable
-	CountryEntity determineCountry(@Nullable final String code) {
+	private CountryEntity determineCountry(@Nullable final String code) {
 		return code == null || code.trim().isEmpty() ? null :
 			countryRepository.findByCode(code).orElseGet(() -> countryRepository.save(new CountryEntity(code)));
+	}
+
+	private static String getLabel(Class<? extends AbstractAuditableBaseEntity> clazz) {
+		return clazz.getSimpleName().replaceAll("Entity$", "");
 	}
 }

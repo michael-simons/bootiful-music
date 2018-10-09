@@ -25,9 +25,12 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.api.TestInstance.Lifecycle;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.neo4j.ogm.driver.ParameterConversionMode;
 import org.neo4j.ogm.session.Session;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.data.neo4j.DataNeo4jTest;
+import org.springframework.boot.test.context.TestConfiguration;
+import org.springframework.context.annotation.Bean;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 /**
@@ -69,5 +72,16 @@ class CountryRepositoryTest {
 				assertThat(c.getYear()).isEqualTo(Year.of(1998));
 				assertThat(c.getAlbums()).containsExactly("13");
 			}, atIndex(1));
+	}
+
+	@TestConfiguration
+	static class Config {
+
+		@Bean
+		public org.neo4j.ogm.config.Configuration  configuration() {
+			var builder = new org.neo4j.ogm.config.Configuration.Builder();
+			builder.withCustomProperty(ParameterConversionMode.CONFIG_KEY, ParameterConversionMode.CONVERT_NON_NATIVE_ONLY);
+			return builder.build();
+		}
 	}
 }

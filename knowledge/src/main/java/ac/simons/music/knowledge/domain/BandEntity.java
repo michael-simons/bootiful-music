@@ -16,16 +16,27 @@
 package ac.simons.music.knowledge.domain;
 
 import static java.util.stream.Collectors.*;
+import static org.neo4j.ogm.annotation.Relationship.INCOMING;
 
+import ac.simons.music.knowledge.support.YearConverter;
+import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.time.Year;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+import org.neo4j.ogm.annotation.EndNode;
+import org.neo4j.ogm.annotation.GeneratedValue;
+import org.neo4j.ogm.annotation.Id;
+import org.neo4j.ogm.annotation.Labels;
 import org.neo4j.ogm.annotation.NodeEntity;
 import org.neo4j.ogm.annotation.Relationship;
+import org.neo4j.ogm.annotation.RelationshipEntity;
+import org.neo4j.ogm.annotation.StartNode;
+import org.neo4j.ogm.annotation.typeconversion.Convert;
 import org.springframework.data.annotation.PersistenceConstructor;
 
 /**
@@ -39,8 +50,8 @@ public class BandEntity extends ArtistEntity {
 	@Setter
 	private CountryEntity foundedIn;
 
-	@Relationship("HAS")
-	private List<MemberEntity> member = new ArrayList<>();
+	@Relationship("HAS_MEMBER")
+	private List<Member> member = new ArrayList<>();
 
 	public BandEntity(String name) {
 		this(name, null);
@@ -52,11 +63,11 @@ public class BandEntity extends ArtistEntity {
 		this.foundedIn = foundedIn;
 	}
 
-	BandEntity addMember(final SoloArtistEntity soloArtist, final YearEntity joinedIn, final YearEntity leftIn) {
-		Optional<MemberEntity> existingMember = this.member.stream()
+	BandEntity addMember(final SoloArtistEntity soloArtist, final Year joinedIn, final Year leftIn) {
+		Optional<Member> existingMember = this.member.stream()
 			.filter(m -> m.getArtist().equals(soloArtist) && m.getJoinedIn().equals(joinedIn)).findFirst();
 		existingMember.ifPresentOrElse(m -> m.setLeftIn(leftIn), () -> {
-			this.member.add(new MemberEntity(soloArtist, joinedIn, leftIn));
+			this.member.add(new Member(this, soloArtist, joinedIn, leftIn));
 		});
 
 		return this;
@@ -64,8 +75,43 @@ public class BandEntity extends ArtistEntity {
 
 	public List<SoloArtistEntity> getActiveMember() {
 		return member.stream()
-			.filter(MemberEntity::isActive)
-			.map(MemberEntity::getArtist)
+			.filter(Member::isActive)
+			.map(Member::getArtist)
 			.collect(toList());
 	}
+
+	@RelationshipEntity("HAS_MEMBER")
+	@Getter
+	static class Member {
+		@Id
+		@GeneratedValue
+		@Getter(AccessLevel.NONE)
+		private Long memberId;
+
+		@StartNode
+		private BandEntity band;
+
+		@EndNode
+		private SoloArtistEntity artist;
+
+		@Convert(YearConverter.class)
+		private Year joinedIn;
+
+		@Convert(YearConverter.class)
+		@Setter
+		private Year leftIn;
+
+		Member(final BandEntity band, final SoloArtistEntity artist, final Year joinedIn, final Year leftIn) {
+			this.band = band;
+			this.artist = artist;
+			this.joinedIn = joinedIn;
+			this.leftIn = leftIn;
+
+		}
+
+		public boolean isActive() {
+			return this.leftIn == null;
+		}
+	}
+
 }

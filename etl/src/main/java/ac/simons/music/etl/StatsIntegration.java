@@ -16,8 +16,7 @@
 package ac.simons.music.etl;
 
 import static ac.simons.music.statsdb.Tables.*;
-import static org.jooq.impl.DSL.count;
-import static org.jooq.impl.DSL.extract;
+import static org.jooq.impl.DSL.*;
 
 import java.sql.DriverManager;
 import java.util.Map;
@@ -25,6 +24,7 @@ import java.util.Map;
 import org.jooq.DatePart;
 import org.jooq.impl.DSL;
 import org.neo4j.graphdb.GraphDatabaseService;
+import org.neo4j.logging.Log;
 import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Mode;
@@ -75,10 +75,22 @@ public class StatsIntegration {
 			+ CREATE_YEAR_AND_DECADE
 			+ " MERGE (month:Month {value: $monthValue}) - [:OF] -> (year)"
 			+ " WITH track, month "
-			+ " MERGE (track) - [:HAS_BEEN_PLAYED] -> (p:PlayCount) - [:IN] -> (month) ON CREATE set p.value = $newPlayCount ON MATCH SET p.value = $newPlayCount";
+		    + " MERGE (track) - [:HAS_BEEN_PLAYED] -> (p:PlayCount {value: $newPlayCount}) - [:IN] -> (month)";
+
+	private static final String WEIGHT_ARTISTS_BY_PLAYCOUNT
+			= " MATCH (playCount:PlayCount) WITH sum(playCount.value) as totalPlays"
+			+ " MATCH (artist:Artist) <- [:RELEASED_BY] - () - [:CONTAINS] -> (track:Track)"
+			+ " WITH DISTINCT artist, track, totalPlays"
+			+ " MATCH (track) - [:HAS_BEEN_PLAYED] -> (playCount:PlayCount)"
+			+ " WITH artist, sum(playCount.value) as artistPlays, totalPlays"
+			+ " SET artist.percentageOfAllPlays = 100.0/totalPlays * artistPlays"
+			+ " RETURN artist";
 
 	@Context
 	public GraphDatabaseService db;
+
+	@Context
+	public Log log;
 
 	@Procedure(name = "stats.loadArtistData", mode = Mode.WRITE)
 	@Description("Loads all artist data from the given connection.")
@@ -90,10 +102,11 @@ public class StatsIntegration {
 		try (var connection = DriverManager.getConnection(url, userName, password);
 			 var neoTransaction = db.beginTx()) {
 
+			log.info("Loading artists from statsdb");
 			DSL.using(connection)
 					.selectFrom(ARTISTS)
 					.forEach(a ->
-							db.execute(CREATE_ARTIST, Map.of("artistName", a.getName()))
+						executeQueryAndLogResults(CREATE_ARTIST, Map.of("artistName", a.getName()))
 					);
 			neoTransaction.success();
 		} catch (Exception e) {
@@ -111,26 +124,29 @@ public class StatsIntegration {
 		try (var connection = DriverManager.getConnection(url, userName, password);
 			 var neoTransaction = db.beginTx()) {
 
-			var stats = DSL.using(connection);
+			var statsDb = DSL.using(connection);
 			var isNoCompilation = TRACKS.COMPILATION.eq("f");
 
-			stats
+			log.info("Loading albums from statsdb");
+			statsDb
 					.selectDistinct(ARTISTS.NAME, TRACKS.ALBUM, GENRES.NAME, TRACKS.YEAR)
 					.from(TRACKS)
 					.join(ARTISTS).onKey()
 					.join(GENRES).onKey()
 					.where(isNoCompilation)
 					.forEach(r -> {
-								var parameters = Map.<String, Object>of(
-										"artistName", r.get(ARTISTS.NAME),
-										"albumName", r.get(TRACKS.ALBUM),
-										"genreName", r.get(GENRES.NAME),
-										"yearValue", Long.valueOf(r.get(TRACKS.YEAR)));
-								db.execute(CREATE_YEAR_AND_DECADE + CREATE_ARTIST +  CREATE_ALBUM_WITH_ARTIST, parameters);
-							}
-					);
+						var parameters = Map.<String, Object>of(
+								"artistName", r.get(ARTISTS.NAME),
+								"albumName", r.get(TRACKS.ALBUM),
+								"genreName", r.get(GENRES.NAME),
+								"yearValue", Long.valueOf(r.get(TRACKS.YEAR)));
 
-			stats
+						var cypher = CREATE_YEAR_AND_DECADE + CREATE_ARTIST + CREATE_ALBUM_WITH_ARTIST;
+						executeQueryAndLogResults(cypher, parameters);
+					});
+
+			log.info("Loading tracks from statsdb");
+			statsDb
 					.select(ARTISTS.NAME, TRACKS.ALBUM, TRACKS.NAME, TRACKS.DISC_NUMBER, TRACKS.TRACK_NUMBER)
 					.from(TRACKS)
 					.join(ARTISTS).onKey()
@@ -143,7 +159,8 @@ public class StatsIntegration {
 								"discNumber", r.get(TRACKS.DISC_NUMBER),
 								"trackNumber", r.get(TRACKS.TRACK_NUMBER)
 						);
-						db.execute(CREATE_TRACK_IN_ALBUM, parameters);
+
+						executeQueryAndLogResults(CREATE_TRACK_IN_ALBUM, parameters);
 					});
 
 			neoTransaction.success();
@@ -162,7 +179,7 @@ public class StatsIntegration {
 		try (var connection = DriverManager.getConnection(url, userName, password);
 			 var neoTransaction = db.beginTx()) {
 
-			var stats = DSL.using(connection);
+			var statsDb = DSL.using(connection);
 			var isNoCompilation = TRACKS.COMPILATION.eq("f");
 
 			final String columnNameYear = "yearValue";
@@ -172,7 +189,11 @@ public class StatsIntegration {
 			var year = extract(PLAYS.PLAYED_ON, DatePart.YEAR).as(columnNameYear);
 			var month = extract(PLAYS.PLAYED_ON, DatePart.MONTH).as(columnNameMonth);
 
-			stats
+			log.info("Deleting existing playcounts");
+			executeQueryAndLogResults("MATCH (playCount:PlayCount) DETACH DELETE playCount", Map.of());
+
+			log.info("Loading playcounts from statsdb");
+			statsDb
 					.select(
 							ARTISTS.NAME,
 							TRACKS.NAME,
@@ -183,7 +204,7 @@ public class StatsIntegration {
 					.join(TRACKS).onKey()
 					.join(ARTISTS).onKey()
 					.where(isNoCompilation)
-					.groupBy(ARTISTS.NAME, TRACKS.ALBUM, TRACKS.NAME, year, month)
+					.groupBy(ARTISTS.NAME, TRACKS.NAME, year, month)
 					.forEach(r -> {
 						var parameters = Map.of(
 								"artistName", r.get(ARTISTS.NAME),
@@ -192,12 +213,22 @@ public class StatsIntegration {
 								columnNameMonth, r.get(columnNameMonth),
 								columnNameNewPlayCount, r.get(columnNameNewPlayCount)
 						);
-						db.execute(CREATE_PLAY_COUNTS, parameters);
+
+						executeQueryAndLogResults(CREATE_PLAY_COUNTS, parameters);
 					});
 
+			log.info("Adding weight to artists");
+			executeQueryAndLogResults(WEIGHT_ARTISTS_BY_PLAYCOUNT, Map.of());
 			neoTransaction.success();
 		} catch (Exception e) {
 			e.printStackTrace();
+		}
+	}
+
+	private void executeQueryAndLogResults(String cypher, Map<String, Object> parameters) {
+		var queryStatistics = db.execute(cypher, parameters).getQueryStatistics();
+		if(log.isDebugEnabled()) {
+			log.debug("Successfully executed:%n%s%n%n%s", cypher, queryStatistics);
 		}
 	}
 }

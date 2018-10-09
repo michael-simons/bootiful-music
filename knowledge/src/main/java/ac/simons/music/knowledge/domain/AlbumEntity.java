@@ -31,13 +31,14 @@ import lombok.AccessLevel;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.ToString;
 
 /**
  * @author Michael J. Simons
  */
 @NodeEntity("Album")
 @Getter
-@EqualsAndHashCode(of = {"artist", "name", "releasedIn"}, callSuper = false)
+@EqualsAndHashCode(of = { "artist", "name", "releasedIn" }, callSuper = false)
 public class AlbumEntity extends AbstractAuditableBaseEntity {
 
 	@Relationship("RELEASED_BY")
@@ -58,7 +59,7 @@ public class AlbumEntity extends AbstractAuditableBaseEntity {
 	@Relationship("CONTAINS")
 	@Getter(AccessLevel.NONE)
 	private Set<AlbumTrack> tracks = new TreeSet<>(
-			Comparator.comparing(AlbumTrack::getDiscNumber).thenComparing(AlbumTrack::getTrackNumber));
+		Comparator.comparing(AlbumTrack::getDiscNumber).thenComparing(AlbumTrack::getTrackNumber));
 
 	public AlbumEntity(ArtistEntity artist, String name, YearEntity releasedIn) {
 		this.artist = artist;
@@ -73,7 +74,8 @@ public class AlbumEntity extends AbstractAuditableBaseEntity {
 
 	@RelationshipEntity("CONTAINS")
 	@Getter
-	static class AlbumTrack {
+	@ToString(of = { "discNumber", "trackNumber", "track" })
+	public static class AlbumTrack {
 		@Id
 		@GeneratedValue
 		@Getter(AccessLevel.NONE)

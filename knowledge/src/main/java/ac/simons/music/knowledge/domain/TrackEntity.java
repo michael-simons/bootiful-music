@@ -26,12 +26,14 @@ import org.springframework.data.annotation.PersistenceConstructor;
 
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
+import lombok.ToString;
 
 /**
  * @author Michael J. Simons
  */
 @NodeEntity("Track")
 @EqualsAndHashCode(of = {"name", "writtenBy"}, callSuper = false)
+@ToString(of = "name")
 public class TrackEntity extends AbstractAuditableBaseEntity {
 
 	@Index(unique = true)
@@ -39,7 +41,7 @@ public class TrackEntity extends AbstractAuditableBaseEntity {
 	private String name;
 
 	@Relationship("WRITTEN_BY")
-	private Set<ArtistEntity> writtenBy = new HashSet<>();
+	private Set<ArtistEntity> writtenBy;
 
 	@Relationship(value = "FEATURING")
 	private Set<SoloArtistEntity> featuring = new HashSet<>();

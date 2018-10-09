@@ -45,6 +45,8 @@ import ac.simons.music.knowledge.domain.ArtistService;
 import ac.simons.music.knowledge.domain.BandEntity;
 import ac.simons.music.knowledge.domain.CountryEntity;
 import ac.simons.music.knowledge.domain.SoloArtistEntity;
+import lombok.Data;
+import lombok.Getter;
 
 /**
  * @author Michael J. Simons
@@ -99,14 +101,16 @@ public class ArtistController {
 		}
 
 		final Class<? extends ArtistEntity> targetType = artistCmd.getType().getImplementingClass();
-		Optional.ofNullable(artistCmd.getId())
-				.flatMap(this.artistService::findArtistById)
-				.ifPresentOrElse(
-						artist -> this.artistService.updateArtist(artist, artistCmd.getOrigin(), targetType),
-						() -> this.artistService
-								.createNewArtist(artistCmd.getName(), artistCmd.getOrigin(), targetType));
+		var optionalArtists = Optional.ofNullable(artistCmd.getId())
+			.flatMap(this.artistService::findArtistById);
 
-		return String.format("redirect:/artists");
+		ArtistEntity artist;
+		if(optionalArtists.isPresent()) {
+			artist = this.artistService.updateArtist(optionalArtists.get(), artistCmd.getOrigin(), targetType);
+		} else {
+			artist = this.artistService.createNewArtist(artistCmd.getName(), artistCmd.getOrigin(), targetType);
+		}
+		return String.format("redirect:/artists/%d", artist.getId());
 	}
 
 	@PostMapping(value = "/{bandId}/member", produces = MediaType.TEXT_HTML_VALUE)
@@ -168,6 +172,7 @@ public class ArtistController {
 		}
 	}
 
+	@Data
 	static class ArtistCmd {
 		private Long id;
 
@@ -195,38 +200,6 @@ public class ArtistController {
 			this.origin = Optional.ofNullable(origin).map(CountryEntity::getCode).orElse(null);
 		}
 
-		public Long getId() {
-			return id;
-		}
-
-		public void setId(Long id) {
-			this.id = id;
-		}
-
-		public String getName() {
-			return name;
-		}
-
-		public void setName(String name) {
-			this.name = name;
-		}
-
-		public ArtistType getType() {
-			return type;
-		}
-
-		public void setType(ArtistType type) {
-			this.type = type;
-		}
-
-		public String getOrigin() {
-			return origin;
-		}
-
-		public void setOrigin(String origin) {
-			this.origin = origin;
-		}
-
 		@Nullable
 		public String getLocalizedOrigin(final Locale locale) {
 			return Optional.ofNullable(this.origin)
@@ -234,18 +207,9 @@ public class ArtistController {
 					.map(code -> new Locale("", code).getDisplayCountry(locale))
 					.orElse(null);
 		}
-
-		@Override
-		public String toString() {
-			return "ArtistCmd{" +
-					"id=" + id +
-					", name='" + name + '\'' +
-					", type=" + type +
-					", origin='" + origin + '\'' +
-					'}';
-		}
 	}
 
+	@Data
 	static class NewMemberCmd {
 		@NotNull
 		private Long artistId;
@@ -254,29 +218,5 @@ public class ArtistController {
 		private Year joinedIn;
 
 		private Year leftIn;
-
-		public Long getArtistId() {
-			return artistId;
-		}
-
-		public void setArtistId(Long artistId) {
-			this.artistId = artistId;
-		}
-
-		public Year getJoinedIn() {
-			return joinedIn;
-		}
-
-		public void setJoinedIn(Year joinedIn) {
-			this.joinedIn = joinedIn;
-		}
-
-		public Year getLeftIn() {
-			return leftIn;
-		}
-
-		public void setLeftIn(Year leftIn) {
-			this.leftIn = leftIn;
-		}
 	}
 }
