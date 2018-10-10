@@ -46,8 +46,35 @@
                 </div>
                 <button type="submit" class="btn btn-primary" th:text="#{common.save}">Submit</button>
             </form>
+        </div>
+    </div>
 
-            <form th:if="${soloArtists != null}" method="post" action="#"
+    <div class="row" th:if="${artistForm.type == T(ac.simons.music.knowledge.web.ArtistController.ArtistType).BAND}">
+        <div class="col">
+            <h2 th:text="#{band.member}">Placeholder</h2>
+            <table class="table table-sm table-striped table-hover">
+                <thead class="thead-dark">
+                <tr>
+                    <th scope="col" th:text="#{artist.name}">Placeholder</th>
+                    <th scope="col" th:text="#{member.joined-in}">Placeholder</th>
+                    <th scope="col" th:text="#{member.left-in}">Placeholder</th>
+                    <th scope="col"></th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="member : ${members}">
+                    <th scope="row" th:text="${member.name}">Placeholder</th>
+                    <td scope="row" th:text="${member.joinedIn}">Placeholder</td>
+                    <td scope="row" th:text="${member.leftIn}">Placeholder</td>
+                    </td>
+                    <td><a href="#" th:href="@{/artists/{artistId}(artistId=${member.id})}"
+                           th:text="#{artists.edit}">Placeholder</a></td>
+                </tr>
+                </tbody>
+            </table>
+
+            <form th:if="${soloArtists != null}"
+                  method="post" action="#"
                   th:action="@{/artists/{bandId}/member(bandId=${artistForm.id})}" th:object="${newMemberForm}">
                 <div class="form-group">
                     <label for="new-membership.artist" th:text="#{artist.name}">Placeholder</label>

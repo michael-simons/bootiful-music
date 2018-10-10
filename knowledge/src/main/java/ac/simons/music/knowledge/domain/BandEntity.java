@@ -15,8 +15,8 @@
  */
 package ac.simons.music.knowledge.domain;
 
+import static java.util.Comparator.*;
 import static java.util.stream.Collectors.*;
-import static org.neo4j.ogm.annotation.Relationship.INCOMING;
 
 import ac.simons.music.knowledge.support.YearConverter;
 import lombok.AccessLevel;
@@ -31,7 +31,6 @@ import java.util.Optional;
 import org.neo4j.ogm.annotation.EndNode;
 import org.neo4j.ogm.annotation.GeneratedValue;
 import org.neo4j.ogm.annotation.Id;
-import org.neo4j.ogm.annotation.Labels;
 import org.neo4j.ogm.annotation.NodeEntity;
 import org.neo4j.ogm.annotation.Relationship;
 import org.neo4j.ogm.annotation.RelationshipEntity;
@@ -73,6 +72,13 @@ public class BandEntity extends ArtistEntity {
 		return this;
 	}
 
+	public List<Member> getMember() {
+
+		return this.member.stream().
+			sorted(comparing(Member::getJoinedIn).thenComparing(Member::getLeftIn, nullsLast(naturalOrder())))
+			.collect(toList());
+	}
+
 	public List<SoloArtistEntity> getActiveMember() {
 		return member.stream()
 			.filter(Member::isActive)
@@ -81,23 +87,24 @@ public class BandEntity extends ArtistEntity {
 	}
 
 	@RelationshipEntity("HAS_MEMBER")
-	@Getter
-	static class Member {
+	public static class Member {
 		@Id
 		@GeneratedValue
-		@Getter(AccessLevel.NONE)
 		private Long memberId;
 
 		@StartNode
 		private BandEntity band;
 
 		@EndNode
+		@Getter(AccessLevel.PACKAGE)
 		private SoloArtistEntity artist;
 
 		@Convert(YearConverter.class)
+		@Getter
 		private Year joinedIn;
 
 		@Convert(YearConverter.class)
+		@Getter
 		@Setter
 		private Year leftIn;
 
@@ -107,6 +114,14 @@ public class BandEntity extends ArtistEntity {
 			this.joinedIn = joinedIn;
 			this.leftIn = leftIn;
 
+		}
+
+		public Long getId() {
+			return this.artist.getId();
+		}
+
+		public String getName() {
+			return this.artist.getName();
 		}
 
 		public boolean isActive() {
