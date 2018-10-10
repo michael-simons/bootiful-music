@@ -34,6 +34,11 @@
                         </option>
                     </select>
                 </div>
+                <div class="form-group" th:if="${artistForm.type == T(ac.simons.music.knowledge.web.ArtistController.ArtistType).BAND}">
+                    <label for="artist.active-since" th:text="#{band.active-since}">Placeholder</label>
+                    <input type="number" step="1" class="form-control" id="artist.active-since"
+                           th:field="*{activeSince}">
+                </div>
                 <div class="form-group">
                     <label for="artist.foundedIn" th:text="#{artist.origin}">Placeholder</label>
                     <select class="form-control" id="artist.foundedIn" th:field="*{origin}">

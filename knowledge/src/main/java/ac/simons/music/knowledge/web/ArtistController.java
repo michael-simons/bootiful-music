@@ -46,6 +46,7 @@ import ac.simons.music.knowledge.domain.BandEntity;
 import ac.simons.music.knowledge.domain.BandEntity.Member;
 import ac.simons.music.knowledge.domain.CountryEntity;
 import ac.simons.music.knowledge.domain.SoloArtistEntity;
+import ac.simons.music.knowledge.domain.YearEntity;
 import lombok.Data;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -120,9 +121,9 @@ public class ArtistController {
 
 		ArtistEntity artist;
 		if(optionalArtists.isPresent()) {
-			artist = this.artistService.updateArtist(optionalArtists.get(), artistCmd.getOrigin(), targetType);
+			artist = this.artistService.updateArtist(optionalArtists.get(), artistCmd.getOrigin(), artistCmd.getActiveSince(), targetType);
 		} else {
-			artist = this.artistService.createNewArtist(artistCmd.getName(), artistCmd.getOrigin(), targetType);
+			artist = this.artistService.createNewArtist(artistCmd.getName(), artistCmd.getOrigin(), artistCmd.getActiveSince(), targetType);
 		}
 		return String.format("redirect:/artists/%d", artist.getId());
 	}
@@ -211,6 +212,8 @@ public class ArtistController {
 
 		private String origin;
 
+		private Year activeSince;
+
 		public ArtistCmd() {
 		}
 
@@ -221,8 +224,11 @@ public class ArtistController {
 			CountryEntity origin = null;
 			if (artist instanceof BandEntity) {
 				origin = ((BandEntity) artist).getFoundedIn();
+				this.activeSince = Optional.ofNullable(((BandEntity) artist).getActiveSince()).map(YearEntity::asYear).
+					orElse(null);
 			} else if (artist instanceof SoloArtistEntity) {
 				origin = ((SoloArtistEntity) artist).getBornIn();
+				activeSince = null;
 			}
 			this.origin = Optional.ofNullable(origin).map(CountryEntity::getCode).orElse(null);
 		}

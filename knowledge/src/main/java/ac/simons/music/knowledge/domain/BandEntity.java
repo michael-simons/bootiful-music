@@ -49,6 +49,11 @@ public class BandEntity extends ArtistEntity {
 	@Setter
 	private CountryEntity foundedIn;
 
+	@Relationship("ACTIVE_SINCE")
+	@Getter
+	@Setter
+	private YearEntity activeSince;
+
 	@Relationship("HAS_MEMBER")
 	private List<Member> member = new ArrayList<>();
 

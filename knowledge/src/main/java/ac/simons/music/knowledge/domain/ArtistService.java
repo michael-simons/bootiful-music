@@ -122,12 +122,14 @@ public class ArtistService {
 	}
 
 	@Transactional
-	public <T extends ArtistEntity> T createNewArtist(final String name, final String countryOfOrigin, final Class<T> type) {
+	public <T extends ArtistEntity> T createNewArtist(final String name, final String countryOfOrigin, final Year activeSince, final Class<T> type) {
 
 		ArtistEntity rv;
-		final CountryEntity country = determineCountry(countryOfOrigin);
+		final CountryEntity country = this.determineCountry(countryOfOrigin);
 		if (type == BandEntity.class) {
-			rv = this.bands.save(new BandEntity(name, country));
+			var band = new BandEntity(name, country);
+			band.setActiveSince(this.determineYear(activeSince).orElse(null));
+			rv = this.bands.save(band);
 		} else if (type == SoloArtistEntity.class) {
 			rv = this.soloArtists.save(new SoloArtistEntity(name, country));
 		} else {
@@ -138,16 +140,18 @@ public class ArtistService {
 	}
 
 	@Transactional
-	public <T extends ArtistEntity> T updateArtist(final ArtistEntity artist, final String countryOfOrigin, final Class<T> type) {
+	public <T extends ArtistEntity> T updateArtist(final ArtistEntity artist, final String countryOfOrigin, final Year activeSince, final Class<T> type) {
 
 		ArtistEntity rv;
+		final CountryEntity country = this.determineCountry(countryOfOrigin);
 		if (type == BandEntity.class) {
 			var band = this.markAsBand(artist);
-			band.setFoundedIn(determineCountry(countryOfOrigin));
+			band.setFoundedIn(country);
+			band.setActiveSince(this.determineYear(activeSince).orElse(null));
 			rv = this.bands.save(band);
 		} else if (type == SoloArtistEntity.class) {
 			var soloArtist = this.markAsSoloArtist(artist);
-			soloArtist.setBornIn(determineCountry(countryOfOrigin));
+			soloArtist.setBornIn(country);
 			rv = this.soloArtists.save(soloArtist);
 		} else {
 			rv = this.removeQualification(artist);
@@ -180,8 +184,9 @@ public class ArtistService {
 		var cypher = String.format(
 			"MATCH (n) WHERE id(n) = $id\n" +
 				"OPTIONAL MATCH (n) - [f:FOUNDED_IN] -> (:Country)\n" +
+				"OPTIONAL MATCH (n) - [a:ACTIVE_SINCE] -> (:Year)\n" +
 				"REMOVE n:%s SET n:%s\n" +
-				"DELETE f",
+				"DELETE f, a",
 			getLabel(BandEntity.class),
 			getLabel(SoloArtistEntity.class));
 
@@ -193,9 +198,10 @@ public class ArtistService {
 	private ArtistEntity removeQualification(ArtistEntity artist) {
 		var cypher = String.format(
 			"MATCH (n) WHERE id(n) = $id\n" +
-				"OPTIONAL MATCH (n) - [f] -> (:Country)\n" +
+				"OPTIONAL MATCH (n) - [f:FOUNDED_IN|BORN_IN] -> (:Country)\n" +
+				"OPTIONAL MATCH (n) - [a:ACTIVE_SINCE] -> (:Year)\n" +
 				"REMOVE n:%s, n:%s\n" +
-				"DELETE f",
+				"DELETE f, a",
 			getLabel(BandEntity.class),
 			getLabel(SoloArtistEntity.class));
 
@@ -219,6 +225,20 @@ public class ArtistService {
 	private CountryEntity determineCountry(@Nullable final String code) {
 		return code == null || code.trim().isEmpty() ? null :
 			countryRepository.findByCode(code).orElseGet(() -> countryRepository.save(new CountryEntity(code)));
+	}
+
+	private Optional<YearEntity> determineYear(@Nullable final Year year) {
+		return Optional.ofNullable(year).map(Year::getValue).map(valueOfYear -> {
+
+			var valueOfDecade = valueOfYear - valueOfYear % 10;
+			var cypher
+				= " MERGE (decade:Decade {value: $valueOfDecade})"
+				+ " MERGE (year:Year {value: $valueOfYear})"
+				+ " MERGE (year) - [:PART_OF] -> (decade)"
+				+ " RETURN year";
+
+			return session.queryForObject(YearEntity.class, cypher, Map.of("valueOfDecade", valueOfDecade, "valueOfYear", valueOfYear));
+		});
 	}
 
 	private static String getLabel(Class<? extends AbstractAuditableBaseEntity> clazz) {
