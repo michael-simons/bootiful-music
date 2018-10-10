@@ -15,10 +15,14 @@
  */
 package ac.simons.music.knowledge.domain;
 
+import java.util.List;
+
+import org.springframework.data.domain.Sort;
 import org.springframework.data.neo4j.repository.Neo4jRepository;
 
 /**
  * @author Michael J. Simons
  */
 interface BandRepository extends Neo4jRepository<BandEntity, Long> {
+	List<BandEntity> findAll(Sort sort);
 }

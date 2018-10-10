@@ -78,19 +78,32 @@ public class ArtistController {
 		return new ModelAndView("artists", Map.of("artists", artists));
 	}
 
+	@ModelAttribute(name = "newMemberForm")
+	NewMemberCmd newMemberForm() {
+		return new NewMemberCmd();
+	}
+
+	@ModelAttribute(name = "newAssociatedArtistForm")
+	NewAssociatedArtistCmd newAssociatedArtistForm() {
+		return new NewAssociatedArtistCmd();
+	}
+
 	@GetMapping(value = "/{artistId}", produces = MediaType.TEXT_HTML_VALUE)
 	public ModelAndView artist(@PathVariable final Long artistId) {
 
 		var artist = this.artistService.findArtistById(artistId)
 				.orElseThrow(() -> new NodeNotFoundException(ArtistEntity.class, artistId));
 		var members = (artist instanceof BandEntity) ? ((BandEntity) artist).getMember() : List.<Member>of();
-		var soloArtists = this.artistService.findAllSoloArtists();
 
+		var soloArtists = this.artistService.findAllSoloArtists();
+		var associatedArtists = this.artistService.findAssociatedArtists(artist);
+		var notAssociatedArtists = this.artistService.findArtistsNotAssociatedWith(artist);
 		var model = Map.of(
 				"artistForm", new ArtistCmd(artist),
 				"members", members,
-				"newMemberForm", new NewMemberCmd(),
-				"soloArtists", soloArtists
+				"soloArtists", soloArtists,
+				"associatedArtists", associatedArtists,
+				"notAssociatedArtists", notAssociatedArtists
 		);
 		return new ModelAndView("artist", model);
 	}
@@ -125,6 +138,19 @@ public class ArtistController {
 			band = this.artistService.addMember(band, soloArtist, newMemberCmd.joinedIn, newMemberCmd.leftIn);
 		}
 		return String.format("redirect:/artists/%d", band.getId());
+	}
+
+	@PostMapping(value = "/{artistId}/associateWith", produces = MediaType.TEXT_HTML_VALUE)
+	public String associateWith(@PathVariable final Long artistId, @Valid final NewAssociatedArtistCmd newAssociatedArtistCmd, final BindingResult newAssociatedArtistBindingResult) {
+		var artist = this.artistService.findArtistById(artistId)
+			.orElseThrow(() -> new NodeNotFoundException(ArtistEntity.class, artistId));
+
+		if (!newAssociatedArtistBindingResult.hasErrors()) {
+			var newAssociatedArtist = this.artistService.findArtistById(newAssociatedArtistCmd.artistId)
+				.orElseThrow(() -> new NodeNotFoundException(ArtistEntity.class, newAssociatedArtistCmd.artistId));
+			this.artistService.associate(artist, newAssociatedArtist);
+		}
+		return String.format("redirect:/artists/%d", artist.getId());
 	}
 
 	enum ArtistType {
@@ -219,5 +245,11 @@ public class ArtistController {
 		private Year joinedIn;
 
 		private Year leftIn;
+	}
+
+	@Data
+	static class NewAssociatedArtistCmd {
+		@NotNull
+		private Long artistId;
 	}
 }

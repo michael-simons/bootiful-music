@@ -63,6 +63,7 @@ public class ArtistService {
 
 	@Transactional(readOnly = true)
 	public List<ArtistEntity> findAllArtists() {
+
 		var cypher = "MATCH (a:Artist) WITH a OPTIONAL MATCH p=(a)-[*0..1]-(c:Country) RETURN a, p ORDER BY a.name";
 
 		final List<ArtistEntity> allArtists = new ArrayList<>();
@@ -74,6 +75,50 @@ public class ArtistService {
 	@Transactional(readOnly = true)
 	public List<SoloArtistEntity> findAllSoloArtists() {
 		return this.soloArtists.findAll(Sort.by("name").ascending());
+	}
+
+	@Transactional(readOnly = true)
+	public List<BandEntity> findAllBands() {
+		return this.bands.findAll(Sort.by("name").ascending());
+	}
+
+	@Transactional
+	public void associate(ArtistEntity artist1, ArtistEntity artist2) {
+
+		var cypher
+			= " MATCH (artist1:Artist {name: $artistName1})"
+			+ " MATCH (artist2:Artist {name: $artistName2})"
+			+ " MERGE (artist1) - [:ASSOCIATED_WITH] - (artist2)";
+		session.query(cypher, Map.of("artistName1", artist1.getName(), "artistName2", artist2.getName()));
+	}
+
+	@Transactional
+	public List<ArtistEntity> findAssociatedArtists(ArtistEntity artist) {
+
+		var cypher = "MATCH (:Artist {name: $artistName}) - [:ASSOCIATED_WITH] - (another:Artist) RETURN another";
+
+		final List<ArtistEntity> associatedArtists = new ArrayList<>();
+		session.query(ArtistEntity.class, cypher, Map.of("artistName", artist.getName()))
+			.forEach(associatedArtists::add);
+		return associatedArtists;
+	}
+
+	@Transactional
+	public List<ArtistEntity> findArtistsNotAssociatedWith(ArtistEntity artist) {
+
+		var cypher
+			= " MATCH (artist:Artist {name: $artistName})"
+			+ " MATCH (notAssociated:Artist)"
+			+ " WHERE (artist) <> (notAssociated)"
+			+ "   AND NOT (artist:Artist {name: $artistName}) - [:ASSOCIATED_WITH] - (notAssociated)"
+			+ "   AND (notAssociated:Band OR notAssociated:SoloArtist)"
+			+ " RETURN notAssociated"
+			+ " ORDER BY notAssociated.name";
+
+		final List<ArtistEntity> associatedArtists = new ArrayList<>();
+		session.query(ArtistEntity.class, cypher, Map.of("artistName", artist.getName()))
+			.forEach(associatedArtists::add);
+		return associatedArtists;
 	}
 
 	@Transactional
