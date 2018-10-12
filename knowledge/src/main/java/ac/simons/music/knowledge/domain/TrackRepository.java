@@ -15,10 +15,41 @@
  */
 package ac.simons.music.knowledge.domain;
 
+import java.util.List;
+
+import org.springframework.data.neo4j.annotation.Query;
 import org.springframework.data.neo4j.repository.Neo4jRepository;
+import org.springframework.data.repository.query.Param;
 
 /**
  * @author Michael J. Simons
  */
 interface TrackRepository extends Neo4jRepository<TrackEntity, Long> {
+
+	/**
+	 * Returns a list of tracks that have been played together with the source track at least in
+	 * {@code monthsPlayedTogether} months where the source track has played at least twice.
+	 *
+	 * @param trackId
+	 * @param monthsPlayedTogether
+	 * @param limit
+	 * @return
+	 */
+	@Query(value
+		= " MATCH (sourceTrack:Track) - [playcountSource:HAS_BEEN_PLAYED_IN] -> (:Month) <-[playcountOtherTrack:HAS_BEEN_PLAYED_IN] - (otherTrack:Track)"
+		+ " WHERE id(sourceTrack) = $trackId"
+		+ "   AND playcountSource.value >= 2"
+		+ " WITH sourceTrack, otherTrack, count(playcountOtherTrack) AS monthsPlayedTogether"
+		+ " WHERE monthsPlayedTogether >= $monthsPlayedTogether"
+		+ " WITH monthsPlayedTogether, otherTrack ORDER BY monthsPlayedTogether DESC LIMIT $limit"
+		+ " MATCH (otherTrack) <- [:CONTAINS] -()- [:RELEASED_BY] -> (artist:Artist)"
+		+ " RETURN DISTINCT monthsPlayedTogether, otherTrack AS track, artist "
+		+ " ORDER BY artist.name, track.name"
+	)
+	List<TrackAndArtist> findAllByPlayedTogetherInSameMonth(
+		@Param("trackId") Long trackId,
+		@Param("monthsPlayedTogether") long monthsPlayedTogether,
+		@Param("limit") long limit
+	);
+
 }

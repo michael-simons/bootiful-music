@@ -66,13 +66,15 @@ public class TrackController {
 			.collect(toList());
 		var containedOn = mapAlbumEntities(this.albumService.findAllAlbumsContaining(track));
 		var soloArtists = this.artistService.findAllSoloArtists();
-
+		var playedTogetherWith = this.trackService.findTracksOftenPlayedTogetherWith(track);
+		
 		var model = Map.of(
 			"track", track,
 			"containedOn", containedOn,
 			"writtenBy", writtenBy,
 			"newAuthorForm", new NewAuthorCmd(),
-			"soloArtists", soloArtists
+			"soloArtists", soloArtists,
+			"playedTogetherWith", playedTogetherWith
 		);
 		return new ModelAndView("track", model);
 	}

@@ -17,6 +17,7 @@ package ac.simons.music.knowledge.domain;
 
 import lombok.RequiredArgsConstructor;
 
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.stereotype.Service;
@@ -37,5 +38,10 @@ public class TrackService {
 	@Transactional
 	public TrackEntity addAuthor(final TrackEntity track, final SoloArtistEntity newMember) {
 		return this.trackRepository.save(track.addAuthor(newMember));
+	}
+
+	@Transactional
+	public List<TrackAndArtist> findTracksOftenPlayedTogetherWith(TrackEntity trackEntity) {
+		return this.trackRepository.findAllByPlayedTogetherInSameMonth(trackEntity.getId(), 6, 15);
 	}
 }

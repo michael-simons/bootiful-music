@@ -10,7 +10,7 @@
     <header class="row intro">
         <div class="col">
             <h1>
-                <span th:text="${albumForm.artist}">Placeholder</span> - <span th:text="${albumForm.name} ">Placeholder</span> (<span th:text="${albumForm.releasedIn}">Placeholder</span>)
+                <a href="#" th:text="${albumForm.artist}" th:href="@{/artists/{artistId}(artistId=${albumForm.artistId})}">Placeholder</a> - <span th:text="${albumForm.name} ">Placeholder</span> (<span th:text="${albumForm.releasedIn}">Placeholder</span>)
             </h1>
         </div>
     </header>

@@ -64,7 +64,7 @@
                     <tr th:each="album : ${theAlbums}">
                         <th scope="row" th:text="${album.name}">Placeholder</th>
                         <td th:text="${album.releasedIn}">Placeholder</td>
-                        <td th:text="${album.artist}">Placeholder</td>
+                        <td><a href="#" th:text="${album.artist}" th:href="@{/artists/{artistId}(artistId=${album.artistId})}">Placeholder</a></td>
                         <td th:text="${album.genre}">Placeholder</td>
                         <td><a href="#" th:href="@{/albums/{albumId}(albumId=${album.id})}" th:text="#{albums.edit}">Placeholder</a>
                         </td>
