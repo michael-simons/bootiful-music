@@ -51,12 +51,12 @@ public class StatsIntegration {
 
 	private static final String CREATE_ALBUM_WITH_ARTIST // Statement is to be used with CREATE_ARTIST_NODE and  CREATE_YEAR_AND_DECADE
 			= " MERGE (album:Album {name: $albumName}) - [:RELEASED_BY] -> (artist) "
-		    + "    ON CREATE SET album.createdAt = localdatetime()"
-		    + "    ON MATCH SET album.updatedAt = localdatetime()"
+			+ "    ON CREATE SET album.createdAt = localdatetime()"
+			+ "    ON MATCH SET album.updatedAt = localdatetime()"
 			+ " MERGE (genre:Genre {name: $genreName}) "
-		    + "    ON CREATE SET genre.createdAt = localdatetime()"
-		    + "    ON MATCH SET genre.updatedAt = localdatetime()"
-		    + " MERGE (album) - [:HAS] -> (genre)"
+			+ "    ON CREATE SET genre.createdAt = localdatetime()"
+			+ "    ON MATCH SET genre.updatedAt = localdatetime()"
+			+ " MERGE (album) - [:HAS] -> (genre)"
 			+ " MERGE (album) - [:RELEASED_IN] -> (year)";
 
 	private static final String CREATE_TRACK_IN_ALBUM // Regarding FOREACH see https://stackoverflow.com/a/27578798
@@ -75,7 +75,7 @@ public class StatsIntegration {
 			+ CREATE_YEAR_AND_DECADE
 			+ " MERGE (month:Month {value: $monthValue}) - [:OF] -> (year)"
 			+ " WITH track, month "
-		    + " MERGE (track) - [:HAS_BEEN_PLAYED_IN {value: $newPlayCount}] -> (month)";
+			+ " MERGE (track) - [:HAS_BEEN_PLAYED_IN {value: $newPlayCount}] -> (month)";
 
 	private static final String WEIGHT_ARTISTS_BY_PLAYCOUNT
 			= " MATCH (:Track) - [playCount:HAS_BEEN_PLAYED_IN] -> () WITH sum(playCount.value) as totalPlays"
