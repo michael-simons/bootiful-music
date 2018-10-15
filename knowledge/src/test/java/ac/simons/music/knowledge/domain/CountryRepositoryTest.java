@@ -53,9 +53,9 @@ class CountryRepositoryTest {
 	@BeforeAll
 	void createTestData() {
 		session.query(
-			"MERGE (a:ArtistEntity:BandEntity {name: 'Die Ärzte'}) - [:FOUNDED_IN] ->  (:CountryEntity {code: 'DE', name:'Germany'})\n"
-				+ "MERGE (bestie:AlbumEntity {name: 'Die Bestie in Menschengestalt', releasedIn: 1993}) - [:RELEASED_BY] -> (a)\n"
-				+ "MERGE (drei10:AlbumEntity {name: '13', releasedIn: 1998}) - [:RELEASED_BY] -> (a)", Map.of());
+			"MERGE (a:ArtistEntity:Band {name: 'Die Ärzte'}) - [:FOUNDED_IN] ->  (:Country {code: 'DE', name:'Germany'})\n"
+				+ "MERGE (bestie:Album {name: 'Die Bestie in Menschengestalt', releasedIn: 1993}) - [:RELEASED_BY] -> (a)\n"
+				+ "MERGE (drei10:Album {name: '13', releasedIn: 1998}) - [:RELEASED_BY] -> (a)", Map.of());
 	}
 
 	@Test
