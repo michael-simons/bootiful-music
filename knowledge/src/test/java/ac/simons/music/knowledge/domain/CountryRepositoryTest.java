@@ -80,7 +80,7 @@ class CountryRepositoryTest {
 		@Bean
 		public org.neo4j.ogm.config.Configuration  configuration() {
 			var builder = new org.neo4j.ogm.config.Configuration.Builder();
-			builder.withCustomProperty(ParameterConversionMode.CONFIG_KEY, ParameterConversionMode.CONVERT_NON_NATIVE_ONLY);
+			builder.withCustomProperty(ParameterConversionMode.CONFIG_PARAMETER_CONVERSION_MODE, ParameterConversionMode.CONVERT_NON_NATIVE_ONLY);
 			return builder.build();
 		}
 	}
