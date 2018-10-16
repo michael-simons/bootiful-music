@@ -70,6 +70,13 @@ public class AlbumController {
 		return new ModelAndView("albums", Map.of("name", name, "albums", albums));
 	}
 
+	@GetMapping(value = { "/by-year" }, produces = MediaType.TEXT_HTML_VALUE)
+	public ModelAndView byName(@RequestParam final Year year) {
+
+		var albums = mapAlbumEntities(this.albumService.findAllAlbumsByYear(year));
+		return new ModelAndView("albums", Map.of("year", year, "albums", albums));
+	}
+
 	@GetMapping(value = "/{albumId}", produces = MediaType.TEXT_HTML_VALUE)
 	public ModelAndView album(@PathVariable final Long albumId) {
 

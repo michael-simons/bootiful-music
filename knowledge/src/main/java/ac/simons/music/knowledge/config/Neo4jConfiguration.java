@@ -19,9 +19,15 @@ import static org.neo4j.ogm.driver.ParameterConversionMode.*;
 
 import java.util.Optional;
 
+import javax.annotation.PostConstruct;
+
+import org.neo4j.ogm.config.ObjectMapperFactory;
 import org.springframework.boot.autoconfigure.data.neo4j.Neo4jProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 
 /**
  * @author Michael J. Simons
@@ -35,6 +41,16 @@ public class Neo4jConfiguration {
 		builder.credentials(properties.getUsername(), properties.getPassword());
 		builder.autoIndex(properties.getAutoIndex().getName());
 		builder.withCustomProperty(CONFIG_PARAMETER_CONVERSION_MODE, CONVERT_NON_NATIVE_ONLY);
+
 		return builder.build();
+	}
+
+	@PostConstruct
+	void configureOGMObjectMapper() {
+
+		var objectMapper = ObjectMapperFactory.objectMapper();
+
+		objectMapper.registerModule(new JavaTimeModule());
+		objectMapper.configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false);
 	}
 }

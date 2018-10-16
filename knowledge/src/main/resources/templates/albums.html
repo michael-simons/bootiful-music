@@ -13,7 +13,7 @@
         </div>
     </header>
     <div class="row">
-        <div class="col-6">
+        <div class="col-4">
             <form method="get" action="#" th:action="@{/albums/by-artist}">
                 <div class="form-group">
                     <label for="artist" th:text="#{album.artist}">Placeholder</label>
@@ -29,7 +29,22 @@
                 <button type="submit" class="btn btn-primary" th:text="#{common.search}">Submit</button>
             </form>
         </div>
-        <div class="col-6">
+        <div class="col-4">
+            <form method="get" action="#" th:action="@{/albums/by-year}">
+                <div class="form-group">
+                    <label for="name" th:text="#{album.releasedIn}">Placeholder</label>
+                    <input type="number" step="1" class="form-control" id="year" aria-describedby="artist.by-year.help"
+                           th:value="${year}"
+                           name="year">
+                    <small id="albums.by-year.help" class="form-text text-muted" th:text="#{albums.by-year.help}">
+                        Placeholder
+                    </small>
+                </div>
+
+                <button type="submit" class="btn btn-primary" th:text="#{common.search}">Submit</button>
+            </form>
+        </div>
+        <div class="col-4">
             <form method="get" action="#" th:action="@{/albums/by-name}">
                 <div class="form-group">
                     <label for="name" th:text="#{album.name}">Placeholder</label>

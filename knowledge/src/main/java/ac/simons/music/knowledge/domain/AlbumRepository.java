@@ -34,9 +34,11 @@ interface AlbumRepository extends Neo4jRepository<AlbumEntity, Long> {
 
 	List<AlbumEntity> findAllByNameMatchesRegex(String name, Sort sort, @Depth int depth);
 
+	List<AlbumEntity> findAllByReleasedInValue(long value, Sort sort, @Depth int depth);
+
 	@Query(value
 		= " MATCH (album:Album) - [c:CONTAINS] -> (track:Track) WHERE id(album) = $albumId"
-		+ " RETURN id(track) as id, track.name as name, c.discNumber as discNumber, c.trackNumber as trackNumber"
+		+ " RETURN id(track) AS id, track.name AS name, c.discNumber AS discNumber, c.trackNumber AS trackNumber"
 		+ " ORDER BY c.discNumber ASC, c.trackNumber ASC"
 	)
 	List<AlbumTrack> findAllAlbumTracks(@Param("albumId") Long albumId);
@@ -49,4 +51,16 @@ interface AlbumRepository extends Neo4jRepository<AlbumEntity, Long> {
 		+ " RETURN p"
 	)
 	List<AlbumEntity> findAllByTrack(@Param("trackId") Long trackId);
+
+	@Query(value
+		= " MATCH (year:Year)"
+		+ " WITH year, size( (year) <- [:RELEASED_IN] - (:Album)) AS releasesByYear"
+		+ " MATCH (year) - [:PART_OF] -> (decade:Decade)"
+		+ " RETURN decade.value AS decade, year.value AS year, releasesByYear AS numberOfReleases"
+	)
+	List<ReleasesByYear> getNumberOfReleasesByYear();
+
+	// Careful with an implicity group by here i.e
+	// + " RETURN decade.value as decade, year.value as year, sum(releasesByYear)"
+	// or similar
 }

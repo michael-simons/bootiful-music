@@ -1,7 +1,12 @@
 <!DOCTYPE html>
-<html xmlns="http://www.w3.org/1999/xhtml" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
-      layout:decorate="~{layout}">
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org"
+      xmlns:xlink="http://www.w3.org/1999/xlink"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorate="~{layout}">
 <head>
+    <!-- See https://www.thymeleaf.org/doc/tutorials/3.0/usingthymeleaf.html#javascript-inlining -->
+    <script th:inline="javascript">
+        var numberOfReleasesByYear = /*[[${numberOfReleasesByYear}]]*/ {};
+    </script>
 </head>
 <body>
 <div layout:fragment="content" class="container" data-controller="index">
@@ -10,6 +15,11 @@
             <h1>A music knowledge base</h1>
         </div>
     </header>
+    <div class="row">
+        <div class="col">
+            <div id="container" style="max-width:100%; height:768px;"></div>
+        </div>
+    </div>
 </div>
 </body>
 </html>

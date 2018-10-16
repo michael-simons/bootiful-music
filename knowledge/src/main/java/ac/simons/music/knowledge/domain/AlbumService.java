@@ -17,6 +17,7 @@ package ac.simons.music.knowledge.domain;
 
 import lombok.RequiredArgsConstructor;
 
+import java.time.Year;
 import java.util.List;
 import java.util.Optional;
 import java.util.regex.Pattern;
@@ -40,6 +41,10 @@ public class AlbumService {
 		return this.albumRepository.findAllByNameMatchesRegex(createRegex(name), Sort.by("name").ascending(), 1);
 	}
 
+	public List<AlbumEntity> findAllAlbumsByYear(Year year) {
+		return this.albumRepository.findAllByReleasedInValue(year.getValue(), Sort.by("name").ascending(), 1);
+	}
+
 	public Optional<AlbumEntity> findAlbumById(Long id) {
 		return this.albumRepository.findById(id, 1);
 	}
@@ -50,6 +55,10 @@ public class AlbumService {
 
 	public List<AlbumEntity> findAllAlbumsContaining(TrackEntity track) {
 		return this.albumRepository.findAllByTrack(track.getId());
+	}
+
+	public List<ReleasesByYear> getNumberOfReleasesByYear() {
+		return albumRepository.getNumberOfReleasesByYear();
 	}
 
 	private static String createRegex(String value) {

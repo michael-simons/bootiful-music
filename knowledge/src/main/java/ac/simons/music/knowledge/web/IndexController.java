@@ -15,6 +15,11 @@
  */
 package ac.simons.music.knowledge.web;
 
+import ac.simons.music.knowledge.domain.AlbumService;
+import lombok.RequiredArgsConstructor;
+
+import java.util.Map;
+
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -24,10 +29,14 @@ import org.springframework.web.servlet.ModelAndView;
  * @author Michael J. Simons
  */
 @Controller
+@RequiredArgsConstructor
 public class IndexController {
+
+	private final AlbumService albumService;
 
 	@GetMapping(value = "/", produces = MediaType.TEXT_HTML_VALUE)
 	public ModelAndView index() {
-		return new ModelAndView("index");
+		return new ModelAndView("index",
+			Map.of("numberOfReleasesByYear", this.albumService.getNumberOfReleasesByYear()));
 	}
 }
