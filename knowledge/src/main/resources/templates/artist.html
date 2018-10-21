@@ -49,6 +49,11 @@
                         </option>
                     </select>
                 </div>
+                <div class="form-group">
+                    <label for="artist.wikidata-entity-id" th:text="#{artist.wikidata-entity-id}">Placeholder</label>
+                    <input class="form-control" id="artist.wikidata-entity-id"
+                           th:field="*{wikidataEntityId}">
+                </div>
                 <button type="submit" class="btn btn-primary" th:text="#{common.save}">Submit</button>
             </form>
         </div>
@@ -138,6 +143,15 @@
                 </div>
                 <button type="submit" class="btn btn-primary" th:text="#{common.save}">Submit</button>
             </form>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-6">
+            <h2 th:text="#{common.wikipedia}">Placeholder</h2>
+            <ul th:each="wikipediaArticle : ${wikipediaArticles}">
+                <li><a th:href="@{${wikipediaArticle.url}}" th:text="${wikipediaArticle.title} + ' (' + ${wikipediaArticle.site} + ')'">Placeholder</a></li>
+            </ul>
         </div>
     </div>
 </div>

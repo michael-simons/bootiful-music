@@ -16,6 +16,7 @@
 package ac.simons.music.knowledge.domain;
 
 import ac.simons.music.knowledge.support.AbstractAuditableBaseEntity;
+import ac.simons.music.knowledge.support.WikidataClient;
 import lombok.RequiredArgsConstructor;
 
 import java.time.Year;
@@ -23,12 +24,14 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import org.neo4j.ogm.session.Session;
 import org.springframework.data.domain.Sort;
 import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionTemplate;
 
 /**
  * @author Michael J. Simons
@@ -44,6 +47,10 @@ public class ArtistService {
 	private final SoloArtistRepository soloArtists;
 
 	private final CountryRepository countryRepository;
+
+	private final WikidataClient wikidataClient;
+
+	private final TransactionTemplate transactionTemplate;
 
 	public Optional<ArtistEntity> findArtistById(Long id) {
 
@@ -122,25 +129,32 @@ public class ArtistService {
 	}
 
 	@Transactional
-	public <T extends ArtistEntity> T createNewArtist(final String name, final String countryOfOrigin, final Year activeSince, final Class<T> type) {
+	public <T extends ArtistEntity> T createNewArtist(final String name, final String countryOfOrigin,
+		final Year activeSince, String wikipediaEntityId, final Class<T> type) {
 
 		ArtistEntity rv;
 		final CountryEntity country = this.determineCountry(countryOfOrigin);
 		if (type == BandEntity.class) {
-			var band = new BandEntity(name, country);
+			var band = new BandEntity(name, wikipediaEntityId, country);
 			band.setActiveSince(this.determineYear(activeSince).orElse(null));
 			rv = this.bands.save(band);
 		} else if (type == SoloArtistEntity.class) {
-			rv = this.soloArtists.save(new SoloArtistEntity(name, country));
+			rv = this.soloArtists.save(new SoloArtistEntity(name, wikipediaEntityId, country));
 		} else {
-			rv = new ArtistEntity(name);
+			rv = new ArtistEntity(name, wikipediaEntityId);
 			this.session.save(rv);
 		}
+
+		this.wikidataClient
+			.retrieveWikipediaLinks(wikipediaEntityId)
+			.thenAccept(result -> updateWikipediaLinksFor(rv.getId(), result));
+
 		return type.cast(rv);
 	}
 
 	@Transactional
-	public <T extends ArtistEntity> T updateArtist(final ArtistEntity artist, final String countryOfOrigin, final Year activeSince, final Class<T> type) {
+	public <T extends ArtistEntity> T updateArtist(final ArtistEntity artist, final String countryOfOrigin,
+		final Year activeSince, String wikipediaEntityId, final Class<T> type) {
 
 		ArtistEntity rv;
 		final CountryEntity country = this.determineCountry(countryOfOrigin);
@@ -156,12 +170,38 @@ public class ArtistService {
 		} else {
 			rv = this.removeQualification(artist);
 		}
+
+		if(rv.getWikidataEntityId() == null || !rv.getWikidataEntityId().equals(wikipediaEntityId)) {
+			rv.setWikidataEntityId(wikipediaEntityId);
+			this.session.save(rv);
+			this.wikidataClient
+				.retrieveWikipediaLinks(wikipediaEntityId)
+				.thenAccept(result -> updateWikipediaLinksFor(rv.getId(), result));
+		}
+
 		return type.cast(rv);
 	}
 
 	@Transactional
-	public BandEntity addMember(final BandEntity band, final SoloArtistEntity newMember, final Year joinedIn, @Nullable final Year leftIn) {
+	public BandEntity addMember(final BandEntity band, final SoloArtistEntity newMember, final Year joinedIn,
+		@Nullable final Year leftIn) {
 		return this.bands.save(band.addMember(newMember, joinedIn, leftIn));
+	}
+
+	private ArtistEntity updateWikipediaLinksFor(long artistId, WikidataClient.LinkResult linkResult) {
+		return this.transactionTemplate.execute(t -> {
+			ArtistEntity artist = this.findArtistById(artistId).get();
+			var newLinks = linkResult.getLinks().stream()
+				.map(values -> new WikipediaArticleEntity(values.get("site"), values.get("title"),
+					values.get("url")))
+				.collect(Collectors.toList());
+
+			var oldLinks = artist.updateWikipediaLinks(newLinks);
+			session.save(artist);
+			oldLinks.forEach(session::delete);
+
+			return artist;
+		});
 	}
 
 	private BandEntity markAsBand(ArtistEntity artist) {

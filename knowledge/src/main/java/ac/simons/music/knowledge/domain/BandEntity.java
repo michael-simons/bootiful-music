@@ -37,6 +37,7 @@ import org.neo4j.ogm.annotation.RelationshipEntity;
 import org.neo4j.ogm.annotation.StartNode;
 import org.neo4j.ogm.annotation.typeconversion.Convert;
 import org.springframework.data.annotation.PersistenceConstructor;
+import org.springframework.lang.Nullable;
 
 /**
  * @author Michael J. Simons
@@ -57,13 +58,13 @@ public class BandEntity extends ArtistEntity {
 	@Relationship("HAS_MEMBER")
 	private List<Member> member = new ArrayList<>();
 
-	public BandEntity(String name) {
-		this(name, null);
+	public BandEntity(String name, @Nullable String wikidataEntityId) {
+		this(name, wikidataEntityId, null);
 	}
 
 	@PersistenceConstructor
-	public BandEntity(String name, CountryEntity foundedIn) {
-		super(name);
+	public BandEntity(String name, @Nullable String wikidataEntityId, @Nullable CountryEntity foundedIn) {
+		super(name, wikidataEntityId);
 		this.foundedIn = foundedIn;
 	}
 

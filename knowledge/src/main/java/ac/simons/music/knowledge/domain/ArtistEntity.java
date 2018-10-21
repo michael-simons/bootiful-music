@@ -18,9 +18,16 @@ package ac.simons.music.knowledge.domain;
 import ac.simons.music.knowledge.support.AbstractAuditableBaseEntity;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
+import lombok.Setter;
+
+import java.util.Collection;
+import java.util.Set;
+import java.util.TreeSet;
 
 import org.neo4j.ogm.annotation.Index;
 import org.neo4j.ogm.annotation.NodeEntity;
+import org.neo4j.ogm.annotation.Relationship;
+import org.springframework.lang.Nullable;
 
 /**
  * @author Michael J. Simons
@@ -33,7 +40,21 @@ public class ArtistEntity extends AbstractAuditableBaseEntity {
 	@Index(unique = true)
 	private String name;
 
-	public ArtistEntity(String name) {
+	@Index(unique = true)
+	@Setter
+	private String wikidataEntityId;
+
+	@Relationship("HAS_LINK_TO")
+	private Set<WikipediaArticleEntity> wikipediaArticles = new TreeSet<>();
+
+	public ArtistEntity(String name, @Nullable String wikidataEntityId) {
 		this.name = name;
+		this.wikidataEntityId = wikidataEntityId;
+	}
+
+	Collection<WikipediaArticleEntity> updateWikipediaLinks(Collection<WikipediaArticleEntity> newLinks) {
+		var oldLinks = this.wikipediaArticles;
+		this.wikipediaArticles = new TreeSet<>(newLinks);
+		return oldLinks;
 	}
 }

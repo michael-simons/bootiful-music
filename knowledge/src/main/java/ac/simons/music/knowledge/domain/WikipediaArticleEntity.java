@@ -15,32 +15,35 @@
  */
 package ac.simons.music.knowledge.domain;
 
-import org.neo4j.ogm.annotation.NodeEntity;
-import org.neo4j.ogm.annotation.Relationship;
-import org.springframework.data.annotation.PersistenceConstructor;
-import org.springframework.lang.Nullable;
-
+import ac.simons.music.knowledge.support.AbstractAuditableBaseEntity;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.ToString;
+
+import org.neo4j.ogm.annotation.NodeEntity;
 
 /**
  * @author Michael J. Simons
  */
-@NodeEntity("SoloArtist")
+@NodeEntity("WikipediaArticle")
 @Getter
-public class SoloArtistEntity extends ArtistEntity {
+@Setter
+@ToString
+public class WikipediaArticleEntity extends AbstractAuditableBaseEntity implements Comparable<WikipediaArticleEntity> {
+	private String site;
 
-	@Relationship("BORN_IN")
-	@Setter
-	private CountryEntity bornIn;
+	private String title;
 
-	public SoloArtistEntity(String name, @Nullable String wikidataEntityId) {
-		this(name, wikidataEntityId, null);
+	private String url;
+
+	public WikipediaArticleEntity(String site, String title, String url) {
+		this.site = site;
+		this.title = title;
+		this.url = url;
 	}
 
-	@PersistenceConstructor
-	public SoloArtistEntity(String name, @Nullable String wikidataEntityId, @Nullable CountryEntity bornIn) {
-		super(name, wikidataEntityId);
-		this.bornIn = bornIn;
+	@Override
+	public int compareTo(WikipediaArticleEntity o) {
+		return this.site.compareTo(o.site);
 	}
 }

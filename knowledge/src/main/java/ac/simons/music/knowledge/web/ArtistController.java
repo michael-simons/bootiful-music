@@ -46,9 +46,10 @@ import ac.simons.music.knowledge.domain.BandEntity;
 import ac.simons.music.knowledge.domain.BandEntity.Member;
 import ac.simons.music.knowledge.domain.CountryEntity;
 import ac.simons.music.knowledge.domain.SoloArtistEntity;
+import ac.simons.music.knowledge.domain.WikipediaArticleEntity;
 import ac.simons.music.knowledge.domain.YearEntity;
+import ac.simons.music.knowledge.support.WikidataClient;
 import lombok.Data;
-import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
 /**
@@ -99,12 +100,17 @@ public class ArtistController {
 		var soloArtists = this.artistService.findAllSoloArtists();
 		var associatedArtists = this.artistService.findAssociatedArtists(artist);
 		var notAssociatedArtists = this.artistService.findArtistsNotAssociatedWith(artist);
+		var wikipediaArticles = artist.getWikipediaArticles().stream()
+			.filter(a -> List.of("dewiki", "enwiki").contains(a.getSite())).collect(toList());
+
 		var model = Map.of(
 				"artistForm", new ArtistCmd(artist),
 				"members", members,
 				"soloArtists", soloArtists,
 				"associatedArtists", associatedArtists,
-				"notAssociatedArtists", notAssociatedArtists
+				"notAssociatedArtists", notAssociatedArtists,
+				"wikipediaArticles",
+			wikipediaArticles
 		);
 		return new ModelAndView("artist", model);
 	}
@@ -121,10 +127,11 @@ public class ArtistController {
 
 		ArtistEntity artist;
 		if(optionalArtists.isPresent()) {
-			artist = this.artistService.updateArtist(optionalArtists.get(), artistCmd.getOrigin(), artistCmd.getActiveSince(), targetType);
+			artist = this.artistService.updateArtist(optionalArtists.get(), artistCmd.getOrigin(), artistCmd.getActiveSince(), artistCmd.getWikidataEntityId(), targetType);
 		} else {
-			artist = this.artistService.createNewArtist(artistCmd.getName(), artistCmd.getOrigin(), artistCmd.getActiveSince(), targetType);
+			artist = this.artistService.createNewArtist(artistCmd.getName(), artistCmd.getOrigin(), artistCmd.getActiveSince(), artistCmd.getWikidataEntityId(), targetType);
 		}
+
 		return String.format("redirect:/artists/%d", artist.getId());
 	}
 
@@ -214,6 +221,8 @@ public class ArtistController {
 
 		private Year activeSince;
 
+		private String wikidataEntityId;
+
 		public ArtistCmd() {
 		}
 
@@ -231,6 +240,7 @@ public class ArtistController {
 				activeSince = null;
 			}
 			this.origin = Optional.ofNullable(origin).map(CountryEntity::getCode).orElse(null);
+			this.wikidataEntityId = artist.getWikidataEntityId();
 		}
 
 		@Nullable
