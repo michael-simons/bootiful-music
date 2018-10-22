@@ -52,6 +52,7 @@ public class ArtistService {
 
 	private final TransactionTemplate transactionTemplate;
 
+	@Transactional(readOnly = true)
 	public Optional<ArtistEntity> findArtistById(Long id) {
 
 		return Optional.ofNullable(session.load(ArtistEntity.class, id))
@@ -153,6 +154,17 @@ public class ArtistService {
 	}
 
 	@Transactional
+	public void deleteArtist(Long id) {
+
+		this.findArtistById(id).ifPresent(a -> {
+			session.delete(a);
+			session.query("MATCH (a:Album) WHERE size((a)-[:RELEASED_BY]->(:Artist))=0 DETACH DELETE a", Map.of());
+			session.query("MATCH (t:Track) WHERE size((:Album)-[:CONTAINS]->(t))=0 DETACH DELETE t", Map.of());
+			session.query("MATCH (w:WikipediaArticle) WHERE size((:Artist)-[:HAS_LINK_TO]->(w))=0 DETACH DELETE w", Map.of());
+		});
+	}
+
+	@Transactional
 	public <T extends ArtistEntity> T updateArtist(final ArtistEntity artist, final String countryOfOrigin,
 		final Year activeSince, String wikipediaEntityId, final Class<T> type) {
 
@@ -171,7 +183,7 @@ public class ArtistService {
 			rv = this.removeQualification(artist);
 		}
 
-		if(rv.getWikidataEntityId() == null || !rv.getWikidataEntityId().equals(wikipediaEntityId)) {
+		if (rv.getWikidataEntityId() == null || !rv.getWikidataEntityId().equals(wikipediaEntityId)) {
 			rv.setWikidataEntityId(wikipediaEntityId);
 			this.session.save(rv);
 			this.wikidataClient
@@ -277,7 +289,8 @@ public class ArtistService {
 				+ " MERGE (year) - [:PART_OF] -> (decade)"
 				+ " RETURN year";
 
-			return session.queryForObject(YearEntity.class, cypher, Map.of("valueOfDecade", valueOfDecade, "valueOfYear", valueOfYear));
+			return session.queryForObject(YearEntity.class, cypher,
+				Map.of("valueOfDecade", valueOfDecade, "valueOfYear", valueOfYear));
 		});
 	}
 

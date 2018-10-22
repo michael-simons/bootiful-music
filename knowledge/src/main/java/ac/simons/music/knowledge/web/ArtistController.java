@@ -16,6 +16,7 @@
 package ac.simons.music.knowledge.web;
 
 import static java.util.stream.Collectors.toList;
+import static org.springframework.web.servlet.mvc.method.annotation.MvcUriComponentsBuilder.*;
 
 import java.time.Year;
 import java.util.Comparator;
@@ -33,12 +34,16 @@ import org.springframework.http.MediaType;
 import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.servlet.ModelAndView;
+import org.springframework.web.servlet.View;
+import org.springframework.web.servlet.mvc.method.annotation.MvcUriComponentsBuilder;
+import org.springframework.web.servlet.view.RedirectView;
 
 import ac.simons.music.knowledge.domain.ArtistEntity;
 import ac.simons.music.knowledge.domain.ArtistService;
@@ -159,6 +164,13 @@ public class ArtistController {
 			this.artistService.associate(artist, newAssociatedArtist);
 		}
 		return String.format("redirect:/artists/%d", artist.getId());
+	}
+
+	@DeleteMapping(value = "/{artistId}", produces = MediaType.TEXT_HTML_VALUE)
+	public View delete(@PathVariable final Long artistId) {
+
+		this.artistService.deleteArtist(artistId);
+		return new RedirectView(fromMethodCall(on(ArtistController.class).artists()).build().toUriString());
 	}
 
 	enum ArtistType {

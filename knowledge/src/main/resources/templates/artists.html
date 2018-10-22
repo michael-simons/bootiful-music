@@ -29,6 +29,7 @@
                         <th scope="col" th:text="#{artist.origin}">Placeholder</th>
                         <th scope="col"></th>
                         <th scope="col"></th>
+                        <th scope="col"></th>
                     </tr>
                     </thead>
                     <tbody>
@@ -41,8 +42,12 @@
                             </td>
                             <td th:case="*" th:text="${artist.getLocalizedOrigin(#locale)}">Placeholder</td>
                         </div>
-                        <td><a href="#" th:href="@{/albums/by-artist(artist=${artist.name})}" th:text="#{albums}">Placeholder</a>
+                        <td>
+                            <form method="post" th:method="delete" th:action="@{/artists/{artistId}(artistId=${artist.id})}">
+                                <button type="submit" class="text-danger btn-link p-0 border-0" th:text="#{artists.delete}">Placeholder</button>
+                            </form>
                         </td>
+                        <td><a href="#" th:href="@{/albums/by-artist(artist=${artist.name})}" th:text="#{albums}">Placeholder</a></td>
                         <td><a href="#" th:href="@{/artists/{artistId}(artistId=${artist.id})}"
                                th:text="#{artists.edit}">Placeholder</a></td>
                     </tr>

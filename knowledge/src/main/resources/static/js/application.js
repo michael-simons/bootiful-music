@@ -51,7 +51,9 @@ function displayNumberOfReleasesByYear() {
 }
 
 $(document).ready(function () {
-    displayNumberOfReleasesByYear();
+    if (window.numberOfReleasesByYear !== undefined) {
+        displayNumberOfReleasesByYear();
 
-    window.addEventListener("resize", displayNumberOfReleasesByYear);
+        window.addEventListener("resize", displayNumberOfReleasesByYear);
+    }
 });
