@@ -36,10 +36,6 @@ public class ArtistEntity {
 	@GeneratedValue
 	private Long id;
 
-	public Long getId() {
-		return this.id;
-	}
-
 	@Index(unique = true)
 	private String name;
 
@@ -67,6 +63,10 @@ public class ArtistEntity {
 		Set<WikipediaArticleEntity> oldLinks = this.wikipediaArticles;
 		this.wikipediaArticles = new TreeSet<>(newLinks);
 		return oldLinks;
+	}
+	
+	public Long getId() {
+		return this.id;
 	}
 
 	public String getName() {

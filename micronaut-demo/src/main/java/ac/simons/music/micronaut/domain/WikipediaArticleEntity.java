@@ -49,6 +49,10 @@ public class WikipediaArticleEntity implements Comparable<WikipediaArticleEntity
 		return this.site.compareTo(o.site);
 	}
 
+	public Long getId() {
+		return this.id;
+	}
+
 	public String getSite() {
 		return this.site;
 	}
