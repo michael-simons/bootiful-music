@@ -1,0 +1,5 @@
+profile: service
+defaultPackage: ac.simons.music.micronaut
+---
+testFramework: junit
+sourceLanguage: java

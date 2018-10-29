@@ -1,0 +1,7 @@
+micronaut:
+    application:
+        name: neo4j
+neo4j:
+    uri: bolt://localhost
+    username: neo4j
+    password: music
