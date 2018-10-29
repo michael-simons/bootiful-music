@@ -43,13 +43,42 @@ interface TrackRepository extends Neo4jRepository<TrackEntity, Long> {
 		+ " WHERE monthsPlayedTogether >= $monthsPlayedTogether"
 		+ " WITH monthsPlayedTogether, otherTrack ORDER BY monthsPlayedTogether DESC LIMIT $limit"
 		+ " MATCH (otherTrack) <- [:CONTAINS] -()- [:RELEASED_BY] -> (artist:Artist)"
-		+ " RETURN DISTINCT monthsPlayedTogether, otherTrack AS track, artist "
+		+ " RETURN DISTINCT otherTrack AS track, artist "
 		+ " ORDER BY artist.name, track.name"
 	)
-	List<TrackAndArtist> findAllByPlayedTogetherInSameMonth(
-		@Param("trackId") Long trackId,
-		@Param("monthsPlayedTogether") long monthsPlayedTogether,
-		@Param("limit") long limit
+	List<TrackAndArtist> findAllPlayedTogetherInSameMonth(
+		Long trackId,
+		long monthsPlayedTogether,
+		long limit
+	);
+
+	/**
+	 * Returns a list of tracks that have been played together with the source track at least in
+	 * {@code monthsPlayedTogether} months where the source track has played at least twice.
+	 * <br>
+	 * This query doesn't return tracks from the same album as the reference track.
+	 *
+	 * @param trackId
+	 * @param monthsPlayedTogether
+	 * @param limit
+	 * @return
+	 */
+	@Query(value
+		= " MATCH (sourceTrack:Track) - [playcountSource:HAS_BEEN_PLAYED_IN] -> (:Month) <-[playcountOtherTrack:HAS_BEEN_PLAYED_IN] - (otherTrack:Track)"
+		+ " WHERE id(sourceTrack) = $trackId"
+		+ "   AND playcountSource.value >= 2"
+		+ "   AND NOT EXISTS ((sourceTrack)<-[:CONTAINS]-()-[:CONTAINS]->(otherTrack)) "
+		+ " WITH sourceTrack, otherTrack, count(playcountOtherTrack) AS monthsPlayedTogether"
+		+ " WHERE monthsPlayedTogether >= $monthsPlayedTogether"
+		+ " WITH monthsPlayedTogether, otherTrack ORDER BY monthsPlayedTogether DESC LIMIT $limit"
+		+ " MATCH (otherTrack) <- [:CONTAINS] -()- [:RELEASED_BY] -> (artist:Artist)"
+		+ " RETURN DISTINCT otherTrack AS track, artist "
+		+ " ORDER BY artist.name, track.name"
+	)
+	List<TrackAndArtist> findAllPlayedTogetherInSameMonthOnDifferentAlbums(
+		Long trackId,
+		long monthsPlayedTogether,
+		long limit
 	);
 
 }

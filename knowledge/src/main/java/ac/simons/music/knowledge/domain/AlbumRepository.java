@@ -41,16 +41,16 @@ interface AlbumRepository extends Neo4jRepository<AlbumEntity, Long> {
 		+ " RETURN id(track) AS id, track.name AS name, c.discNumber AS discNumber, c.trackNumber AS trackNumber"
 		+ " ORDER BY c.discNumber ASC, c.trackNumber ASC"
 	)
-	List<AlbumTrack> findAllAlbumTracks(@Param("albumId") Long albumId);
+	List<AlbumTrack> findAllAlbumTracks(Long albumId);
 
 	@Query(value
-		= " MATCH (track:Track) <- [:CONTAINS] - (album:Album)"
+		= " MATCH (album:Album) - [:CONTAINS] -> (track:Track)"
 		+ " MATCH p=(album) - [*1] - ()"
 		+ " WHERE id(track) = $trackId"
 		+ "   AND ALL(relationship IN relationships(p) WHERE type(relationship) <> 'CONTAINS')"
 		+ " RETURN p"
 	)
-	List<AlbumEntity> findAllByTrack(@Param("trackId") Long trackId);
+	List<AlbumEntity> findAllByTrack(Long trackId);
 
 	@Query(value
 		= " MATCH (year:Year)"

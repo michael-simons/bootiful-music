@@ -42,6 +42,6 @@ public class TrackService {
 
 	@Transactional
 	public List<TrackAndArtist> findTracksOftenPlayedTogetherWith(TrackEntity trackEntity) {
-		return this.trackRepository.findAllByPlayedTogetherInSameMonth(trackEntity.getId(), 6, 15);
+		return this.trackRepository.findAllPlayedTogetherInSameMonthOnDifferentAlbums(trackEntity.getId(), 6, 15);
 	}
 }

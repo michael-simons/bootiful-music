@@ -32,7 +32,7 @@
 		<neo4j.version>3.4.9</neo4j.version>
 		<neo4j-ogm.version>3.1.4</neo4j-ogm.version>
 		<neo4j-java-driver.version>1.6.3</neo4j-java-driver.version>
-		<spring-data-releasetrain.version>Lovelace-SR1</spring-data-releasetrain.version>
+		<spring-data-releasetrain.version>Lovelace-SR2</spring-data-releasetrain.version>
 		<webjars-locator.version>0.34</webjars-locator.version>
 	</properties>
 
