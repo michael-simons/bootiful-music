@@ -61,6 +61,10 @@ public class AlbumService {
 		return albumRepository.getNumberOfReleasesByYear();
 	}
 
+	public List<AlbumEntity> findAllAlbumsWithGenre(GenreEntity genre) {
+		return albumRepository.findAllByGenreNameOrderByName(genre.getName(), 1);
+	}
+
 	private static String createRegex(String value) {
 		return String.format("(?i).*%s.*", Pattern.quote(value));
 	}

@@ -28,6 +28,13 @@
             </form>
         </div>
     </div>
+
+    <div class="row">
+        <div class="col">
+            <h2 th:text="#{albums.with-genre}">Placeholder</h2>
+            <div th:replace="albums :: listOfAlbums(${albums})"></div>
+        </div>
+    </div>
 </div>
 </body>
 </html>

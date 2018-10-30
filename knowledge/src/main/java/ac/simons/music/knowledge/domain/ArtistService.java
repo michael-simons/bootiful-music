@@ -42,9 +42,9 @@ public class ArtistService {
 
 	private final Session session;
 
-	private final BandRepository bands;
+	private final BandRepository bandRepository;
 
-	private final SoloArtistRepository soloArtists;
+	private final SoloArtistRepository soloArtistRepository;
 
 	private final CountryRepository countryRepository;
 
@@ -61,12 +61,12 @@ public class ArtistService {
 
 	@Transactional(readOnly = true)
 	public Optional<BandEntity> findBandById(Long id) {
-		return bands.findById(id, 2);
+		return bandRepository.findById(id, 2);
 	}
 
 	@Transactional(readOnly = true)
 	public Optional<SoloArtistEntity> findSoloArtistById(Long id) {
-		return soloArtists.findById(id);
+		return soloArtistRepository.findById(id);
 	}
 
 	@Transactional(readOnly = true)
@@ -82,12 +82,12 @@ public class ArtistService {
 
 	@Transactional(readOnly = true)
 	public List<SoloArtistEntity> findAllSoloArtists() {
-		return this.soloArtists.findAll(Sort.by("name").ascending());
+		return this.soloArtistRepository.findAll(Sort.by("name").ascending());
 	}
 
 	@Transactional(readOnly = true)
 	public List<BandEntity> findAllBands() {
-		return this.bands.findAll(Sort.by("name").ascending());
+		return this.bandRepository.findAll(Sort.by("name").ascending());
 	}
 
 	@Transactional
@@ -138,9 +138,9 @@ public class ArtistService {
 		if (type == BandEntity.class) {
 			var band = new BandEntity(name, wikipediaEntityId, country);
 			band.setActiveSince(this.determineYear(activeSince).orElse(null));
-			rv = this.bands.save(band);
+			rv = this.bandRepository.save(band);
 		} else if (type == SoloArtistEntity.class) {
-			rv = this.soloArtists.save(new SoloArtistEntity(name, wikipediaEntityId, country));
+			rv = this.soloArtistRepository.save(new SoloArtistEntity(name, wikipediaEntityId, country));
 		} else {
 			rv = new ArtistEntity(name, wikipediaEntityId);
 			this.session.save(rv);
@@ -174,11 +174,11 @@ public class ArtistService {
 			var band = this.markAsBand(artist);
 			band.setFoundedIn(country);
 			band.setActiveSince(this.determineYear(activeSince).orElse(null));
-			rv = this.bands.save(band);
+			rv = this.bandRepository.save(band);
 		} else if (type == SoloArtistEntity.class) {
 			var soloArtist = this.markAsSoloArtist(artist);
 			soloArtist.setBornIn(country);
-			rv = this.soloArtists.save(soloArtist);
+			rv = this.soloArtistRepository.save(soloArtist);
 		} else {
 			rv = this.removeQualification(artist);
 		}
@@ -197,7 +197,7 @@ public class ArtistService {
 	@Transactional
 	public BandEntity addMember(final BandEntity band, final SoloArtistEntity newMember, final Year joinedIn,
 		@Nullable final Year leftIn) {
-		return this.bands.save(band.addMember(newMember, joinedIn, leftIn));
+		return this.bandRepository.save(band.addMember(newMember, joinedIn, leftIn));
 	}
 
 	private ArtistEntity updateWikipediaLinksFor(long artistId, WikidataClient.LinkResult linkResult) {

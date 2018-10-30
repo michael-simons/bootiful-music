@@ -25,6 +25,7 @@ import lombok.Setter;
 
 import java.time.Year;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -80,9 +81,7 @@ public class BandEntity extends ArtistEntity {
 
 	public List<Member> getMember() {
 
-		return this.member.stream().
-			sorted(comparing(Member::getJoinedIn).thenComparing(Member::getLeftIn, nullsLast(naturalOrder())))
-			.collect(toList());
+		return Collections.unmodifiableList(this.member);
 	}
 
 	public List<SoloArtistEntity> getActiveMember() {

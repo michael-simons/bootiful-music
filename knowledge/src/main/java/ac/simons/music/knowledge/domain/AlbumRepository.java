@@ -60,6 +60,8 @@ interface AlbumRepository extends Neo4jRepository<AlbumEntity, Long> {
 	)
 	List<ReleasesByYear> getNumberOfReleasesByYear();
 
+	List<AlbumEntity> findAllByGenreNameOrderByName(String name, @Depth int depth);
+
 	// Careful with an implicity group by here i.e
 	// + " RETURN decade.value as decade, year.value as year, sum(releasesByYear)"
 	// or similar

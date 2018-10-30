@@ -15,6 +15,9 @@
  */
 package ac.simons.music.knowledge.web;
 
+import static ac.simons.music.knowledge.web.AlbumController.mapAlbumEntities;
+
+import ac.simons.music.knowledge.domain.AlbumService;
 import ac.simons.music.knowledge.domain.GenreEntity;
 import ac.simons.music.knowledge.domain.GenreRepository;
 import lombok.Data;
@@ -44,7 +47,10 @@ import org.springframework.web.servlet.ModelAndView;
 @RequestMapping("/genres")
 @RequiredArgsConstructor
 public class GenreController {
+
 	private final GenreRepository genreRepository;
+
+	private final AlbumService albumService;
 
 	@GetMapping(value = { "", "/" }, produces = MediaType.TEXT_HTML_VALUE)
 	public ModelAndView genres() {
@@ -66,7 +72,8 @@ public class GenreController {
 
 		var model = Map.of(
 			"genreCmd", new GenreCmd(genre),
-			"genre", genre
+			"genre", genre,
+			"albums", mapAlbumEntities(albumService.findAllAlbumsWithGenre(genre))
 		);
 		return new ModelAndView("genre", model);
 	}
