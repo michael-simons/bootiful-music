@@ -74,7 +74,7 @@ public class ArtistController {
 
 	@GetMapping(value = "/new", produces = MediaType.TEXT_HTML_VALUE)
 	public ModelAndView artist() {
-		return new ModelAndView("artist", Map.of("artistForm", new ArtistCmd()));
+		return new ModelAndView("artist", Map.of("artistCmd", new ArtistCmd()));
 	}
 
 	@GetMapping(value = {"", "/"}, produces = MediaType.TEXT_HTML_VALUE)
@@ -109,7 +109,7 @@ public class ArtistController {
 			.filter(a -> List.of("dewiki", "enwiki").contains(a.getSite())).collect(toList());
 
 		var model = Map.of(
-				"artistForm", new ArtistCmd(artist),
+				"artistCmd", new ArtistCmd(artist),
 				"members", members,
 				"soloArtists", soloArtists,
 				"associatedArtists", associatedArtists,

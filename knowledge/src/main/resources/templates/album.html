@@ -3,14 +3,14 @@
       xmlns:th="http://www.thymeleaf.org"
       layout:decorate="~{layout}">
 <head>
-    <title th:text="${albumForm.name}">Placeholder</title>
+    <title th:text="${albumCmd.name}">Placeholder</title>
 </head>
 <body>
 <div layout:fragment="content" class="container">
     <header class="row intro">
         <div class="col">
             <h1>
-                <a href="#" th:text="${albumForm.artist}" th:href="@{/artists/{artistId}(artistId=${albumForm.artistId})}">Placeholder</a> - <span th:text="${albumForm.name} ">Placeholder</span> (<span th:text="${albumForm.releasedIn}">Placeholder</span>)
+                <a href="#" th:text="${albumCmd.artist}" th:href="@{/artists/{artistId}(artistId=${albumCmd.artistId})}">Placeholder</a> - <span th:text="${albumCmd.name} ">Placeholder</span> (<span th:text="${albumCmd.releasedIn}">Placeholder</span>)
             </h1>
         </div>
     </header>

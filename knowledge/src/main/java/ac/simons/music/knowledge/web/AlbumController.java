@@ -19,8 +19,6 @@ import static java.util.stream.Collectors.*;
 
 import ac.simons.music.knowledge.domain.AlbumEntity;
 import ac.simons.music.knowledge.domain.AlbumService;
-import ac.simons.music.knowledge.domain.ArtistEntity;
-import ac.simons.music.knowledge.domain.BandEntity;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
 
@@ -84,7 +82,7 @@ public class AlbumController {
 			.orElseThrow(() -> new NodeNotFoundException(AlbumEntity.class, albumId));
 
 		var model = Map.of(
-			"albumForm", new AlbumCmd(album),
+			"albumCmd", new AlbumCmd(album),
 			"tracks", this.albumService.findAllTracksContainedOn(album)
 		);
 		return new ModelAndView("album", model);

@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      xmlns:th="http://www.thymeleaf.org"
+      layout:decorate="~{layout}">
+<head>
+    <title th:text="#{genres}">Placeholder</title>
+</head>
+<body>
+<div layout:fragment="content" class="container">
+    <header class="row intro">
+        <div class="col">
+            <h1 th:text="#{genres}">Placeholder</h1>
+        </div>
+    </header>
+    <div class="row">
+        <div class="col">
+            <a class="btn btn-primary" href="#" role="button" th:href="@{/genres/new}"
+               th:text="#{genres.new}">Placeholder</a>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col">
+            <table class="table table-sm table-striped table-hover">
+                <thead class="thead-dark">
+                <tr>
+                    <th scope="col" th:text="#{genre.name}">Placeholder</th>
+                    <th scope="col"></th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="genre : ${genres}">
+                    <th scope="row" th:text="${genre.name}">Placeholder</th>
+                    <td><a href="#" th:href="@{/genres/{genreId}(genreId=${genre.id})}"
+                           th:text="#{genres.edit}">Placeholder</a></td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+</body>
+</html>

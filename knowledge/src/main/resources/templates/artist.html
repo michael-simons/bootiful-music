@@ -14,16 +14,15 @@
     </header>
     <div class="row">
         <div class="col">
-            <form method="post" action="#" th:action="@{/artists}" th:object="${artistForm}">
+            <form method="post" action="#" th:action="@{/artists}" th:object="${artistCmd}">
                 <input type="hidden" th:field="*{id}"/>
                 <div class="form-group">
                     <label for="artist.name" th:text="#{artist.name}">Placeholder</label>
-                    <input type="text" class="form-control" id="artist.name" aria-describedby="artist.name.help"
+                    <input type="text" class="form-control" id="artist.name" aria-describedby="artist.name.help" th:classappend="${#fields.hasErrors('name')}? 'is-invalid' : ''"
                            th:field="*{name}"
                            th:placeholder="#{artist.name.placeholder}">
-                    <small id="artist.name.help" class="form-text text-muted" th:text="#{artist.name.help}">
-                        Placeholder
-                    </small>
+                    <div class="invalid-feedback" th:if="${#fields.hasErrors('name')}" th:errors="*{name}">Placeholder.</div>
+                    <small id="artist.name.help" class="form-text text-muted" th:text="#{artist.name.help}">Placeholder</small>
                 </div>
                 <div class="form-group">
                     <label for="artist.type" th:text="#{artist.type}">Placeholder</label>
@@ -34,7 +33,7 @@
                         </option>
                     </select>
                 </div>
-                <div class="form-group" th:if="${artistForm.type == T(ac.simons.music.knowledge.web.ArtistController.ArtistType).BAND}">
+                <div class="form-group" th:if="${artistCmd.type == T(ac.simons.music.knowledge.web.ArtistController.ArtistType).BAND}">
                     <label for="artist.active-since" th:text="#{band.active-since}">Placeholder</label>
                     <input type="number" step="1" class="form-control" id="artist.active-since"
                            th:field="*{activeSince}">
@@ -81,7 +80,7 @@
 
             <form th:if="${notAssociatedArtists != null}"
                   method="post" action="#"
-                  th:action="@{/artists/{artistId}/associateWith(artistId=${artistForm.id})}" th:object="${newMemberForm}">
+                  th:action="@{/artists/{artistId}/associateWith(artistId=${artistCmd.id})}" th:object="${newMemberForm}">
                 <div class="form-group">
                     <label for="new-associated-artist" th:text="#{artist.name}">Placeholder</label>
                     <select class="form-control" id="new-associated-artist" th:field="*{artistId}">
@@ -96,7 +95,7 @@
             </form>
         </div>
 
-        <div class="col-6" th:if="${artistForm.type == T(ac.simons.music.knowledge.web.ArtistController.ArtistType).BAND}">
+        <div class="col-6" th:if="${artistCmd.type == T(ac.simons.music.knowledge.web.ArtistController.ArtistType).BAND}">
             <h2 th:text="#{band.member}">Placeholder</h2>
             <table class="table table-sm table-striped table-hover">
                 <thead class="thead-dark">
@@ -121,7 +120,7 @@
 
             <form th:if="${soloArtists != null}"
                   method="post" action="#"
-                  th:action="@{/artists/{bandId}/member(bandId=${artistForm.id})}" th:object="${newMemberForm}">
+                  th:action="@{/artists/{bandId}/member(bandId=${artistCmd.id})}" th:object="${newMemberForm}">
                 <div class="form-group">
                     <label for="new-membership.artist" th:text="#{artist.name}">Placeholder</label>
                     <select class="form-control" id="new-membership.artist" th:field="*{artistId}">

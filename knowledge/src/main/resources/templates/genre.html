@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      xmlns:th="http://www.thymeleaf.org"
+      layout:decorate="~{layout}">
+<head>
+    <title th:text="#{genres.new}">Placeholder</title>
+</head>
+<body>
+<div layout:fragment="content" class="container">
+    <header class="row intro">
+        <div class="col">
+            <h1 th:text="#{genres.new}">Placeholder</h1>
+        </div>
+    </header>
+    <div class="row">
+        <div class="col">
+            <form method="post" action="#" th:action="@{/genres}" th:object="${genreCmd}">
+                <input type="hidden" th:field="*{id}"/>
+                <div class="form-group">
+                    <label for="genre.name" th:text="#{genre.name}">Placeholder</label>
+                    <input type="text" class="form-control" id="genre.name" aria-describedby="genre.name.help" th:classappend="${#fields.hasErrors('name')}? 'is-invalid' : ''"
+                           th:field="*{name}"
+                           th:placeholder="#{genre.name.placeholder}">
+                    <div class="invalid-feedback" th:if="${#fields.hasErrors('name')}" th:errors="*{name}">Placeholder.</div>
+                    <small id="genre.name.help" class="form-text text-muted" th:text="#{genre.name.help}">Placeholder</small>
+                </div>
+                <button type="submit" class="btn btn-primary" th:text="#{common.save}">Submit</button>
+            </form>
+        </div>
+    </div>
+</div>
+</body>
+</html>

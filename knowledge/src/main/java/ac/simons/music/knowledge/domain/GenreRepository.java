@@ -15,26 +15,10 @@
  */
 package ac.simons.music.knowledge.domain;
 
-import org.neo4j.ogm.annotation.Index;
-import org.neo4j.ogm.annotation.NodeEntity;
-
-import ac.simons.music.knowledge.support.AbstractAuditableBaseEntity;
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
-import lombok.Setter;
+import org.springframework.data.neo4j.repository.Neo4jRepository;
 
 /**
  * @author Michael J. Simons
  */
-@NodeEntity("Genre")
-@Getter
-@EqualsAndHashCode(of = "name", callSuper = false)
-public class GenreEntity extends AbstractAuditableBaseEntity {
-	@Index(unique = true)
-	@Setter
-	private String name;
-
-	public GenreEntity(String name) {
-		this.name = name;
-	}
+public interface GenreRepository extends Neo4jRepository<GenreEntity, Long> {
 }
