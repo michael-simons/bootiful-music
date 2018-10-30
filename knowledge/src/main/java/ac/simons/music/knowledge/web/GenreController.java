@@ -56,7 +56,12 @@ public class GenreController {
 	public ModelAndView genres() {
 
 		var genres = this.genreRepository.findAll(Sort.by("name").ascending());
-		return new ModelAndView("genres", Map.of("genres", genres));
+		var model = Map.of(
+			"genres", genres,
+			"subgenres", genreRepository.findAllSubgrenes()
+		);
+
+		return new ModelAndView("genres", model);
 	}
 
 	@GetMapping(value = "/new", produces = MediaType.TEXT_HTML_VALUE)
