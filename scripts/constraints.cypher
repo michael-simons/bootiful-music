@@ -4,5 +4,7 @@ CREATE CONSTRAINT ON (d:Decade) ASSERT d.value IS UNIQUE
 CREATE CONSTRAINT ON (c:Country) ASSERT c.code IS UNIQUE
 CREATE CONSTRAINT ON (g:Genre) ASSERT g.name IS UNIQUE
 
+CREATE INDEX ON :Album(name)
+
 // Enterprise Feature
 // CREATE CONSTRAINT ON ()-[playCount:HAS_BEEN_PLAYED_IN]-() ASSERT exists(playCount.value)
