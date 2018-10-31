@@ -15,6 +15,7 @@
  */
 package ac.simons.music.knowledge.web;
 
+import static ac.simons.music.knowledge.web.AlbumController.mapAlbumEntities;
 import static java.util.stream.Collectors.toList;
 import static org.springframework.web.servlet.mvc.method.annotation.MvcUriComponentsBuilder.*;
 
@@ -45,6 +46,7 @@ import org.springframework.web.servlet.View;
 import org.springframework.web.servlet.mvc.method.annotation.MvcUriComponentsBuilder;
 import org.springframework.web.servlet.view.RedirectView;
 
+import ac.simons.music.knowledge.domain.AlbumService;
 import ac.simons.music.knowledge.domain.ArtistEntity;
 import ac.simons.music.knowledge.domain.ArtistService;
 import ac.simons.music.knowledge.domain.BandEntity;
@@ -66,6 +68,8 @@ import lombok.RequiredArgsConstructor;
 public class ArtistController {
 
 	private final ArtistService artistService;
+
+	private final AlbumService albumService;
 
 	@ModelAttribute("countries")
 	public List<CountryValue> countries(final Locale locale) {
@@ -107,6 +111,7 @@ public class ArtistController {
 		var notAssociatedArtists = this.artistService.findArtistsNotAssociatedWith(artist);
 		var wikipediaArticles = artist.getWikipediaArticles().stream()
 			.filter(a -> List.of("dewiki", "enwiki").contains(a.getSite())).collect(toList());
+		var albums = mapAlbumEntities(this.albumService.findAllAlbumsByArtist(artist.getName()));
 
 		var model = Map.of(
 				"artistCmd", new ArtistCmd(artist),
@@ -114,8 +119,8 @@ public class ArtistController {
 				"soloArtists", soloArtists,
 				"associatedArtists", associatedArtists,
 				"notAssociatedArtists", notAssociatedArtists,
-				"wikipediaArticles",
-			wikipediaArticles
+				"wikipediaArticles", wikipediaArticles,
+				"albums", albums
 		);
 		return new ModelAndView("artist", model);
 	}

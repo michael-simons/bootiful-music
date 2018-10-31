@@ -146,7 +146,28 @@
     </div>
 
     <div class="row">
-        <div class="col-6">
+        <div class="col-6" th:if="${#lists.size(albums)} > 0">
+            <h2 th:text="#{albums}">Placeholder</h2>
+            <table class="table table-sm table-striped table-hover" >
+                <thead class="thead-dark">
+                <tr>
+                    <th scope="col" th:text="#{album.name}">Placeholder</th>
+                    <th scope="col" th:text="#{album.releasedIn}">Placeholder</th>
+                    <th scope="col"></th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="album : ${albums}">
+                    <th scope="row" th:text="${album.name}">Placeholder</th>
+                    <td th:text="${album.releasedIn}">Placeholder</td>
+                    <td><a href="#" th:href="@{/albums/{albumId}(albumId=${album.id})}" th:text="#{albums.edit}">Placeholder</a>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="col-4">
             <h2 th:text="#{common.wikipedia}">Placeholder</h2>
             <ul th:each="wikipediaArticle : ${wikipediaArticles}">
                 <li><a th:href="@{${wikipediaArticle.url}}" th:text="${wikipediaArticle.title} + ' (' + ${wikipediaArticle.site} + ')'">Placeholder</a></li>
