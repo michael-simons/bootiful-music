@@ -1,0 +1,170 @@
+<style type="text/css" media="screen">
+/*
+.nodes-image {
+	margin:-100;
+}
+*/	
+@import url("//maxcdn.bootstrapcdn.com/font-awesome/4.4.0/css/font-awesome.min.css");
+
+.imageblock .content img, .image img {max-width: 900px;max-height: 300px;}
+.deck h3, .deck h4 {display: block !important;margin-bottom:8px;margin-top:5px;}
+.listingblock {margin:8px;}
+.pull-bottom {position:relative;bottom:1em;}
+.admonitionblock td.icon [class^="fa icon-"]{font-size:2.5em;text-shadow:1px 1px 2px rgba(0,0,0,.5);cursor:default}
+.admonitionblock td.icon .icon-note:before{content:"\f05a";color:#19407c}
+.admonitionblock td.icon .icon-tip:before{content:"\f0eb";text-shadow:1px 1px 2px rgba(155,155,0,.8);color:#111}
+.admonitionblock td.icon .icon-warning:before{content:"\f071";color:#bf6900}
+.admonitionblock td.icon .icon-caution:before{content:"\f06d";color:#bf3400}
+.admonitionblock td.icon .icon-important:before{content:"\f06a";color:#bf0000}
+.admonitionblock.note.speaker { display:none; }
+</style>
+<style type="text/css" media="screen">
+/* #editor.maximize-editor .CodeMirror-code { font-size:24px; line-height:26px; } */
+</style>
+<article class="guide" ng-controller="AdLibDataController">
+  <carousel class="deck container-fluid">
+    <!--slide class="row-fluid">
+      <div class="col-sm-3">
+        <h3>Getting data into Neo4j</h3>
+        <p class="lead">Information</p>
+			<!dl>
+				
+				
+				
+				
+				
+			</dl>
+		</div>
+      <div class="col-sm-9">
+        <figure>
+          <img style="width:300px" src=""/>
+        </figure>
+      </div>
+    </slide-->
+    
+
+
+   <h4>Getting data into Neo4j</h4>
+   
+
+
+<slide class="row-fluid">
+  <div class="col-sm-12">
+    <h3>With LOAD CSV</h3>
+    <br/>
+    <div>
+      <div class="paragraph">
+<p><code>LOAD CSV</code> is a build-in Cypher command</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre mode="cypher"  class="highlight pre-scrollable programlisting cm-s-neo code runnable standalone-example ng-binding" data-lang="cypher" lang="cypher"><!--code class="cypher language-cypher"-->LOAD CSV WITH HEADERS FROM 'http://localhost:8001/data/artists.csv' as line FIELDTERMINATOR ';'
+MERGE (a:Artist {name: line.Name})
+MERGE (c:Country {code: line.`Founded in`})
+MERGE (a) - [:FOUNDED_IN] -> (c)
+RETURN *<!--/code--></pre>
+</div>
+</div>
+	</div>
+  </div>
+</slide>
+
+
+
+<slide class="row-fluid">
+  <div class="col-sm-12">
+    <h3>With APOC: The simple version</h3>
+    <br/>
+    <div>
+      <div class="listingblock">
+<div class="content">
+<pre mode="cypher"  class="highlight pre-scrollable programlisting cm-s-neo code runnable standalone-example ng-binding" data-lang="cypher" lang="cypher"><!--code class="cypher language-cypher"-->WITH "jdbc:postgresql://localhost:5432/bootiful-music?currentSchema=dev&user=statsdb-dev&password=dev" as url
+CALL apoc.load.jdbc(url,"artists") YIELD row
+MERGE (artist:Artist {name: row.name})
+   ON CREATE SET artist.createdAt = localdatetime()
+   ON MATCH SET artist.updatedAt = localdatetime()
+RETURN artist<!--/code--></pre>
+</div>
+</div>
+	</div>
+  </div>
+</slide>
+
+
+
+<slide class="row-fluid">
+  <div class="col-sm-12">
+    <h3>With APOC: Joining SQL and Cypher</h3>
+    <br/>
+    <div>
+      <div class="paragraph">
+<p>Who said there is no place for more than one declarative query language?</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre mode="cypher"  class="highlight pre-scrollable programlisting cm-s-neo code runnable standalone-example ng-binding" data-lang="cypher" lang="cypher"><!--code class="cypher language-cypher"-->WITH "jdbc:postgresql://localhost:5432/bootiful-music?currentSchema=dev&user=statsdb-dev&password=dev" as url,
+     "SELECT DISTINCT a.name as artist_name, t.album, g.name as genre_name, t.year
+      FROM tracks t JOIN artists a ON a.id = t.artist_id JOIN genres g ON g.id = t.genre_id
+      WHERE t.compilation = 'f'" as sql
+CALL apoc.load.jdbc(url,sql) YIELD row
+MERGE (decade:Decade {value: row.year-row.year%10})
+MERGE (year:Year {value: row.year})
+MERGE (year) - [:PART_OF] -> (decade)
+MERGE (artist:Artist {name: row.artist_name})
+MERGE (album:Album {name: row.album}) - [:RELEASED_BY] -> (artist)
+MERGE (genre:Genre {name: row.genre_name})
+MERGE (album) - [:HAS] -> (genre)
+MERGE (album) - [:RELEASED_IN] -> (year)<!--/code--></pre>
+</div>
+</div>
+	</div>
+  </div>
+</slide>
+
+
+
+<slide class="row-fluid">
+  <div class="col-sm-12">
+    <h3>Using custom stored procedures</h3>
+    <br/>
+    <div>
+      <div class="paragraph">
+<p>The artist data</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre mode="cypher"  class="highlight pre-scrollable programlisting cm-s-neo code runnable standalone-example ng-binding" data-lang="cypher" lang="cypher"><!--code class="cypher language-cypher"-->call stats.loadArtistData('statsdb-dev', 'dev', 'jdbc:postgresql://localhost:5432/bootiful-music?currentSchema=dev')<!--/code--></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Albums</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre mode="cypher"  class="highlight pre-scrollable programlisting cm-s-neo code runnable standalone-example ng-binding" data-lang="cypher" lang="cypher"><!--code class="cypher language-cypher"-->call stats.loadAlbumData('statsdb-dev', 'dev', 'jdbc:postgresql://localhost:5432/bootiful-music?currentSchema=dev')<!--/code--></pre>
+</div>
+</div>
+	</div>
+  </div>
+</slide>
+
+
+
+<slide class="row-fluid">
+  <div class="col-sm-12">
+    <h3>The result</h3>
+    <br/>
+    <div>
+      <div class="listingblock">
+<div class="content">
+<pre mode="cypher"  class="highlight pre-scrollable programlisting cm-s-neo code runnable standalone-example ng-binding" data-lang="cypher" lang="cypher"><!--code class="cypher language-cypher"-->MATCH path1=(album:Album {name: 'Innuendo'}) - [:RELEASED_BY] -> (:Artist)
+MATCH path2=(album) - [:RELEASED_IN] -> (:Year) - [:PART_OF] -> (:Decade)
+MATCH (album) - [:CONTAINS] -> (tracks:Track)
+RETURN path1, path2, tracks<!--/code--></pre>
+</div>
+</div>
+	</div>
+  </div>
+</slide>
+  </carousel>
+</article>

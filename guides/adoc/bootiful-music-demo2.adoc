@@ -1,0 +1,73 @@
+= Getting data into Neo4j
+
+== With LOAD CSV
+
+`LOAD CSV` is a build-in Cypher command
+
+[source,cypher,subs=attributes]
+----
+LOAD CSV WITH HEADERS FROM 'http://localhost:8001/data/artists.csv' as line FIELDTERMINATOR ';'
+MERGE (a:Artist {name: line.Name})
+MERGE (c:Country {code: line.`Founded in`})
+MERGE (a) - [:FOUNDED_IN] -> (c)
+RETURN *
+----
+
+== With APOC: The simple version
+
+[source,cypher,subs=attributes]
+----
+WITH "jdbc:postgresql://localhost:5432/bootiful-music?currentSchema=dev&user=statsdb-dev&password=dev" as url
+CALL apoc.load.jdbc(url,"artists") YIELD row
+MERGE (artist:Artist {name: row.name})
+   ON CREATE SET artist.createdAt = localdatetime()
+   ON MATCH SET artist.updatedAt = localdatetime()
+RETURN artist
+----
+
+== With APOC: Joining SQL and Cypher
+
+Who said there is no place for more than one declarative query language? 
+
+[source,cypher,subs=attributes]
+----
+WITH "jdbc:postgresql://localhost:5432/bootiful-music?currentSchema=dev&user=statsdb-dev&password=dev" as url,
+     "SELECT DISTINCT a.name as artist_name, t.album, g.name as genre_name, t.year
+      FROM tracks t JOIN artists a ON a.id = t.artist_id JOIN genres g ON g.id = t.genre_id
+      WHERE t.compilation = 'f'" as sql
+CALL apoc.load.jdbc(url,sql) YIELD row
+MERGE (decade:Decade {value: row.year-row.year%10})
+MERGE (year:Year {value: row.year})
+MERGE (year) - [:PART_OF] -> (decade)
+MERGE (artist:Artist {name: row.artist_name})
+MERGE (album:Album {name: row.album}) - [:RELEASED_BY] -> (artist)
+MERGE (genre:Genre {name: row.genre_name})
+MERGE (album) - [:HAS] -> (genre)
+MERGE (album) - [:RELEASED_IN] -> (year)
+----
+
+== Using custom stored procedures
+
+The artist data
+
+[source,cypher,subs=attributes]
+----
+call stats.loadArtistData('statsdb-dev', 'dev', 'jdbc:postgresql://localhost:5432/bootiful-music?currentSchema=dev')
+----
+
+Albums
+
+[source,cypher,subs=attributes]
+----
+call stats.loadAlbumData('statsdb-dev', 'dev', 'jdbc:postgresql://localhost:5432/bootiful-music?currentSchema=dev')
+----
+
+== The result
+
+[source,cypher,subs=attributes]
+----
+MATCH path1=(album:Album {name: 'Innuendo'}) - [:RELEASED_BY] -> (:Artist)
+MATCH path2=(album) - [:RELEASED_IN] -> (:Year) - [:PART_OF] -> (:Decade)
+MATCH (album) - [:CONTAINS] -> (tracks:Track) 
+RETURN path1, path2, tracks
+----

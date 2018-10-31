@@ -1,0 +1,400 @@
+= Going from relational databases to databases with relations with Neo4j and Spring Data
+
+== Cypher (1): Simple CRUD
+
+Cypher is Neo4j's declarative query language.
+It can be used to query the database, create, update and delete nodes, properties and relationships.
+There's also the https://gql.today[GQL Manifesto], an effort to establish GQL - Graph Query Language - as an industry standard for graph databases, similar like SQL for relational.
+
+"Give me all the artists" reads as this:
+
+[source,cypher,subs=attributes]
+----
+MATCH (a:Artist) RETURN a
+----
+
+That is pretty boring, as there are is no data yet. Let's create some.
+
+[source,cypher,subs=attributes]
+----
+CREATE (b:Artist:Band {name: 'Queen'})
+RETURN b
+----
+
+This creates a node with two labels (`Artist` and `Band` and one property, name).
+
+== Cypher (2): Not so simple CRUD
+
+Bands used to release albums
+
+[source,cypher,subs=attributes]
+----
+MATCH (b:Band {name: 'Queen'})
+CREATE (a:Album {name: 'A Night At The Opera'}) - [r:RELEASED_BY] -> (b)
+RETURN a, r, b
+----
+
+This statements works, but has a problem: If run twice, it creates the same album again.
+Luckily, we can create constraints:
+
+[source,cypher,subs=attributes]
+----
+CREATE CONSTRAINT ON (a:Album) ASSERT a.name IS UNIQUE
+----
+
+And there is the `merge` clause: The `merge` clause matches existing nodes and relationships, creating a pattern if there's no match:
+
+[source,cypher,subs=attributes]
+----
+MATCH (b:Band {name: 'Queen'})
+MERGE (a:Album {name: 'A Day At The Races'}) - [r:RELEASED_BY] -> (b)
+RETURN a, r, b
+----
+
+== Cypher (3): Not so simple CRUD
+
+Albums usually have a release year.
+A year is part of a decade.
+
+Here we use multiple merges in one go.
+The reason being: `merge` creates the full complete pattern
+
+[source,cypher,subs=attributes]
+----
+MERGE (decade:Decade {value: 1970})
+MERGE (year:Year {value: 1976})
+MERGE (year) - [:PART_OF] -> (decade)
+MERGE (artist:Artist {name: 'Queen'})
+MERGE (album:Album {name: 'A Day At The Races'}) - [:RELEASED_BY] -> (artist)
+MERGE (album) - [:RELEASED_IN] -> (year)
+RETURN *
+----
+
+A SQL query yielding the same result would consist of a select and at least 2, probably more inserts, depending on the normalization.
+
+== A look at the scheme so far
+
+While Neo4j is fully ACID-compliant, there is no real scheme. Nodes, properties and relationships are create as needed.
+We can however retrieve the current scheme
+
+[source,cypher,subs=attributes]
+----
+call db.schema()
+----
+
+This is a stored procedure.
+There are a lot of built-ins, you can add APOC and Graph algorithms and also your own.
+
+== Not quite there yet
+
+I want to have some more information. The genres of albums:
+
+[source,cypher,subs=attributes]
+----
+MATCH (a:Album)
+WHERE a.name in ['A Night At The Opera', 'A Day At The Races']
+WITH a
+MERGE (g:Genre {name: 'Rock'})
+MERGE (a) - [:HAS] -> (g)
+RETURN a,g
+----
+
+== Not quite there yet
+
+And origin of Bands and their members:
+
+[source,cypher,subs=attributes]
+----
+MERGE (gb:Country {code: 'GB', name: 'Great Britain'})
+MERGE (tz:Country {code: 'TZ', name: 'Tanzania'})
+WITH gb, tz
+MATCH (b:Band {name: 'Queen'})
+MERGE (b) - [:FOUNDED_IN] -> (gb)
+MERGE (fm:Artist:SoloArtist {name: 'Freddie Mercury'}) 
+MERGE (fm) - [:BORN_IN] -> (tz)
+MERGE (b) - [:HAS_MEMBER {joinedIn: 1970, leftIn: 1991}] -> (fm)
+RETURN *
+----
+
+Now things look like this:
+
+[source,cypher,subs=attributes]
+----
+call db.schema()
+----
+
+== Retrieve all the data
+
+Until now, we dealt only with some nodes and manually creation thereof.
+I want to retrieve data via SQL from a PostgreSQL instance.
+
+For reference read my post https://info.michael-simons.eu/2018/10/12/how-to-get-data-into-neo4j/[How to get data into Neo4j?].
+
+To make all this work, you have to add your database's JDBC driver to `$NEO4J_HOME/plugins`.
+
+== Using APOC with single tables
+
+This uses `apoc.load.jdbc` with a single table. Read more in the https://neo4j-contrib.github.io/neo4j-apoc-procedures/#_load_jdbc[user guide].
+
+[source,cypher,subs=attributes]
+----
+WITH "jdbc:postgresql://localhost:5432/bootiful-music?currentSchema=dev&user=statsdb-dev&password=dev" as url
+CALL apoc.load.jdbc(url,"artists") YIELD row
+MERGE (artist:Artist {name: row.name})
+   ON CREATE SET artist.createdAt = localdatetime()
+   ON MATCH SET artist.updatedAt = localdatetime()
+RETURN artist
+----
+
+== Using APOC with custom SQL
+
+Who said there is no place for more than one declarative query language? 
+Have a look:
+
+[source,cypher,subs=attributes]
+----
+WITH "jdbc:postgresql://localhost:5432/bootiful-music?currentSchema=dev&user=statsdb-dev&password=dev" as url,
+     "SELECT DISTINCT a.name as artist_name, t.album, g.name as genre_name, t.year
+      FROM tracks t JOIN artists a ON a.id = t.artist_id JOIN genres g ON g.id = t.genre_id
+      WHERE t.compilation = 'f'" as sql
+CALL apoc.load.jdbc(url,sql) YIELD row
+MERGE (decade:Decade {value: row.year-row.year%10})
+MERGE (year:Year {value: row.year})
+MERGE (year) - [:PART_OF] -> (decade)
+MERGE (artist:Artist {name: row.artist_name})
+MERGE (album:Album {name: row.album}) - [:RELEASED_BY] -> (artist)
+MERGE (genre:Genre {name: row.genre_name})
+MERGE (album) - [:HAS] -> (genre)
+MERGE (album) - [:RELEASED_IN] -> (year)
+----
+
+== Using custom stored procedures (1)
+
+When I started this talk, was eager to explorer all the possibilities.
+One of them are custom stored procedures.
+
+----
+public class StatsIntegration {
+    @Context
+    public GraphDatabaseService db;
+    
+    @Procedure(name = "stats.loadArtistData", mode = Mode.WRITE)
+    @Description("Loads all artist data from the given connection.")
+    public void loadArtistData(
+            @Name("userName") String userName,
+            @Name("password") String password,
+            @Name("url") String url) {
+
+        try (var connection = DriverManager.getConnection(url, userName, password);
+            var neoTransaction = db.beginTx()) {
+            DSL.using(connection)
+                    .selectFrom(ARTISTS)
+                    .forEach(a ->
+                        executeQueryAndLogResults(CREATE_ARTIST, Map.of("artistName", a.getName()))
+                    );
+            neoTransaction.success();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+}
+----
+
+== Using custom stored procedures (2)
+
+The artist data
+
+[source,cypher,subs=attributes]
+----
+call stats.loadArtistData('statsdb-dev', 'dev', 'jdbc:postgresql://localhost:5432/bootiful-music?currentSchema=dev')
+----
+
+Albums
+
+[source,cypher,subs=attributes]
+----
+call stats.loadAlbumData('statsdb-dev', 'dev', 'jdbc:postgresql://localhost:5432/bootiful-music?currentSchema=dev')
+----
+
+Playcounts
+
+[source,cypher,subs=attributes]
+----
+call stats.loadPlayCounts('statsdb-dev', 'dev', 'jdbc:postgresql://localhost:5432/bootiful-music?currentSchema=dev')
+----
+
+== The result
+
+[source,cypher,subs=attributes]
+----
+MATCH path1=(album:Album {name: 'Innuendo'}) - [:RELEASED_BY] -> (:Artist)
+MATCH path2=(album) - [:RELEASED_IN] -> (:Year) - [:PART_OF] -> (:Decade)
+MATCH (album) - [:CONTAINS] -> (tracks:Track) 
+RETURN path1, path2, tracks
+----
+
+== Some interesting queries: Simple analytics
+
+[source,cypher,subs=attributes]
+----
+MATCH (s:SoloArtist)<-[:HAS_MEMBER]-()
+RETURN s, count(*) as member
+ORDER BY member desc limit 5;
+----
+
+[source,cypher,subs=attributes]
+----
+MATCH (g:Genre)<-[:HAS]-(:Album)-[:CONTAINS]->(:Track)-[p:HAS_BEEN_PLAYED_IN]->()-[:OF]->(y:Year)
+WITH g, sum(p.value) as playsByYear, y.value as year
+RETURN g.name, avg(playsByYear) as averagePlaysByYear
+ORDER by averagePlaysByYear desc
+LIMIT 10
+----
+
+== Recommendations
+
+[source,cypher,subs=attributes]
+----
+:params {artist: 'Black Sabbath'}
+----
+
+Bands that released stuff in the same genre:
+
+[source,cypher,subs=attributes]
+----
+MATCH (s:Artist {name:$artist})
+MATCH (s)<-[:RELEASED_BY]-()-[:HAS]->(g:Genre)<-[:HAS]-()-[:RELEASED_BY]->(a)
+WHERE s<>a
+RETURN a.name, count(*) as score
+ORDER BY score desc limit 10;
+----
+
+In the same year
+
+[source,cypher,subs=attributes]
+----
+MATCH (s:Artist {name:$artist})
+MATCH (s)<-[:RELEASED_BY]-()-[:HAS]->(g:Genre)<-[:HAS]-()-[:RELEASED_BY]->(a)
+WHERE s<>a
+WITH s,a, count(*) as genreScore
+MATCH (s)<-[:RELEASED_BY]-()-[:RELEASED_IN]->(:Year)<-[:RELEASED_IN]-()-[:RELEASED_BY]->(a)
+WITH s,a,genreScore, count(*) as yearScore
+RETURN a.name, genreScore*0.5 + yearScore *0.25 as score
+ORDER BY score desc limit 10;
+----
+
+By personal preference
+
+[source,cypher,subs=attributes]
+----
+MATCH ()-[ap:HAS_BEEN_PLAYED_IN]->()
+WITH sum(ap.value) as allPlays
+
+MATCH (s:Artist {name:$artist})
+MATCH (s)<-[:RELEASED_BY]-()-[:HAS]->(g)<-[:HAS]-()-[:RELEASED_BY]->(a)
+WHERE s<>a
+WITH allPlays, s,a, count(*) as genreScore
+
+MATCH (s)<-[:RELEASED_BY]-()-[:RELEASED_IN]->(:Year)<-[:RELEASED_IN]-()-[:RELEASED_BY]->(a)
+WITH allPlays, a, genreScore, count(*) as yearScore
+
+MATCH (a)<-[:RELEASED_BY]-(:Album)-[:CONTAINS]->(:Track)-[p:HAS_BEEN_PLAYED_IN]->()
+RETURN a.name, (genreScore*0.5 + yearScore *0.25)*-1.0/allPlays*sum(p.value) as score
+
+ORDER BY score desc limit 10;
+----
+
+== Behavior based recommendation
+
+[source,cypher,subs=attributes]
+----
+:params {trackName: 'Killer Queen'}
+----
+
+[source,cypher,subs=attributes]
+----
+MATCH (sourceTrack:Track) - [playcountSource:HAS_BEEN_PLAYED_IN] -> (:Month) <-[playcountOtherTrack:HAS_BEEN_PLAYED_IN] - (otherTrack:Track)    
+WHERE sourceTrack.name = $trackName
+  AND playcountSource.value >= 2    
+  AND NOT EXISTS ((sourceTrack)<-[:CONTAINS]-()-[:CONTAINS]->(otherTrack))     
+WITH sourceTrack, otherTrack, count(playcountOtherTrack) AS monthsPlayedTogether    
+
+WHERE monthsPlayedTogether >= 2  
+WITH monthsPlayedTogether, otherTrack ORDER BY monthsPlayedTogether DESC LIMIT 10
+
+MATCH (otherTrack) <- [:CONTAINS] -()- [:RELEASED_BY] -> (artist:Artist)    
+RETURN DISTINCT monthsPlayedTogether, artist.name as artist, otherTrack.name as track
+ORDER BY monthsPlayedTogether desc, artist, track
+----
+
+== Creating subcategories
+
+[source,cypher,subs=attributes]
+----
+MATCH (a)-[:HAS]->(g:Genre), 
+      (a)-[:RELEASED_IN]->(:Year)-[:PART_OF]->(d:Decade), 
+      (a)-[:RELEASED_BY]->(artist)-[:FOUNDED_IN|:BORN_IN]->(c:Country)
+WITH g, d,c, count(*) as freq, collect(a) as albums
+ORDER BY freq desc LIMIT 200
+WITH albums, freq, apoc.create.vNode(['Cat'], {name:g.name+ " " +d.value +" " + c.name}) as cat
+UNWIND albums as album
+RETURN cat, album, apoc.create.vRelationship(album,'IN',{freq:freq},cat) as rel
+----
+
+== Connected artists
+
+[source,cypher,subs=attributes]
+----
+match (a:Artist {name:"Queen"}), (a2:Artist {name:"Dire Straits"})
+match path= shortestPath( (a)-[:ASSOCIATED_WITH*]-(a2))
+return path
+
+match (a:Artist {name:"Slayer"})
+match (a2:Artist {name:'Iced Earth'})
+match path=shortestPath( (a)-[:ASSOCIATED_WITH*]-(a2))
+return a.name, a2.name, path limit 10
+
+
+match (a:Artist {name:"Slayer"})
+match (a2:Artist) where a <> a2
+match path=shortestPath( (a)-[:ASSOCIATED_WITH*]-(a2))
+return a.name, a2.name, length(path), path 
+order by length(path) desc 
+limit 10
+
+match (a:Artist {name:"Slayer"})
+match (a2:Artist {name:'Exodus'})
+match path=allShortestPaths( (a)-[:ASSOCIATED_WITH*]-(a2))
+return a.name, a2.name, path limit 10
+
+
+match (a:Artist {name:"Slayer"})
+match (a2:Artist) where a <> a2
+match path=allShortestPaths( (a)-[:ASSOCIATED_WITH*]-(a2))
+return a.name, a2.name, length(path), path 
+order by length(path) desc 
+limit 2;
+
+----
+
+
+== About this talk
+
+Relational databases still have many use cases. 
+Either being able to handle complex aggregations of time series, dealing with sums, products, either over all tuples or with moving windows. 
+RDBMs are unbeaten handling huge sets with a relatively small number of joins. 
+There has been quite the renaissance of SQL and RDBMs in the past years (and the presenter of this talk might not be innocent here), but there's one type of store whose qualities are not beaten by RDBMs: Graph Databases.
+
+Graph databases like Neo4j have several features that no other store has. 
+They are the first choice if your application deals with a lot of real relations, stores object trees that should be queryable and much more. 
+Objects corresponds to nodes and relations are just that. 
+Neo4j facilitates the use of both through its query language Cypher: An easy to learn, pattern matching query language.
+
+In this talk I'll present my approach to Neo4j, Object Graph Mapper (OGM) and Spring Data Neo4j (SDN), coming from a relational background. 
+I'll explain the building blocks of SDN, present different ways to to turn some or all of your relational data into a graph and access it from a Spring Boot based application.
+
+== About the author
+
+Father, Husband, Cyclist and also a programmer: I'm a software developer who likes many languages, but Java the most. I wrote the first German book about Spring Boot and work on Spring Data Neo4j and Neo4j OGM at Neo4j. I share my knowledge on my personal blog and in Java User Groups.
+
+I founded the Euregio JUG (EuregJUG) in the 3 borders area of the Netherlands, Belgium and Germany. In the summer of 2018 I was announced Java Champion.

@@ -1,0 +1,123 @@
+= Demo 1
+
+== Cypher (1): Simple CRUD
+
+"Give me all the artists" reads as this:
+
+[source,cypher,subs=attributes]
+----
+MATCH (a:Artist) RETURN a
+----
+
+That is pretty boring, as there are is no data yet. Let's create some.
+
+[source,cypher,subs=attributes]
+----
+CREATE (b:Artist:Band {name: 'Queen'})
+RETURN b
+----
+
+This creates a node with two labels (`Artist` and `Band` and one property, name).
+
+== Cypher (2): Not so simple CRUD
+
+Bands used to release albums
+
+[source,cypher,subs=attributes]
+----
+MATCH (b:Band {name: 'Queen'})
+CREATE (a:Album {name: 'A Night At The Opera'}) - [r:RELEASED_BY] -> (b)
+RETURN a, r, b
+----
+
+This statements works, but has a problem: If run twice, it creates the same album again.
+Luckily, we can create constraints:
+
+[source,cypher,subs=attributes]
+----
+CREATE CONSTRAINT ON (a:Album) ASSERT a.name IS UNIQUE
+----
+
+And there is the `merge` clause: The `merge` clause matches existing nodes and relationships, creating a pattern if there's no match:
+
+[source,cypher,subs=attributes]
+----
+MATCH (b:Band {name: 'Queen'})
+MERGE (a:Album {name: 'A Day At The Races'}) - [r:RELEASED_BY] -> (b)
+RETURN a, r, b
+----
+
+== Cypher (3): Not so simple CRUD
+
+Albums usually have a release year.
+A year is part of a decade.
+
+Here we use multiple merges in one go.
+The reason being: `merge` creates the full complete pattern
+
+[source,cypher,subs=attributes]
+----
+MERGE (decade:Decade {value: 1970})
+MERGE (year:Year {value: 1976})
+MERGE (year) - [:PART_OF] -> (decade)
+MERGE (artist:Artist {name: 'Queen'})
+MERGE (album:Album {name: 'A Day At The Races'}) - [:RELEASED_BY] -> (artist)
+MERGE (album) - [:RELEASED_IN] -> (year)
+RETURN *
+----
+
+A SQL query yielding the same result would consist of a select and at least 2, probably more inserts, depending on the normalization.
+
+== A look at the scheme so far
+
+While Neo4j is fully ACID-compliant, there is no real scheme. Nodes, properties and relationships are create as needed.
+We can however retrieve the current scheme
+
+[source,cypher,subs=attributes]
+----
+call db.schema()
+----
+
+This is a stored procedure.
+There are a lot of built-ins, you can add APOC and Graph algorithms and also your own.
+
+== Not quite there yet: Adding genres
+
+I want to have some more information. The genres of albums:
+
+[source,cypher,subs=attributes]
+----
+MATCH (a:Album)
+WHERE a.name in ['A Night At The Opera', 'A Day At The Races']
+WITH a
+MERGE (g:Genre {name: 'Rock'})
+MERGE (a) - [:HAS] -> (g)
+RETURN a,g
+----
+
+== Not quite there yet: Adding members
+
+And origin of Bands and their members:
+
+[source,cypher,subs=attributes]
+----
+MERGE (gb:Country {code: 'GB', name: 'Great Britain'})
+MERGE (tz:Country {code: 'TZ', name: 'Tanzania'})
+WITH gb, tz
+MATCH (b:Band {name: 'Queen'})
+MERGE (b) - [:FOUNDED_IN] -> (gb)
+MERGE (fm:Artist:SoloArtist {name: 'Freddie Mercury'}) 
+MERGE (fm) - [:BORN_IN] -> (tz)
+MERGE (b) - [:HAS_MEMBER {joinedIn: 1970, leftIn: 1991}] -> (fm)
+RETURN *
+----
+
+== The resulting scheme
+
+Now things look like this:
+
+[source,cypher,subs=attributes]
+----
+call db.schema() yield nodes, relationships
+return filter(node in nodes where any(label IN apoc.node.labels(node) WHERE NOT label  in ["WikipediaArticle", "Artist"])) as nodes, relationships
+----
