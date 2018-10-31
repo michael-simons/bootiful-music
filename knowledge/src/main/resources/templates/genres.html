@@ -17,10 +17,27 @@
     </header>
 
     <div class="row">
-        <div class="col">
+        <div class="col-3">
+            <table class="table table-sm table-striped table-hover">
+                <thead class="thead-dark">
+                <tr>
+                    <th scope="col" th:text="#{genre.name}">Placeholder</th>
+                    <th scope="col"></th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="genre : ${top10Subgenres}">
+                    <td th:text="${genre.name}">Placeholder</td>
+                    <td th:text="${genre.frequency}">Placeholder</a></td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+        <div class="col-9">
             <div id="container" style="max-width:100%; height:50em;"></div>
         </div>
     </div>
+
 
     <div class="row">
         <div class="col">

@@ -16,14 +16,19 @@
 package ac.simons.music.knowledge.web;
 
 import static ac.simons.music.knowledge.web.AlbumController.mapAlbumEntities;
+import static java.util.Comparator.comparingLong;
+import static java.util.stream.Collectors.toList;
 
 import ac.simons.music.knowledge.domain.AlbumService;
 import ac.simons.music.knowledge.domain.GenreEntity;
 import ac.simons.music.knowledge.domain.GenreRepository;
+import ac.simons.music.knowledge.domain.Subgenre;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.RequiredArgsConstructor;
 
+import java.util.Comparator;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -56,9 +61,12 @@ public class GenreController {
 	public ModelAndView genres() {
 
 		var genres = this.genreRepository.findAll(Sort.by("name").ascending());
+		var allSubgrenes = genreRepository.findAllSubgrenes();
+		var top10Subgenres = allSubgrenes.stream().sorted(comparingLong(Subgenre::getFrequency).reversed()).limit(10).collect(toList());
 		var model = Map.of(
 			"genres", genres,
-			"subgenres", genreRepository.findAllSubgrenes()
+			"subgenres", allSubgrenes,
+			"top10Subgenres", top10Subgenres
 		);
 
 		return new ModelAndView("genres", model);
