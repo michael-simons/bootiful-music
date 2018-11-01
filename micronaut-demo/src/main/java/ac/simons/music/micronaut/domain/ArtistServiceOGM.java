@@ -19,20 +19,23 @@ import javax.inject.Singleton;
 
 import org.neo4j.ogm.cypher.ComparisonOperator;
 import org.neo4j.ogm.cypher.Filter;
-import org.neo4j.ogm.session.Session;
+import org.neo4j.ogm.session.SessionFactory;
 
 /**
  * @author Michael J. Simons
  */
 @Singleton
 class ArtistServiceOGM implements ArtistService {
-	private final Session session;
+	private final SessionFactory sessionFactory;
 
-	ArtistServiceOGM(Session session) {
-		this.session = session;
+	ArtistServiceOGM(SessionFactory sessionFactory) {
+		this.sessionFactory = sessionFactory;
 	}
 
 	public Iterable<ArtistEntity> findByName(String name) {
-		return this.session.loadAll(ArtistEntity.class, new Filter("name", ComparisonOperator.CONTAINING, name), 1);
+		var session = sessionFactory.openSession();
+		var artists = session.loadAll(
+			ArtistEntity.class, new Filter("name", ComparisonOperator.CONTAINING, name));
+		return artists;
 	}
 }

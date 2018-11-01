@@ -17,27 +17,25 @@ package ac.simons.music.micronaut.config;
 
 import io.micronaut.context.annotation.Bean;
 import io.micronaut.context.annotation.Factory;
-import io.micronaut.runtime.context.scope.ThreadLocal;
 
 import org.neo4j.driver.v1.Driver;
 import org.neo4j.ogm.drivers.bolt.driver.BoltDriver;
-import org.neo4j.ogm.session.Session;
+import org.neo4j.ogm.session.SessionFactory;
 
 /**
  * @author Michael J. Simons
  */
 @Factory
-public class SessionFactory {
-	private final org.neo4j.ogm.session.SessionFactory delegate;
+public class SessionFactoryFactory {
 
-	public SessionFactory(Driver driver) {
-		this.delegate = new org.neo4j.ogm.session.SessionFactory(
-			new BoltDriver(driver), "ac.simons.music.micronaut.domain");
+	private final Driver driver;
+
+	public SessionFactoryFactory(Driver driver) {
+		this.driver = driver;
 	}
 
-	@Bean
-	@ThreadLocal
-	public Session session() {
-		return delegate.openSession();
+	@Bean(preDestroy = "close")
+	public SessionFactory sessionFactory() {
+		return new SessionFactory(new BoltDriver(driver), "ac.simons.music.micronaut.domain");
 	}
 }
