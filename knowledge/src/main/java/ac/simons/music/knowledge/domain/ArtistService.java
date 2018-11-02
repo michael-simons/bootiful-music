@@ -15,6 +15,8 @@
  */
 package ac.simons.music.knowledge.domain;
 
+import static java.util.Collections.emptyMap;
+
 import ac.simons.music.knowledge.support.AbstractAuditableBaseEntity;
 import ac.simons.music.knowledge.support.WikidataClient;
 import lombok.RequiredArgsConstructor;
@@ -75,7 +77,7 @@ public class ArtistService {
 		var cypher = "MATCH (a:Artist) WITH a OPTIONAL MATCH p=(a)-[*0..1]-(c:Country) RETURN a, p ORDER BY a.name";
 
 		final List<ArtistEntity> allArtists = new ArrayList<>();
-		session.query(ArtistEntity.class, cypher, Map.of())
+		session.query(ArtistEntity.class, cypher, emptyMap())
 			.forEach(allArtists::add);
 		return allArtists;
 	}
@@ -158,9 +160,9 @@ public class ArtistService {
 
 		this.findArtistById(id).ifPresent(a -> {
 			session.delete(a);
-			session.query("MATCH (a:Album) WHERE size((a)-[:RELEASED_BY]->(:Artist))=0 DETACH DELETE a", Map.of());
-			session.query("MATCH (t:Track) WHERE size((:Album)-[:CONTAINS]->(t))=0 DETACH DELETE t", Map.of());
-			session.query("MATCH (w:WikipediaArticle) WHERE size((:Artist)-[:HAS_LINK_TO]->(w))=0 DETACH DELETE w", Map.of());
+			session.query("MATCH (a:Album) WHERE size((a)-[:RELEASED_BY]->(:Artist))=0 DETACH DELETE a", emptyMap());
+			session.query("MATCH (t:Track) WHERE size((:Album)-[:CONTAINS]->(t))=0 DETACH DELETE t", emptyMap());
+			session.query("MATCH (w:WikipediaArticle) WHERE size((:Artist)-[:HAS_LINK_TO]->(w))=0 DETACH DELETE w", emptyMap());
 		});
 	}
 
