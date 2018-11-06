@@ -1,4 +1,4 @@
-= Demo 1
+= My „business“ domain
 
 == Cypher (1): Simple CRUD
 

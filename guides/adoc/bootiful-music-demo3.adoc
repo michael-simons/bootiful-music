@@ -1,0 +1,36 @@
+= Some advanced queries
+
+== Implicit grouping
+
+[source,cypher,subs=attributes]
+----
+MATCH (s:SoloArtist)<-[:HAS_MEMBER]-()
+WITH s, count(*) as bands ORDER BY bands limit 5
+RETURN s, bands
+----
+
+== Just counting relationships
+
+[source,cypher,subs=attributes]
+----
+MATCH (s:SoloArtist) 
+RETURN s, size((s)<-[:HAS_MEMBER]-()) as bands
+ORDER BY bands desc limit 5
+----
+
+== Creating micro genres
+
+[source,cypher,subs=attributes]
+----
+match (a)-[:HAS]->(g:Genre), 
+      (a)-[:RELEASED_IN]->(:Year)-[:PART_OF]->(d:Decade), 
+      (a)-[:RELEASED_BY]->(artist)-[:FOUNDED_IN|:BORN_IN]->(c:Country)
+with g, d,c, count(*) as freq, collect(a) as albums
+order by freq desc limit 200
+with albums, freq, apoc.create.vNode(['Cat'], {name:g.name+ " "+d.value+" "+c.name}) as cat
+unwind albums as a
+return cat, a, apoc.create.vRelationship(a,'IN',{freq:freq},cat) as rel
+----
+
+== Recommendations
+
