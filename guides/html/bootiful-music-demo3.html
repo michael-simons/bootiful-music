@@ -1,0 +1,276 @@
+<style type="text/css" media="screen">
+/*
+.nodes-image {
+	margin:-100;
+}
+*/	
+@import url("//maxcdn.bootstrapcdn.com/font-awesome/4.4.0/css/font-awesome.min.css");
+
+.imageblock .content img, .image img {max-width: 900px;max-height: 300px;}
+.deck h3, .deck h4 {display: block !important;margin-bottom:8px;margin-top:5px;}
+.listingblock {margin:8px;}
+.pull-bottom {position:relative;bottom:1em;}
+.admonitionblock td.icon [class^="fa icon-"]{font-size:2.5em;text-shadow:1px 1px 2px rgba(0,0,0,.5);cursor:default}
+.admonitionblock td.icon .icon-note:before{content:"\f05a";color:#19407c}
+.admonitionblock td.icon .icon-tip:before{content:"\f0eb";text-shadow:1px 1px 2px rgba(155,155,0,.8);color:#111}
+.admonitionblock td.icon .icon-warning:before{content:"\f071";color:#bf6900}
+.admonitionblock td.icon .icon-caution:before{content:"\f06d";color:#bf3400}
+.admonitionblock td.icon .icon-important:before{content:"\f06a";color:#bf0000}
+.admonitionblock.note.speaker { display:none; }
+</style>
+<style type="text/css" media="screen">
+/* #editor.maximize-editor .CodeMirror-code { font-size:24px; line-height:26px; } */
+</style>
+<article class="guide" ng-controller="AdLibDataController">
+  <carousel class="deck container-fluid">
+    <!--slide class="row-fluid">
+      <div class="col-sm-3">
+        <h3>Some advanced queries</h3>
+        <p class="lead">Information</p>
+			<!dl>
+				
+				
+				
+				
+				
+			</dl>
+		</div>
+      <div class="col-sm-9">
+        <figure>
+          <img style="width:300px" src=""/>
+        </figure>
+      </div>
+    </slide-->
+    
+
+
+   <h4>Some advanced queries</h4>
+   
+
+
+<slide class="row-fluid">
+  <div class="col-sm-12">
+    <h3>Implicit grouping</h3>
+    <br/>
+    <div>
+      <div class="listingblock">
+<div class="content">
+<pre mode="cypher"  class="highlight pre-scrollable programlisting cm-s-neo code runnable standalone-example ng-binding" data-lang="cypher" lang="cypher"><!--code class="cypher language-cypher"-->MATCH (s:SoloArtist)<-[:HAS_MEMBER]-()
+WITH s, count(*) as bands ORDER BY bands limit 5
+RETURN s, bands<!--/code--></pre>
+</div>
+</div>
+	</div>
+  </div>
+</slide>
+
+
+
+<slide class="row-fluid">
+  <div class="col-sm-12">
+    <h3>Just counting relationships</h3>
+    <br/>
+    <div>
+      <div class="listingblock">
+<div class="content">
+<pre mode="cypher"  class="highlight pre-scrollable programlisting cm-s-neo code runnable standalone-example ng-binding" data-lang="cypher" lang="cypher"><!--code class="cypher language-cypher"-->MATCH (s:SoloArtist)
+RETURN s, size((s)<-[:HAS_MEMBER]-()) as bands
+ORDER BY bands desc limit 5<!--/code--></pre>
+</div>
+</div>
+	</div>
+  </div>
+</slide>
+
+
+
+<slide class="row-fluid">
+  <div class="col-sm-12">
+    <h3>Also retrieve the data</h3>
+    <br/>
+    <div>
+      <div class="listingblock">
+<div class="content">
+<pre mode="cypher"  class="highlight pre-scrollable programlisting cm-s-neo code runnable standalone-example ng-binding" data-lang="cypher" lang="cypher"><!--code class="cypher language-cypher"-->MATCH (a:SoloArtist)
+WHERE size((a)<- [:HAS_MEMBER] - ()) >= 2
+WITH a
+MATCH p=(a)<-[:HAS_MEMBER]-()
+RETURN p<!--/code--></pre>
+</div>
+</div>
+	</div>
+  </div>
+</slide>
+
+
+
+<slide class="row-fluid">
+  <div class="col-sm-12">
+    <h3>Using virtual relationships</h3>
+    <br/>
+    <div>
+      <div class="listingblock">
+<div class="content">
+<pre mode="cypher"  class="highlight pre-scrollable programlisting cm-s-neo code runnable standalone-example ng-binding" data-lang="cypher" lang="cypher"><!--code class="cypher language-cypher"-->MATCH  (a:SoloArtist) <- [m:HAS_MEMBER] - (b)
+WITH a, collect(distinct b) as bands
+WHERE size(bands) >= 2
+UNWIND bands as b
+OPTIONAL MATCH p=(a) - [:ASSOCIATED_WITH] - (o)
+RETURN p,a,b, apoc.create.vRelationship(a,'IS_MEMBER_OF',{},b) as r<!--/code--></pre>
+</div>
+</div>
+	</div>
+  </div>
+</slide>
+
+
+
+<slide class="row-fluid">
+  <div class="col-sm-12">
+    <h3>Creating micro genres</h3>
+    <br/>
+    <div>
+      <div class="listingblock">
+<div class="content">
+<pre mode="cypher"  class="highlight pre-scrollable programlisting cm-s-neo code runnable standalone-example ng-binding" data-lang="cypher" lang="cypher"><!--code class="cypher language-cypher"-->MATCH (a)-[:HAS]->(g:Genre),
+      (a)-[:RELEASED_IN]->(:Year)-[:PART_OF]->(d:Decade),
+      (a)-[:RELEASED_BY]->(artist)-[:FOUNDED_IN|:BORN_IN]->(c:Country)
+WITH g, d,c, count(*) as freq, collect(a) as albums
+ORDER by freq desc limit 200
+WITH albums, freq, apoc.create.vNode(['Cat'], {name:g.name+ " "+d.value+" "+c.name}) as cat
+UNWIND albums as a
+RETURN cat, a, apoc.create.vRelationship(a,'IN',{freq:freq},cat) as rel<!--/code--></pre>
+</div>
+</div>
+	</div>
+  </div>
+</slide>
+
+
+
+<slide class="row-fluid">
+  <div class="col-sm-12">
+    <h3>Recommendations (1)</h3>
+    <br/>
+    <div>
+      <div class="listingblock">
+<div class="content">
+<pre mode="cypher"  class="highlight pre-scrollable programlisting cm-s-neo code runnable standalone-example ng-binding" data-lang="cypher" lang="cypher"><!--code class="cypher language-cypher"-->:params {artist: 'Queen'}<!--/code--></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>First "score" by genre</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre mode="cypher"  class="highlight pre-scrollable programlisting cm-s-neo code runnable standalone-example ng-binding" data-lang="cypher" lang="cypher"><!--code class="cypher language-cypher"-->MATCH (s:Artist {name:$artist})
+MATCH (s)<-[:RELEASED_BY]-()-[:HAS]->(g:Genre)<-[:HAS]-()-[:RELEASED_BY]->(a)
+WHERE a<>s
+WITH s,a, count(*) as genreScore order by genreScore desc
+RETURN s.name, a.name, genreScore<!--/code--></pre>
+</div>
+</div>
+	</div>
+  </div>
+</slide>
+
+
+
+<slide class="row-fluid">
+  <div class="col-sm-12">
+    <h3>Recommendations (2)</h3>
+    <br/>
+    <div>
+      <div class="paragraph">
+<p>Add additional aspects</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre mode="cypher"  class="highlight pre-scrollable programlisting cm-s-neo code runnable standalone-example ng-binding" data-lang="cypher" lang="cypher"><!--code class="cypher language-cypher"-->MATCH (s:Artist {name:$artist})
+MATCH (s)<-[:RELEASED_BY]-()-[:HAS]->(g:Genre)<-[:HAS]-()-[:RELEASED_BY]->(a)
+WHERE a<>s
+WITH s,a, count(*) as genreScore
+
+MATCH (s)<-[:RELEASED_BY]-()-[:RELEASED_IN]->(:Year)<-[:RELEASED_IN]-()-[:RELEASED_BY]->(a)
+WITH s,a,genreScore, count(*) as yearScore
+
+RETURN s.name, a.name, genreScore*0.1 + yearScore *0.5 as score
+ORDER BY score desc limit 10;<!--/code--></pre>
+</div>
+</div>
+	</div>
+  </div>
+</slide>
+
+
+
+<slide class="row-fluid">
+  <div class="col-sm-12">
+    <h3>Recommendations (3)</h3>
+    <br/>
+    <div>
+      <div class="paragraph">
+<p>Add additional aspects</p>
+</div>
+<div class="paragraph">
+<p>MATCH (s:Artist {name:$artist})
+MATCH (a:Artist {name:'Bela B.'})
+OPTIONAL MATCH (s)-[:FOUNDED_IN]&#8594;()&#8592;[:FOUNDED_IN]-(a)
+WITH s,a, count(*)</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre mode="cypher"  class="highlight pre-scrollable programlisting cm-s-neo code runnable standalone-example ng-binding" data-lang="cypher" lang="cypher"><!--code class="cypher language-cypher"-->MATCH (s:Artist {name:$artist})
+MATCH (s)<-[:RELEASED_BY]-()-[:HAS]->(g:Genre)<-[:HAS]-()-[:RELEASED_BY]->(a)
+WHERE a<>s
+WITH s,a, count(*) as genreScore
+
+MATCH (s)<-[:RELEASED_BY]-()-[:RELEASED_IN]->(:Year)<-[:RELEASED_IN]-()-[:RELEASED_BY]->(a)
+WITH s,a,genreScore, count(*) as yearScore
+
+WITH s,a,genreScore,yearScore,
+     EXISTS((s)-[:FOUNDED_IN]->()<-[:FOUNDED_IN]-(a)) as foundedInSameCountry
+
+WITH s,a,genreScore,yearScore,
+     CASE foundedInSameCountry WHEN true THEN 1.1 ELSE 0.9 END as bump
+
+RETURN s.name, a.name, (genreScore*0.1 + yearScore *0.25)*bump  as score
+ORDER BY score desc limit 10;<!--/code--></pre>
+</div>
+</div>
+	</div>
+  </div>
+</slide>
+
+
+
+<slide class="row-fluid">
+  <div class="col-sm-12">
+    <h3>Connections</h3>
+    <br/>
+    <div>
+      <div class="listingblock">
+<div class="content">
+<pre mode="cypher"  class="highlight pre-scrollable programlisting cm-s-neo code runnable standalone-example ng-binding" data-lang="cypher" lang="cypher"><!--code class="cypher language-cypher"-->MATCH (a:Artist {name:"Slayer"})
+MATCH (a2:Artist {name:'Iced Earth'})
+MATCH path=shortestPath( (a)-[:ASSOCIATED_WITH*]-(a2))
+RETURN a.name, a2.name, path limit 10<!--/code--></pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre mode="cypher"  class="highlight pre-scrollable programlisting cm-s-neo code runnable standalone-example ng-binding" data-lang="cypher" lang="cypher"><!--code class="cypher language-cypher"-->MATCH (n:Band) where n.name IN ['Slayer', 'Metallica', 'Megadeth', 'Exodus']
+OPTIONAL MATCH (n) - [:HAS_MEMBER] -> (s:SoloArtist)
+WITH collect(n) + collect(s) as nodes
+UNWIND nodes as n
+UNWIND nodes as m
+WITH * WHERE id(n) < id(m)
+MATCH path = allShortestPaths( (n)-[*..2]-(m) )
+RETURN path<!--/code--></pre>
+</div>
+</div>
+	</div>
+  </div>
+</slide>
+  </carousel>
+</article>

@@ -1,0 +1,248 @@
+<style type="text/css" media="screen">
+/*
+.nodes-image {
+	margin:-100;
+}
+*/	
+@import url("//maxcdn.bootstrapcdn.com/font-awesome/4.4.0/css/font-awesome.min.css");
+
+.imageblock .content img, .image img {max-width: 900px;max-height: 300px;}
+.deck h3, .deck h4 {display: block !important;margin-bottom:8px;margin-top:5px;}
+.listingblock {margin:8px;}
+.pull-bottom {position:relative;bottom:1em;}
+.admonitionblock td.icon [class^="fa icon-"]{font-size:2.5em;text-shadow:1px 1px 2px rgba(0,0,0,.5);cursor:default}
+.admonitionblock td.icon .icon-note:before{content:"\f05a";color:#19407c}
+.admonitionblock td.icon .icon-tip:before{content:"\f0eb";text-shadow:1px 1px 2px rgba(155,155,0,.8);color:#111}
+.admonitionblock td.icon .icon-warning:before{content:"\f071";color:#bf6900}
+.admonitionblock td.icon .icon-caution:before{content:"\f06d";color:#bf3400}
+.admonitionblock td.icon .icon-important:before{content:"\f06a";color:#bf0000}
+.admonitionblock.note.speaker { display:none; }
+</style>
+<style type="text/css" media="screen">
+/* #editor.maximize-editor .CodeMirror-code { font-size:24px; line-height:26px; } */
+</style>
+<article class="guide" ng-controller="AdLibDataController">
+  <carousel class="deck container-fluid">
+    <!--slide class="row-fluid">
+      <div class="col-sm-3">
+        <h3>My „business“ domain</h3>
+        <p class="lead">Information</p>
+			<!dl>
+				
+				
+				
+				
+				
+			</dl>
+		</div>
+      <div class="col-sm-9">
+        <figure>
+          <img style="width:300px" src=""/>
+        </figure>
+      </div>
+    </slide-->
+    
+
+
+   <h4>My „business“ domain</h4>
+   
+
+
+<slide class="row-fluid">
+  <div class="col-sm-12">
+    <h3>Cypher (1): Simple CRUD</h3>
+    <br/>
+    <div>
+      <div class="paragraph">
+<p>"Give me all the artists" reads as this:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre mode="cypher"  class="highlight pre-scrollable programlisting cm-s-neo code runnable standalone-example ng-binding" data-lang="cypher" lang="cypher"><!--code class="cypher language-cypher"-->MATCH (a:Artist) RETURN a<!--/code--></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>That is pretty boring, as there are is no data yet. Let&#8217;s create some.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre mode="cypher"  class="highlight pre-scrollable programlisting cm-s-neo code runnable standalone-example ng-binding" data-lang="cypher" lang="cypher"><!--code class="cypher language-cypher"-->CREATE (b:Artist:Band {name: 'Queen'})
+RETURN b<!--/code--></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>This creates a node with two labels (<code>Artist</code> and <code>Band</code> and one property, name).</p>
+</div>
+	</div>
+  </div>
+</slide>
+
+
+
+<slide class="row-fluid">
+  <div class="col-sm-12">
+    <h3>Cypher (2): Not so simple CRUD</h3>
+    <br/>
+    <div>
+      <div class="paragraph">
+<p>Bands used to release albums</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre mode="cypher"  class="highlight pre-scrollable programlisting cm-s-neo code runnable standalone-example ng-binding" data-lang="cypher" lang="cypher"><!--code class="cypher language-cypher"-->MATCH (b:Band {name: 'Queen'})
+CREATE (a:Album {name: 'A Night At The Opera'}) - [r:RELEASED_BY] -> (b)
+RETURN a, r, b<!--/code--></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>This statements works, but has a problem: If run twice, it creates the same album again.
+Luckily, we can create constraints:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre mode="cypher"  class="highlight pre-scrollable programlisting cm-s-neo code runnable standalone-example ng-binding" data-lang="cypher" lang="cypher"><!--code class="cypher language-cypher"-->CREATE CONSTRAINT ON (a:Album) ASSERT a.name IS UNIQUE<!--/code--></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>And there is the <code>merge</code> clause: The <code>merge</code> clause matches existing nodes and relationships, creating a pattern if there&#8217;s no match:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre mode="cypher"  class="highlight pre-scrollable programlisting cm-s-neo code runnable standalone-example ng-binding" data-lang="cypher" lang="cypher"><!--code class="cypher language-cypher"-->MATCH (b:Band {name: 'Queen'})
+MERGE (a:Album {name: 'A Day At The Races'}) - [r:RELEASED_BY] -> (b)
+RETURN a, r, b<!--/code--></pre>
+</div>
+</div>
+	</div>
+  </div>
+</slide>
+
+
+
+<slide class="row-fluid">
+  <div class="col-sm-12">
+    <h3>Cypher (3): Not so simple CRUD</h3>
+    <br/>
+    <div>
+      <div class="paragraph">
+<p>Albums usually have a release year.
+A year is part of a decade.</p>
+</div>
+<div class="paragraph">
+<p>Here we use multiple merges in one go.
+The reason being: <code>merge</code> creates the full complete pattern</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre mode="cypher"  class="highlight pre-scrollable programlisting cm-s-neo code runnable standalone-example ng-binding" data-lang="cypher" lang="cypher"><!--code class="cypher language-cypher"-->MERGE (decade:Decade {value: 1970})
+MERGE (year:Year {value: 1976})
+MERGE (year) - [:PART_OF] -> (decade)
+MERGE (artist:Artist {name: 'Queen'})
+MERGE (album:Album {name: 'A Day At The Races'}) - [:RELEASED_BY] -> (artist)
+MERGE (album) - [:RELEASED_IN] -> (year)
+RETURN *<!--/code--></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>A SQL query yielding the same result would consist of a select and at least 2, probably more inserts, depending on the normalization.</p>
+</div>
+	</div>
+  </div>
+</slide>
+
+
+
+<slide class="row-fluid">
+  <div class="col-sm-12">
+    <h3>A look at the scheme so far</h3>
+    <br/>
+    <div>
+      <div class="paragraph">
+<p>While Neo4j is fully ACID-compliant, there is no real scheme. Nodes, properties and relationships are create as needed.
+We can however retrieve the current scheme</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre mode="cypher"  class="highlight pre-scrollable programlisting cm-s-neo code runnable standalone-example ng-binding" data-lang="cypher" lang="cypher"><!--code class="cypher language-cypher"-->call db.schema()<!--/code--></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>This is a stored procedure.
+There are a lot of built-ins, you can add APOC and Graph algorithms and also your own.</p>
+</div>
+	</div>
+  </div>
+</slide>
+
+
+
+<slide class="row-fluid">
+  <div class="col-sm-12">
+    <h3>Not quite there yet: Adding genres</h3>
+    <br/>
+    <div>
+      <div class="paragraph">
+<p>I want to have some more information. The genres of albums:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre mode="cypher"  class="highlight pre-scrollable programlisting cm-s-neo code runnable standalone-example ng-binding" data-lang="cypher" lang="cypher"><!--code class="cypher language-cypher"-->MATCH (a:Album)
+WHERE a.name in ['A Night At The Opera', 'A Day At The Races']
+WITH a
+MERGE (g:Genre {name: 'Rock'})
+MERGE (a) - [:HAS] -> (g)
+RETURN a,g<!--/code--></pre>
+</div>
+</div>
+	</div>
+  </div>
+</slide>
+
+
+
+<slide class="row-fluid">
+  <div class="col-sm-12">
+    <h3>Not quite there yet: Adding members</h3>
+    <br/>
+    <div>
+      <div class="paragraph">
+<p>And origin of Bands and their members:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre mode="cypher"  class="highlight pre-scrollable programlisting cm-s-neo code runnable standalone-example ng-binding" data-lang="cypher" lang="cypher"><!--code class="cypher language-cypher"-->MERGE (gb:Country {code: 'GB', name: 'Great Britain'})
+MERGE (tz:Country {code: 'TZ', name: 'Tanzania'})
+WITH gb, tz
+MATCH (b:Band {name: 'Queen'})
+MERGE (b) - [:FOUNDED_IN] -> (gb)
+MERGE (fm:Artist:SoloArtist {name: 'Freddie Mercury'})
+MERGE (fm) - [:BORN_IN] -> (tz)
+MERGE (b) - [:HAS_MEMBER {joinedIn: 1970, leftIn: 1991}] -> (fm)
+RETURN *<!--/code--></pre>
+</div>
+</div>
+	</div>
+  </div>
+</slide>
+
+
+
+<slide class="row-fluid">
+  <div class="col-sm-12">
+    <h3>The resulting scheme</h3>
+    <br/>
+    <div>
+      <div class="paragraph">
+<p>Now things look like this:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre mode="cypher"  class="highlight pre-scrollable programlisting cm-s-neo code runnable standalone-example ng-binding" data-lang="cypher" lang="cypher"><!--code class="cypher language-cypher"-->call db.schema() yield nodes, relationships
+return filter(node in nodes where any(label IN apoc.node.labels(node) WHERE NOT label  in ["WikipediaArticle", "Artist"])) as nodes, relationships<!--/code--></pre>
+</div>
+</div>
+	</div>
+  </div>
+</slide>
+  </carousel>
+</article>
