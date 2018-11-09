@@ -2,10 +2,10 @@ FROM openjdk:11-jre-slim
 
 RUN addgroup --system neo4j && adduser --no-create-home --system --home /var/lib/neo4j --group neo4j
 
-ENV NEO4J_SHA256=f2a2eda7a4313216a99a9400001fef6de1a3aa399602dd1a57f552a5f73cf349 \
-    NEO4J_TARBALL=neo4j-community-3.4.7-unix.tar.gz \
+ENV NEO4J_SHA256=2715282a71d805cbc547ed174c8a3e09ea4bda678fc110c7e30c452c486ee04d \
+    NEO4J_TARBALL=neo4j-community-3.4.9-unix.tar.gz \
     NEO4J_EDITION=community
-ARG NEO4J_URI=http://dist.neo4j.org/neo4j-community-3.4.7-unix.tar.gz
+ARG NEO4J_URI=http://dist.neo4j.org/neo4j-community-3.4.9-unix.tar.gz
 ARG NEO4J_APOC_URI=https://github.com/neo4j-contrib/neo4j-apoc-procedures/releases/download/3.4.0.1/apoc-3.4.0.1-all.jar
 
 COPY ./local-package/* /tmp/
