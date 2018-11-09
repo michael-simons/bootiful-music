@@ -95,15 +95,6 @@ RETURN a, r, b<!--/code--></pre>
 </div>
 </div>
 <div class="paragraph">
-<p>This statements works, but has a problem: If run twice, it creates the same album again.
-Luckily, we can create constraints:</p>
-</div>
-<div class="listingblock">
-<div class="content">
-<pre mode="cypher"  class="highlight pre-scrollable programlisting cm-s-neo code runnable standalone-example ng-binding" data-lang="cypher" lang="cypher"><!--code class="cypher language-cypher"-->CREATE CONSTRAINT ON (a:Album) ASSERT a.name IS UNIQUE<!--/code--></pre>
-</div>
-</div>
-<div class="paragraph">
 <p>And there is the <code>merge</code> clause: The <code>merge</code> clause matches existing nodes and relationships, creating a pattern if there&#8217;s no match:</p>
 </div>
 <div class="listingblock">

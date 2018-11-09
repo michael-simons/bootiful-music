@@ -30,14 +30,6 @@ CREATE (a:Album {name: 'A Night At The Opera'}) - [r:RELEASED_BY] -> (b)
 RETURN a, r, b
 ----
 
-This statements works, but has a problem: If run twice, it creates the same album again.
-Luckily, we can create constraints:
-
-[source,cypher,subs=attributes]
-----
-CREATE CONSTRAINT ON (a:Album) ASSERT a.name IS UNIQUE
-----
-
 And there is the `merge` clause: The `merge` clause matches existing nodes and relationships, creating a pattern if there's no match:
 
 [source,cypher,subs=attributes]
