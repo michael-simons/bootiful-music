@@ -21,7 +21,7 @@ services:
       build:
         context: knowledgedb
       environment:
-        - NEO4J_AUTH_FILE=/run/secrets/knowledgedb_root_password
+        - NEO4J_AUTH_FILE=/run/secrets/knowledgedb_auth_file
         - EXTENSION_SCRIPT=/tmp/install-apoc.sh
         - NEO4J_dbms_memory_heap_initial__size=2G
         - NEO4J_dbms_memory_heap_max__size=2G
@@ -29,7 +29,7 @@ services:
         - ./var/knowledgedb:/data
         - ./var/knowledgedb/plugins:/plugins
       secrets:
-        - knowledgedb_root_password
+        - knowledgedb_auth_file
       ports:
         - "7474:7474"
         - "7687:7687"
@@ -41,5 +41,5 @@ secrets:
     file: ./secrets/${PROFILE}/database_root_password
   database_statsdb_password:
     file: ./secrets/${PROFILE}/database_statsdb_password
-  knowledgedb_root_password:
-    file: ./secrets/${PROFILE}/knowledgedb_root_password
+  knowledgedb_auth_file:
+    file: ./secrets/${PROFILE}/knowledgedb_auth_file
