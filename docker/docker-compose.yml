@@ -35,6 +35,20 @@ services:
         - "7687:7687"
       links:
         - statsdb
+  knowledge:
+      image: bootiful-music/knowledge
+      build:
+        context: knowledge
+      environment:
+        - NEO4J_AUTH_FILE=/run/secrets/knowledgedb_auth_file
+        - SPRING_MAIN_BANNER_MODE=off
+        - SPRING_DATA_NEO4J_URI=bolt://knowledgedb:7687
+      secrets:
+        - knowledgedb_auth_file
+      ports:
+        - "8080:8080"
+      links:
+        - knowledgedb
 
 secrets:
   database_root_password:
