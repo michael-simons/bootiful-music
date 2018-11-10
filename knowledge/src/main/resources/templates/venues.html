@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      xmlns:th="http://www.thymeleaf.org"
+      layout:decorate="~{layout}">
+<head>
+    <title th:text="#{venues}">Placeholder</title>
+
+</head>
+<body>
+<div layout:fragment="content" class="container">
+    <header class="row intro">
+        <div class="col">
+            <h1 id="peng" th:text="#{venues}">Placeholder</h1>
+        </div>
+    </header>
+
+    <div class="row">
+        <div class="col">
+            <div id="map" th:data-venues-url="@{/venues}" ><div id="info"></div></div>
+        </div>
+    </div>
+</div>
+</body>
+</html>

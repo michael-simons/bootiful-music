@@ -31,6 +31,7 @@
 		<junit-platform.version>1.2.0</junit-platform.version>
 		<neo4j.version>3.4.9</neo4j.version>
 		<neo4j-java-driver.version>1.6.3</neo4j-java-driver.version>
+		<openlayers.version>5.2.0</openlayers.version>
 		<webjars-locator.version>0.34</webjars-locator.version>
 	</properties>
 
@@ -86,6 +87,11 @@
 			<groupId>org.webjars</groupId>
 			<artifactId>d3js</artifactId>
 			<version>${d3js.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.webjars</groupId>
+			<artifactId>openlayers</artifactId>
+			<version>${openlayers.version}</version>
 		</dependency>
 
 		<!-- Ops -->
