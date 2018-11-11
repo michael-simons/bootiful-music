@@ -225,7 +225,7 @@ function displayVenues() {
         return Math.round(line.getLength() * 100) / 100;
     };
 
-    const venuesUrl = $(map).data('venuesUrl');
+    const venuesUrl = $('#map').data('venuesUrl');
     const loadVenues = function () {
         const center = ol.proj.toLonLat(map.getView().getCenter());
         const extent = map.getView().calculateExtent(map.getSize());
