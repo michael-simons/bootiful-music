@@ -18,6 +18,9 @@ This schema lives in a PostgreSQL and its four entities gives us enormous analyt
 We will then see how to create a Graph inside Neo4j from the same data and explore which possibilities we gain by using real relationships.
 
 We will use Spring Data Neo4j from within Spring Boot to interact with the Graph.
+
+
+See this series of blog posts: https://info.michael-simons.eu/2018/10/11/from-relational-databases-to-databases-with-relations/[From relational databases to databases with relations].
 --
 
 [[the-business-domain]]
@@ -187,7 +190,7 @@ For your reference, an https://www.youtube.com/watch?v=4pwTd6NEuN0[english] and 
 
 === Software needed
 
-* Java 10+
+* Java 11+
 * http://maven.apache.org[Maven] is bundled with our repositories
 * Docker (https://www.docker.com/community-edition[Community edition]) or a version that is bundled with your OS.
 * Java-IDE of your choice
