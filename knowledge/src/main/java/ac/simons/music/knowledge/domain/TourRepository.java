@@ -17,23 +17,11 @@ package ac.simons.music.knowledge.domain;
 
 import java.util.List;
 
-import org.springframework.data.neo4j.annotation.Query;
 import org.springframework.data.neo4j.repository.Neo4jRepository;
 
 /**
  * @author Michael J. Simons
  */
-public interface MusicVenueRepository extends Neo4jRepository<MusicVenueEntity, Long> {
-
-	@Query(value
-			= " MATCH (m:MusicVenue)"
-			+ " WHERE distance(m.location, point({latitude: $latitude, longitude: $longitude})) <= $distanceInMeter"
-			+ " RETURN m")
-	List<MusicVenueEntity> findAllByLocationNear(double latitude, double longitude, double distanceInMeter);
-
-	@Query(value
-			= " MATCH (t:Tour) - [p:HAD_PART_OF_ITINERARY] -> (m:MusicVenue)"
-			+ " WHERE id(t) = $tourId"
-			+ " RETURN m ORDER BY p.visitedAt ASC")
-	List<MusicVenueEntity> findAllByTour(long tourId);
+public interface TourRepository extends Neo4jRepository<TourEntity, Long> {
+	List<TourEntity> findAllByArtistName(String name);
 }

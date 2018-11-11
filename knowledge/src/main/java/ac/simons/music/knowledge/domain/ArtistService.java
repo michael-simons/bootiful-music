@@ -16,6 +16,8 @@
 package ac.simons.music.knowledge.domain;
 
 import static java.util.Collections.emptyMap;
+import static java.util.Comparator.comparing;
+import static java.util.stream.Collectors.toList;
 
 import ac.simons.music.knowledge.support.AbstractAuditableBaseEntity;
 import ac.simons.music.knowledge.support.WikidataClient;
@@ -23,6 +25,7 @@ import lombok.RequiredArgsConstructor;
 
 import java.time.Year;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -53,6 +56,8 @@ public class ArtistService {
 	private final WikidataClient wikidataClient;
 
 	private final TransactionTemplate transactionTemplate;
+
+	private final TourRepository tourRepository;
 
 	@Transactional(readOnly = true)
 	public Optional<ArtistEntity> findArtistById(Long id) {
@@ -90,6 +95,13 @@ public class ArtistService {
 	@Transactional(readOnly = true)
 	public List<BandEntity> findAllBands() {
 		return this.bandRepository.findAll(Sort.by("name").ascending());
+	}
+
+	@Transactional(readOnly = true)
+	public List<TourEntity> findToursByArtist(final ArtistEntity artist) {
+		return this.tourRepository.findAllByArtistName(artist.getName()).stream()
+				.sorted(comparing(t -> t.getStartedIn().getValue()))
+				.collect(toList());
 	}
 
 	@Transactional
@@ -208,7 +220,7 @@ public class ArtistService {
 			var newLinks = linkResult.getLinks().stream()
 				.map(values -> new WikipediaArticleEntity(values.get("site"), values.get("title"),
 					values.get("url")))
-				.collect(Collectors.toList());
+				.collect(toList());
 
 			var oldLinks = artist.updateWikipediaLinks(newLinks);
 			session.save(artist);

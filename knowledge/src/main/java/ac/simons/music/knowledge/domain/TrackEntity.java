@@ -45,7 +45,7 @@ public class TrackEntity extends AbstractAuditableBaseEntity {
 	@Relationship("WRITTEN_BY")
 	private Set<ArtistEntity> writtenBy;
 
-	@Relationship(value = "FEATURING")
+	@Relationship("FEATURING")
 	private Set<SoloArtistEntity> featuring = new HashSet<>();
 
 	public TrackEntity(String name) {

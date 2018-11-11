@@ -53,6 +53,7 @@ import ac.simons.music.knowledge.domain.BandEntity;
 import ac.simons.music.knowledge.domain.BandEntity.Member;
 import ac.simons.music.knowledge.domain.CountryEntity;
 import ac.simons.music.knowledge.domain.SoloArtistEntity;
+import ac.simons.music.knowledge.domain.TourEntity;
 import ac.simons.music.knowledge.domain.WikipediaArticleEntity;
 import ac.simons.music.knowledge.domain.YearEntity;
 import ac.simons.music.knowledge.support.WikidataClient;
@@ -112,6 +113,7 @@ public class ArtistController {
 		var wikipediaArticles = artist.getWikipediaArticles().stream()
 			.filter(a -> List.of("dewiki", "enwiki").contains(a.getSite())).collect(toList());
 		var albums = mapAlbumEntities(this.albumService.findAllAlbumsByArtist(artist.getName()));
+		var tours = this.artistService.findToursByArtist(artist).stream().map(TourCmd::new).collect(toList());
 
 		var model = Map.of(
 				"artistCmd", new ArtistCmd(artist),
@@ -120,7 +122,8 @@ public class ArtistController {
 				"associatedArtists", associatedArtists,
 				"notAssociatedArtists", notAssociatedArtists,
 				"wikipediaArticles", wikipediaArticles,
-				"albums", albums
+				"albums", albums,
+				"tours", tours
 		);
 		return new ModelAndView("artist", model);
 	}
@@ -284,5 +287,19 @@ public class ArtistController {
 	static class NewAssociatedArtistCmd {
 		@NotNull
 		private Long artistId;
+	}
+
+	@Data
+	static class TourCmd {
+		@NotNull
+		private Long id;
+
+		@NotNull
+		private String name;
+
+		TourCmd(TourEntity tour) {
+			this.id = tour.getId();
+			this.name = String.format("%s (%d)", tour.getName(), tour.getStartedIn().getValue());
+		}
 	}
 }

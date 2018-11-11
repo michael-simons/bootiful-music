@@ -52,7 +52,14 @@ public class VenueController {
 			@RequestParam double longitude,
 			@RequestParam double distanceInMeter
 	) {
-
 		return musicVenueRepository.findAllByLocationNear(latitude, longitude, distanceInMeter);
+	}
+
+	@GetMapping(value = {"/by-tour"}, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+	@ResponseBody
+	public List<MusicVenueEntity> byTour(
+			@RequestParam long tourId
+	) {
+		return musicVenueRepository.findAllByTour(tourId);
 	}
 }

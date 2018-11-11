@@ -226,7 +226,7 @@ function displayVenues() {
     };
 
     const venuesUrl = $('#map').data('venuesUrl');
-    const loadVenues = function () {
+    const loadVenues = function (url) {
         const center = ol.proj.toLonLat(map.getView().getCenter());
         const extent = map.getView().calculateExtent(map.getSize());
         const topLeft = ol.extent.getTopLeft(extent);
@@ -234,7 +234,7 @@ function displayVenues() {
         const bottomLeft = ol.extent.getBottomLeft(extent);
         const radius = Math.max(distanceBetweenPoints(topLeft, topRight), distanceBetweenPoints(topLeft, bottomLeft)) / 2.0;
         $.ajax({
-            url: venuesUrl,
+            url: url,
             data: {"latitude": center[1], "longitude": center[0], "distanceInMeter": radius},
             success: function (response) {
                 vectorSource.clear();
@@ -253,7 +253,13 @@ function displayVenues() {
     }
 
     map.on('moveend', function (evt) {
-        loadVenues();
+        if(venuesUrl) {
+            loadVenues(venuesUrl);
+        }
+    });
+
+    $('#venues-url-changer').change(function() {
+        loadVenues($(this).val())
     });
 }
 
