@@ -17,11 +17,23 @@ package ac.simons.music.knowledge.domain;
 
 import java.util.List;
 
+import org.springframework.data.neo4j.annotation.Query;
 import org.springframework.data.neo4j.repository.Neo4jRepository;
 
 /**
  * @author Michael J. Simons
  */
 public interface TourRepository extends Neo4jRepository<TourEntity, Long> {
-	List<TourEntity> findAllByArtistName(String name);
+
+	@Query(value
+			= " MATCH (a:Artist) - [:WAS_ON] -> (t:Tour) - [p:HAD_PART_OF_ITINERARY] -> (m:MusicVenue)"
+			+ " WHERE a.name = $name"
+			+ " WITH t, m ORDER BY t.name, p.visitedAt ASC"
+			+ " WITH t, COLLECT(m) AS venues"
+			+ " WITH t, reduce(hlp = {d: 0.0, l: head(venues).location}, v IN venues | {d: hlp.d + distance(hlp.l, v.location), l: v.location}).d  AS distanceInMeter"
+			+ " MATCH (t) - [:STARTED_IN] -> (y:Year)"
+			+ " RETURN id(t) as id, t.name as name, y.value as year, distanceInMeter"
+			+ " ORDER by year asc"
+	)
+	List<TourOverview> findAllByArtistName(String name);
 }

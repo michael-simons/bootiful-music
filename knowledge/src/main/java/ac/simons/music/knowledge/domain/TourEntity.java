@@ -33,7 +33,6 @@ import org.neo4j.ogm.annotation.typeconversion.Convert;
 
 import ac.simons.music.knowledge.support.AbstractAuditableBaseEntity;
 import ac.simons.music.knowledge.support.NoOpLocalDateConversion;
-import ac.simons.music.knowledge.support.NoOpLocalDateTimeConversion;
 import lombok.Getter;
 import lombok.Setter;
 

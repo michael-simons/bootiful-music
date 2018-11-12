@@ -25,11 +25,9 @@ import lombok.RequiredArgsConstructor;
 
 import java.time.Year;
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 import org.neo4j.ogm.session.Session;
 import org.springframework.data.domain.Sort;
@@ -98,10 +96,8 @@ public class ArtistService {
 	}
 
 	@Transactional(readOnly = true)
-	public List<TourEntity> findToursByArtist(final ArtistEntity artist) {
-		return this.tourRepository.findAllByArtistName(artist.getName()).stream()
-				.sorted(comparing(t -> t.getStartedIn().getValue()))
-				.collect(toList());
+	public List<TourOverview> findToursByArtist(final ArtistEntity artist) {
+		return this.tourRepository.findAllByArtistName(artist.getName());
 	}
 
 	@Transactional

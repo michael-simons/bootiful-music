@@ -238,10 +238,13 @@ function displayVenues() {
             data: {"latitude": center[1], "longitude": center[0], "distanceInMeter": radius},
             success: function (response) {
                 vectorSource.clear();
-                var markers = response.map(function (mv) {
+
+                const hasDetailedInformation = response.venues !== undefined;
+                const venues = hasDetailedInformation ? response.venues : response;
+                const markers = venues.map(function (mv) {
                     let marker = new ol.Feature({
                         geometry: new ol.geom.Point(ol.proj.fromLonLat([mv.location.x, mv.location.y])),
-                        name: mv.name
+                        name: mv.label !== undefined ? mv.label : mv.name
                     });
                     marker.setStyle(starStyle);
                     return marker

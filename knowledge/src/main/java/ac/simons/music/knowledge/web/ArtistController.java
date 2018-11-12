@@ -17,7 +17,8 @@ package ac.simons.music.knowledge.web;
 
 import static ac.simons.music.knowledge.web.AlbumController.mapAlbumEntities;
 import static java.util.stream.Collectors.toList;
-import static org.springframework.web.servlet.mvc.method.annotation.MvcUriComponentsBuilder.*;
+import static org.springframework.web.servlet.mvc.method.annotation.MvcUriComponentsBuilder.fromMethodCall;
+import static org.springframework.web.servlet.mvc.method.annotation.MvcUriComponentsBuilder.on;
 
 import java.time.Year;
 import java.util.Comparator;
@@ -43,7 +44,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.View;
-import org.springframework.web.servlet.mvc.method.annotation.MvcUriComponentsBuilder;
 import org.springframework.web.servlet.view.RedirectView;
 
 import ac.simons.music.knowledge.domain.AlbumService;
@@ -53,10 +53,7 @@ import ac.simons.music.knowledge.domain.BandEntity;
 import ac.simons.music.knowledge.domain.BandEntity.Member;
 import ac.simons.music.knowledge.domain.CountryEntity;
 import ac.simons.music.knowledge.domain.SoloArtistEntity;
-import ac.simons.music.knowledge.domain.TourEntity;
-import ac.simons.music.knowledge.domain.WikipediaArticleEntity;
 import ac.simons.music.knowledge.domain.YearEntity;
-import ac.simons.music.knowledge.support.WikidataClient;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
 
@@ -111,9 +108,9 @@ public class ArtistController {
 		var associatedArtists = this.artistService.findAssociatedArtists(artist);
 		var notAssociatedArtists = this.artistService.findArtistsNotAssociatedWith(artist);
 		var wikipediaArticles = artist.getWikipediaArticles().stream()
-			.filter(a -> List.of("dewiki", "enwiki").contains(a.getSite())).collect(toList());
+				.filter(a -> List.of("dewiki", "enwiki").contains(a.getSite())).collect(toList());
 		var albums = mapAlbumEntities(this.albumService.findAllAlbumsByArtist(artist.getName()));
-		var tours = this.artistService.findToursByArtist(artist).stream().map(TourCmd::new).collect(toList());
+		var tours = this.artistService.findToursByArtist(artist);
 
 		var model = Map.of(
 				"artistCmd", new ArtistCmd(artist),
@@ -136,10 +133,10 @@ public class ArtistController {
 
 		final Class<? extends ArtistEntity> targetType = artistCmd.getType().getImplementingClass();
 		var optionalArtists = Optional.ofNullable(artistCmd.getId())
-			.flatMap(this.artistService::findArtistById);
+				.flatMap(this.artistService::findArtistById);
 
 		ArtistEntity artist;
-		if(optionalArtists.isPresent()) {
+		if (optionalArtists.isPresent()) {
 			artist = this.artistService.updateArtist(optionalArtists.get(), artistCmd.getOrigin(), artistCmd.getActiveSince(), artistCmd.getWikidataEntityId(), targetType);
 		} else {
 			artist = this.artistService.createNewArtist(artistCmd.getName(), artistCmd.getOrigin(), artistCmd.getActiveSince(), artistCmd.getWikidataEntityId(), targetType);
@@ -164,11 +161,11 @@ public class ArtistController {
 	@PostMapping(value = "/{artistId}/associateWith", produces = MediaType.TEXT_HTML_VALUE)
 	public String associateWith(@PathVariable final Long artistId, @Valid final NewAssociatedArtistCmd newAssociatedArtistCmd, final BindingResult newAssociatedArtistBindingResult) {
 		var artist = this.artistService.findArtistById(artistId)
-			.orElseThrow(() -> new NodeNotFoundException(ArtistEntity.class, artistId));
+				.orElseThrow(() -> new NodeNotFoundException(ArtistEntity.class, artistId));
 
 		if (!newAssociatedArtistBindingResult.hasErrors()) {
 			var newAssociatedArtist = this.artistService.findArtistById(newAssociatedArtistCmd.artistId)
-				.orElseThrow(() -> new NodeNotFoundException(ArtistEntity.class, newAssociatedArtistCmd.artistId));
+					.orElseThrow(() -> new NodeNotFoundException(ArtistEntity.class, newAssociatedArtistCmd.artistId));
 			this.artistService.associate(artist, newAssociatedArtist);
 		}
 		return String.format("redirect:/artists/%d", artist.getId());
@@ -254,7 +251,7 @@ public class ArtistController {
 			if (artist instanceof BandEntity) {
 				origin = ((BandEntity) artist).getFoundedIn();
 				this.activeSince = Optional.ofNullable(((BandEntity) artist).getActiveSince()).map(YearEntity::asYear).
-					orElse(null);
+						orElse(null);
 			} else if (artist instanceof SoloArtistEntity) {
 				origin = ((SoloArtistEntity) artist).getBornIn();
 				activeSince = null;
@@ -287,19 +284,5 @@ public class ArtistController {
 	static class NewAssociatedArtistCmd {
 		@NotNull
 		private Long artistId;
-	}
-
-	@Data
-	static class TourCmd {
-		@NotNull
-		private Long id;
-
-		@NotNull
-		private String name;
-
-		TourCmd(TourEntity tour) {
-			this.id = tour.getId();
-			this.name = String.format("%s (%d)", tour.getName(), tour.getStartedIn().getValue());
-		}
 	}
 }

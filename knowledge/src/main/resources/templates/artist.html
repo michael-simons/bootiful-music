@@ -184,8 +184,8 @@
                     <select class="form-control"  id="venues-url-changer">
                         <option value=""></option>
                         <option th:each="tour : ${tours}"
-                                th:value="@{/venues/by-tour(tourId=${tour.id})}"
-                                th:text="${tour.name}">Placeholder
+                                th:value="@{/tours/{tourId}(tourId=${tour.id})}"
+                                th:text="${tour.label}">Placeholder
                         </option>
                     </select>
                 </div>
