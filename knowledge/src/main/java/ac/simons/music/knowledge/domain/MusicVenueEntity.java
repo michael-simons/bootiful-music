@@ -18,9 +18,11 @@ package ac.simons.music.knowledge.domain;
 import ac.simons.music.knowledge.support.AbstractAuditableBaseEntity;
 import ac.simons.music.knowledge.support.NativePointConverter;
 import lombok.Getter;
+import lombok.Setter;
 
 import org.neo4j.ogm.annotation.Index;
 import org.neo4j.ogm.annotation.NodeEntity;
+import org.neo4j.ogm.annotation.Relationship;
 import org.neo4j.ogm.annotation.typeconversion.Convert;
 import org.springframework.data.geo.Point;
 
@@ -35,6 +37,10 @@ public class MusicVenueEntity extends AbstractAuditableBaseEntity {
 
 	@Convert(NativePointConverter.class)
 	private Point location;
+
+	@Relationship("IS_LOCATED_IN")
+	@Setter
+	private CountryEntity foundedIn;
 
 	public MusicVenueEntity(String name, Point location) {
 		this.name = name;
