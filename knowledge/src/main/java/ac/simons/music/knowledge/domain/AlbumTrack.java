@@ -28,7 +28,7 @@ import org.springframework.data.neo4j.annotation.QueryResult;
  */
 @QueryResult
 @Data
-@ToString(of = { "discNumber", "trackNumber", "track" })
+@ToString(of = { "discNumber", "trackNumber", "name" })
 public class AlbumTrack {
 
 	private Long id;
