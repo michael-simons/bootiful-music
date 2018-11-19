@@ -55,11 +55,13 @@ The artist data
 call stats.loadArtistData('statsdb-dev', 'dev', 'jdbc:postgresql://localhost:5432/bootiful-music?currentSchema=dev')
 ----
 
-Albums
+Albums, Tracks and playcounts.
 
 [source,cypher,subs=attributes]
 ----
 call stats.loadAlbumData('statsdb-dev', 'dev', 'jdbc:postgresql://localhost:5432/bootiful-music?currentSchema=dev')
+call stats.loadPlayCounts('statsdb-dev', 'dev', 'jdbc:postgresql://localhost:5432/bootiful-music?currentSchema=dev')
+RETURN "Done."
 ----
 
 == The result
