@@ -135,9 +135,10 @@ RETURN p,a,b, apoc.create.vRelationship(a,'IS_MEMBER_OF',{},b) as r<!--/code--><
 <pre mode="cypher"  class="highlight pre-scrollable programlisting cm-s-neo code runnable standalone-example ng-binding" data-lang="cypher" lang="cypher"><!--code class="cypher language-cypher"-->MATCH (a)-[:HAS]->(g:Genre),
       (a)-[:RELEASED_IN]->(:Year)-[:PART_OF]->(d:Decade),
       (a)-[:RELEASED_BY]->(artist)-[:FOUNDED_IN|:BORN_IN]->(c:Country)
+WHERE c.name IS NOT NULL
 WITH g, d,c, count(*) as freq, collect(a) as albums
 ORDER by freq desc limit 200
-WITH albums, freq, apoc.create.vNode(['Cat'], {name:g.name+ " "+d.value+" "+c.name}) as cat
+WITH albums, freq, apoc.create.vNode(['Cat'], {name:d.value + " " + c.name + " " + g.name}) as cat
 UNWIND albums as a
 RETURN cat, a, apoc.create.vRelationship(a,'IN',{freq:freq},cat) as rel<!--/code--></pre>
 </div>
