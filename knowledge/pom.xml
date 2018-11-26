@@ -135,15 +135,15 @@
 			<scope>test</scope>
 		</dependency>
 		<dependency>
-			<groupId>org.neo4j</groupId>
-			<artifactId>neo4j-ogm-embedded-driver</artifactId>
-			<version>${neo4j-ogm.version}</version>
+			<groupId>org.testcontainers</groupId>
+			<artifactId>junit-jupiter</artifactId>
+			<version>unspecified</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
-			<groupId>org.neo4j</groupId>
+			<groupId>org.testcontainers</groupId>
 			<artifactId>neo4j</artifactId>
-			<version>${neo4j.version}</version>
+			<version>unspecified</version>
 			<scope>test</scope>
 		</dependency>
 	</dependencies>

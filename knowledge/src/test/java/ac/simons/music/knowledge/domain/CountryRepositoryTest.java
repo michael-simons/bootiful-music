@@ -18,49 +18,59 @@ package ac.simons.music.knowledge.domain;
 import static org.assertj.core.api.Assertions.*;
 
 import java.time.Year;
-import java.util.Map;
 
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestInstance;
-import org.junit.jupiter.api.TestInstance.Lifecycle;
-import org.junit.jupiter.api.extension.ExtendWith;
+import org.neo4j.driver.v1.AuthTokens;
+import org.neo4j.driver.v1.GraphDatabase;
 import org.neo4j.ogm.driver.ParameterConversionMode;
 import org.neo4j.ogm.session.Session;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.data.neo4j.DataNeo4jTest;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Bean;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
+import org.testcontainers.containers.Neo4jContainer;
 
 /**
  * @author Michael J. Simons
  */
-@ExtendWith(SpringExtension.class)
 @DataNeo4jTest
-@TestInstance(Lifecycle.PER_CLASS)
 class CountryRepositoryTest {
+
+	private static final Neo4jContainer neo4jContainer = new Neo4jContainer()
+		.withAdminPassword(null);
 
 	private final Session session;
 
 	private final CountryRepository countryRepository;
 
-	@Autowired CountryRepositoryTest(Session session, CountryRepository countryRepository) {
+	@Autowired
+	CountryRepositoryTest(Session session, CountryRepository countryRepository) {
 		this.session = session;
 		this.countryRepository = countryRepository;
 	}
 
 	@BeforeAll
-	void createTestData() {
-		session.query(
-			"MERGE (a:ArtistEntity:Band {name: 'Die Ärzte'}) - [:FOUNDED_IN] ->  (:Country {code: 'DE', name:'Germany'})\n"
-				+ "MERGE (bestie:Album {name: 'Die Bestie in Menschengestalt', releasedIn: 1993}) - [:RELEASED_BY] -> (a)\n"
-				+ "MERGE (drei10:Album {name: '13', releasedIn: 1998}) - [:RELEASED_BY] -> (a)", Map.of());
+	static void startNeo4jContainer() {
+		neo4jContainer.start();
+
+		try (var driver = GraphDatabase.driver(neo4jContainer.getBoltUrl(), AuthTokens.none());
+			var session = driver.session()
+		) {
+			session.writeTransaction(work ->
+				work.run(""
+					+ "MERGE (a:ArtistEntity:Band {name: 'Die Ärzte'}) - [:FOUNDED_IN] ->  (:Country {code: 'DE', name:'Germany'}) "
+					+ "MERGE (bestie:Album {name: 'Die Bestie in Menschengestalt', releasedIn: 1993}) - [:RELEASED_BY] -> (a) "
+					+ "MERGE (drei10:Album {name: '13', releasedIn: 1998}) - [:RELEASED_BY] -> (a)")
+			);
+		} catch (Exception e) {
+			fail(e.getMessage());
+		}
 	}
 
 	@Test
 	void getStatisticsForCountryShouldWork() {
-
 		var statistics = this.countryRepository.getStatisticsFor(new CountryEntity("DE"));
 		assertThat(statistics)
 			.hasSize(2)
@@ -74,13 +84,20 @@ class CountryRepositoryTest {
 			}, atIndex(1));
 	}
 
+	@AfterAll
+	static void stopNeo4jContainer() {
+		neo4jContainer.stop();
+	}
+
 	@TestConfiguration
 	static class Config {
 
 		@Bean
-		public org.neo4j.ogm.config.Configuration  configuration() {
+		public org.neo4j.ogm.config.Configuration configuration() {
 			var builder = new org.neo4j.ogm.config.Configuration.Builder();
-			builder.withCustomProperty(ParameterConversionMode.CONFIG_PARAMETER_CONVERSION_MODE, ParameterConversionMode.CONVERT_NON_NATIVE_ONLY);
+			builder.uri(neo4jContainer.getBoltUrl());
+			builder.withCustomProperty(ParameterConversionMode.CONFIG_PARAMETER_CONVERSION_MODE,
+				ParameterConversionMode.CONVERT_NON_NATIVE_ONLY);
 			return builder.build();
 		}
 	}
