@@ -22,6 +22,15 @@ We will use Spring Data Neo4j from within Spring Boot to interact with the Graph
 
 See this series of blog posts: https://info.michael-simons.eu/2018/10/11/from-relational-databases-to-databases-with-relations/[From relational databases to databases with relations].
 --
+== Talks
+
+=== Devoxx Ukraine 2018
+
+++++
+<iframe id="talk_frame_428698" src="//speakerdeck.com/player/b1c410abf8044725acbcb997a73852df" width="480" height="269" style="border:0; padding:0; margin:0; background:transparent;" frameborder="0" allowtransparency="true" allowfullscreen="allowfullscreen" mozallowfullscreen="true" webkitallowfullscreen="true"></iframe>
+++++
+
+Directlink: https://speakerdeck.com/michaelsimons/going-from-relational-databases-to-databases-with-relations-with-neo4j-and-spring-data[Going from relational databases to databases with relations with Neo4j and Spring Data]
 
 [[the-business-domain]]
 == The business domain
