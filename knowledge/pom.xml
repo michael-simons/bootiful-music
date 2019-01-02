@@ -31,7 +31,7 @@
 		<neo4j.version>3.4.9</neo4j.version>
 		<neo4j-java-driver.version>1.6.3</neo4j-java-driver.version>
 		<openlayers.version>5.2.0</openlayers.version>
-		<testcontainers.version>1.10.4</testcontainers.version>
+		<testcontainers.version>1.10.5</testcontainers.version>
 		<webjars-locator.version>0.34</webjars-locator.version>
 	</properties>
 

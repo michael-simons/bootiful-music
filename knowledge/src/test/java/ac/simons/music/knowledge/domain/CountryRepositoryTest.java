@@ -19,7 +19,6 @@ import static org.assertj.core.api.Assertions.*;
 
 import java.time.Year;
 
-import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.neo4j.driver.v1.AuthTokens;
@@ -31,13 +30,17 @@ import org.springframework.boot.test.autoconfigure.data.neo4j.DataNeo4jTest;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.testcontainers.containers.Neo4jContainer;
+import org.testcontainers.junit.jupiter.Container;
+import org.testcontainers.junit.jupiter.Testcontainers;
 
 /**
  * @author Michael J. Simons
  */
+@Testcontainers
 @DataNeo4jTest
 class CountryRepositoryTest {
 
+	@Container
 	private static final Neo4jContainer neo4jContainer = new Neo4jContainer()
 		.withAdminPassword(null);
 
@@ -52,9 +55,7 @@ class CountryRepositoryTest {
 	}
 
 	@BeforeAll
-	static void startNeo4jContainer() {
-		neo4jContainer.start();
-
+	static void prepareTestdata() {
 		try (var driver = GraphDatabase.driver(neo4jContainer.getBoltUrl(), AuthTokens.none());
 			var session = driver.session()
 		) {
@@ -82,11 +83,6 @@ class CountryRepositoryTest {
 				assertThat(c.getYear()).isEqualTo(Year.of(1998));
 				assertThat(c.getAlbums()).containsExactly("13");
 			}, atIndex(1));
-	}
-
-	@AfterAll
-	static void stopNeo4jContainer() {
-		neo4jContainer.stop();
 	}
 
 	@TestConfiguration
