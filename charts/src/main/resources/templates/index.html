@@ -11,7 +11,7 @@
 <div layout:fragment="content" class="container" data-controller="index">
     <header class="row intro">
         <div class="col">
-            <h1 th:text="#{charts.title(${#temporals.format(yearMonth, 'MMM yyyy', locale)})}">The charts</h1>
+            <h1 th:text="#{charts.title(${#temporals.format(yearMonth)})}">The charts</h1>
         </div>
     </header>
     <div class="row">

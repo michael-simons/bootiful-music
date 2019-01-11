@@ -14,7 +14,7 @@
 	<parent>
 		<groupId>org.springframework.boot</groupId>
 		<artifactId>spring-boot-starter-parent</artifactId>
-		<version>2.0.6.RELEASE</version>
+		<version>2.1.1.RELEASE</version>
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
 
@@ -24,15 +24,24 @@
 
 		<bootstrap.version>4.1.3</bootstrap.version>
 		<faucet-pipeline.version>1.0.0</faucet-pipeline.version>
-		<flyway.version>5.2.0</flyway.version>
 		<highcharts.version>6.1.3</highcharts.version>
-		<java.version>10</java.version>
+		<java.version>11</java.version>
 		<jooq.version>3.11.3</jooq.version>
 		<jquery.version>3.3.1</jquery.version>
 		<webjars-locator.version>0.34</webjars-locator.version>
 	</properties>
 
 	<dependencies>
+		<!-- Needed for various modules -->
+		<dependency>
+			<groupId>javax.xml.bind</groupId>
+			<artifactId>jaxb-api</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.glassfish.jaxb</groupId>
+			<artifactId>jaxb-runtime</artifactId>
+		</dependency>
+
 		<!-- Database related -->
 		<dependency>
 			<groupId>org.postgresql</groupId>
