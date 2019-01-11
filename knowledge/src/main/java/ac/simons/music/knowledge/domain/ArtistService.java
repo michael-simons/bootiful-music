@@ -29,6 +29,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.function.UnaryOperator;
+import java.util.regex.Pattern;
 
 import org.neo4j.ogm.session.Session;
 import org.springframework.data.domain.Sort;
@@ -77,18 +79,32 @@ public class ArtistService {
 
 	@Transactional(readOnly = true)
 	public List<ArtistEntity> findAllArtists() {
-
-		var cypher = "MATCH (a:Artist) WITH a OPTIONAL MATCH p=(a)-[*0..1]-(c:Country) RETURN a, p ORDER BY a.name";
-
-		final List<ArtistEntity> allArtists = new ArrayList<>();
-		session.query(ArtistEntity.class, cypher, emptyMap())
-			.forEach(allArtists::add);
-		return allArtists;
+		return findAllArtistImpl(null);
 	}
 
 	@Transactional(readOnly = true)
-	public List<ArtistEntity> findAllArtistsByName(@Nullable String name) {
-		return emptyList();
+	public List<ArtistEntity> findAllArtistsByName(String name) {
+		return name.isBlank() ? emptyList() : findAllArtistImpl(name);
+	}
+
+	private List<ArtistEntity> findAllArtistImpl(@Nullable final String name) {
+
+		var cypher = ""
+			+ "MATCH (a:Artist) "
+			+ "WHERE a.name =~ $name "
+			+ "WITH a OPTIONAL MATCH p=(a)-[*0..1]-(c:Country) "
+			+ "RETURN a, p ORDER BY a.name";
+
+		UnaryOperator<String> format = s -> String.format("(?i).*%s.*", s);
+		var parameterValue = Optional.ofNullable(name)
+			.map(Pattern::quote)
+			.map(format)
+			.orElse(".*");
+
+		final List<ArtistEntity> allArtists = new ArrayList<>();
+		session.query(ArtistEntity.class, cypher, Map.of("name", parameterValue))
+			.forEach(allArtists::add);
+		return allArtists;
 	}
 
 	@Transactional(readOnly = true)
