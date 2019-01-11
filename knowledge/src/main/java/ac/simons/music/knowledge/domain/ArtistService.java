@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 the original author or authors.
+ * Copyright 2018-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,7 +15,7 @@
  */
 package ac.simons.music.knowledge.domain;
 
-import static java.util.Collections.emptyMap;
+import static java.util.Collections.*;
 import static java.util.Comparator.comparing;
 import static java.util.stream.Collectors.toList;
 
@@ -25,6 +25,7 @@ import lombok.RequiredArgsConstructor;
 
 import java.time.Year;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -83,6 +84,11 @@ public class ArtistService {
 		session.query(ArtistEntity.class, cypher, emptyMap())
 			.forEach(allArtists::add);
 		return allArtists;
+	}
+
+	@Transactional(readOnly = true)
+	public List<ArtistEntity> findAllArtistsByName(@Nullable String name) {
+		return emptyList();
 	}
 
 	@Transactional(readOnly = true)

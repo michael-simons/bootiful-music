@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 the original author or authors.
+ * Copyright 2018-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,11 +16,13 @@
 package ac.simons.music.knowledge.web;
 
 import static ac.simons.music.knowledge.web.AlbumController.mapAlbumEntities;
+import static java.util.Collections.*;
 import static java.util.stream.Collectors.toList;
 import static org.springframework.web.servlet.mvc.method.annotation.MvcUriComponentsBuilder.fromMethodCall;
 import static org.springframework.web.servlet.mvc.method.annotation.MvcUriComponentsBuilder.on;
 
 import java.time.Year;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
@@ -42,6 +44,7 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.View;
 import org.springframework.web.servlet.view.RedirectView;
@@ -81,9 +84,22 @@ public class ArtistController {
 
 	@GetMapping(value = {"", "/"}, produces = MediaType.TEXT_HTML_VALUE)
 	public ModelAndView artists() {
+		return new ModelAndView("artists", Map.of("artists", emptyList()));
+	}
+
+	@GetMapping(value = {"/by-name"}, produces = MediaType.TEXT_HTML_VALUE)
+	public ModelAndView artists(@RequestParam final String name) {
+
+		var artists = this.artistService.findAllArtistsByName(name)
+			.stream().map(ArtistCmd::new).collect(toList());
+		return new ModelAndView("artists", Map.of("name", name, "artists", artists));
+	}
+
+	@GetMapping(value = {"/all"}, produces = MediaType.TEXT_HTML_VALUE)
+	public ModelAndView allArtists() {
 
 		var artists = this.artistService.findAllArtists()
-				.stream().map(ArtistCmd::new).collect(toList());
+			.stream().map(ArtistCmd::new).collect(toList());
 		return new ModelAndView("artists", Map.of("artists", artists));
 	}
 

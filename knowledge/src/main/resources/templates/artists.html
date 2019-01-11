@@ -13,15 +13,35 @@
         </div>
     </header>
     <div class="row">
-        <div class="col">
-            <a class="btn btn-primary" href="#" role="button" th:href="@{/artists/new}"
+        <div class="col-4">
+            <form method="get" action="#" th:action="@{/artists/by-name}">
+                <div class="form-group">
+                    <label for="artist" th:text="#{album.artist}">Placeholder</label>
+                    <input type="text" class="form-control" id="artist" aria-describedby="artist.name.help"
+                           th:value="${name}"
+                           name="name"
+                           th:placeholder="#{artist.name.placeholder}">
+                    <small id="albums.by-artist.help" class="form-text text-muted" th:text="#{artists.by-name.help}">
+                        Placeholder
+                    </small>
+                </div>
+
+                <button type="submit" class="btn btn-primary" th:text="#{common.search}">Submit</button>
+                <a class="btn btn-link" href="#" role="button" th:href="@{/artists/all}"
+                   th:text="#{artists.all}">Placeholder</a>
+            </form>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-4">
+            <a class="btn btn-secondary" href="#" role="button" th:href="@{/artists/new}"
                th:text="#{artists.new}">Placeholder</a>
         </div>
     </div>
     <div class="row">
         <div class="col">
             <div th:fragment="listOfArtists(theArtists)" th:with="theArtists=${theArtists} ?: ${artists}" th:remove="tag">
-                <table class="table table-sm table-striped table-hover">
+                <table class="table table-sm table-striped table-hover" >
                     <thead class="thead-dark">
                     <tr>
                         <th scope="col" th:text="#{artist.name}">Placeholder</th>
