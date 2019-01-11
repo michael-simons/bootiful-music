@@ -267,6 +267,10 @@ public class ArtistController {
 					.map(code -> new Locale("", code).getDisplayCountry(locale))
 					.orElse(null);
 		}
+
+		public boolean isNew() {
+			return this.id == null;
+		}
 	}
 
 	@Data

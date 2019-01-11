@@ -58,7 +58,7 @@
         </div>
     </div>
 
-    <div class="row">
+    <div class="row" th:if="${!artistCmd.new}">
         <div class="col-6">
             <h2 th:text="#{artist.associated-artists}">Placeholder</h2>
             <table class="table table-sm table-striped table-hover">
@@ -145,8 +145,8 @@
         </div>
     </div>
 
-    <div class="row">
-        <div class="col-6" th:if="${#lists.size(albums)} > 0">
+    <div class="row" th:if="${!artistCmd.new}">
+        <div class="col-6" th:if="${#lists.size(albums) > 0}">
             <h2 th:text="#{albums}">Placeholder</h2>
             <table class="table table-sm table-striped table-hover" >
                 <thead class="thead-dark">
@@ -175,7 +175,7 @@
         </div>
     </div>
 
-    <div class="row" th:if="${#lists.size(tours)} > 0">
+    <div class="row" th:if="${!artistCmd.new && #lists.size(tours)  > 0}">
         <div class="col">
             <h2 th:text="#{on-tour}">Placeholder</h2>
 
