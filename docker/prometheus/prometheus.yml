@@ -3,10 +3,10 @@ global:
   evaluation_interval: 15s
 
 scrape_configs:
-#  - job_name: 'neo4j'
-#    metrics_path: '/metrics'
-#    static_configs:
-#      - targets: ['knowledgedb:2004']
+  - job_name: 'neo4j'
+    metrics_path: '/metrics'
+    static_configs:
+      - targets: ['knowledgedb:2004']
       
   - job_name: 'knowledge'
     metrics_path: '/actuator/prometheus'
