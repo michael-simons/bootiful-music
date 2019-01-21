@@ -25,6 +25,7 @@ services:
         - EXTENSION_SCRIPT=/tmp/install-apoc.sh
         - NEO4J_dbms_memory_heap_initial__size=2G
         - NEO4J_dbms_memory_heap_max__size=2G
+        - NEO4J_metrics_prometheus_enabled=true
       volumes:
         - ./var/knowledgedb:/data
         - ./var/knowledgedb/plugins:/plugins
@@ -33,6 +34,8 @@ services:
       ports:
         - "7474:7474"
         - "7687:7687"
+      expose:
+        - 2004
       links:
         - statsdb
   knowledge:
@@ -49,6 +52,16 @@ services:
         - "8080:8080"
       links:
         - knowledgedb
+  prometheus:
+      image: prom/prometheus
+      volumes:
+        - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+        - ./var/prometheus:/prometheus
+      ports:
+        - "9090:9090"
+      links:
+        - knowledgedb
+        - knowledge
 
 secrets:
   database_root_password:
