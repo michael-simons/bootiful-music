@@ -21,11 +21,12 @@ services:
       build:
         context: knowledgedb
       environment:
-        - NEO4J_AUTH_FILE=/run/secrets/knowledgedb_auth_file
         - EXTENSION_SCRIPT=/tmp/install-apoc.sh
+        - NEO4J_AUTH_FILE=/run/secrets/knowledgedb_auth_file
         - NEO4J_dbms_memory_heap_initial__size=2G
         - NEO4J_dbms_memory_heap_max__size=2G
         - NEO4J_metrics_prometheus_enabled=true
+        - NEO4J_dbms_security_procedures_unrestricted=apoc.*,algo.*
       volumes:
         - ./var/knowledgedb:/data
         - ./var/knowledgedb/plugins:/plugins
@@ -35,7 +36,7 @@ services:
         - "7474:7474"
         - "7687:7687"
       expose:
-        - 2004
+        - "2004"
       links:
         - statsdb
   knowledge:
