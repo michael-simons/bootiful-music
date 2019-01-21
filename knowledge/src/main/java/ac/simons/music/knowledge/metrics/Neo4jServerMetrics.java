@@ -15,10 +15,13 @@
  */
 package ac.simons.music.knowledge.metrics;
 
+import static java.util.Collections.*;
+
 import io.micrometer.core.instrument.Gauge;
 import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.core.instrument.binder.MeterBinder;
 
+import java.util.Collections;
 import java.util.Map;
 import java.util.function.ToDoubleFunction;
 
@@ -41,7 +44,7 @@ public class Neo4jServerMetrics implements MeterBinder {
 	public void bindTo(MeterRegistry registry) {
 
 		ToDoubleFunction<Session> nodeCount = session -> session
-			.queryForObject(Double.class, "MATCH (n) RETURN COUNT(*)", Map.of());
+			.queryForObject(Double.class, "MATCH (n) RETURN COUNT(*)", emptyMap());
 
 		ToDoubleFunction<Session> storeSize = session -> retrieveSysInfo(session, "Store sizes", "TotalStoreSize");
 
