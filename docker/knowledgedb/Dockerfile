@@ -2,6 +2,10 @@ FROM openjdk:11-jre-slim
 
 RUN addgroup --system neo4j && adduser --no-create-home --system --home /var/lib/neo4j --group neo4j
 
+ENV TINI_VERSION=v0.18.0
+ADD https://github.com/krallin/tini/releases/download/${TINI_VERSION}/tini /usr/bin/tini
+RUN chmod +x /usr/bin/tini
+
 ENV NEO4J_SHA256=376a32e3835de3dfe0592912893ca7a5c14cab9a8cb0072fa268931f686c1ddf   \
     NEO4J_TARBALL=neo4j-enterprise-3.5.1-unix.tar.gz \
     NEO4J_EDITION=enterprise
@@ -12,7 +16,7 @@ COPY ./local-package/* /tmp/
 COPY ./install-apoc.sh /tmp/
 
 RUN apt-get update
-RUN DEBIAN_FRONTEND=noninteractive apt-get update && apt-get install -y -q --no-install-recommends gosu bash curl tini \
+RUN DEBIAN_FRONTEND=noninteractive apt-get update && apt-get install -y -q --no-install-recommends gosu bash curl \
     && curl --fail --silent --show-error --location --remote-name ${NEO4J_URI} \
     && curl --fail --silent --show-error --location -o /tmp/apoc.jar ${NEO4J_APOC_URI} \
     && echo "${NEO4J_SHA256}  ${NEO4J_TARBALL}" | sha256sum -cw - \
