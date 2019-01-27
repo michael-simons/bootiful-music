@@ -192,6 +192,19 @@ public class ArtistController {
 		return String.format("redirect:/artists/%d", artist.getId());
 	}
 
+	@DeleteMapping(value = "/{artistId}/deassociateFrom", produces = MediaType.TEXT_HTML_VALUE)
+	public String deassociateFrom(@PathVariable final Long artistId, @Valid final NewAssociatedArtistCmd newAssociatedArtistCmd, final BindingResult newAssociatedArtistBindingResult) {
+		var artist = this.artistService.findArtistById(artistId)
+				.orElseThrow(() -> new NodeNotFoundException(ArtistEntity.class, artistId));
+
+		if (!newAssociatedArtistBindingResult.hasErrors()) {
+			var newAssociatedArtist = this.artistService.findArtistById(newAssociatedArtistCmd.artistId)
+					.orElseThrow(() -> new NodeNotFoundException(ArtistEntity.class, newAssociatedArtistCmd.artistId));
+			this.artistService.deassociate(artist, newAssociatedArtist);
+		}
+		return String.format("redirect:/artists/%d", artist.getId());
+	}
+
 	@DeleteMapping(value = "/{artistId}", produces = MediaType.TEXT_HTML_VALUE)
 	public View delete(@PathVariable final Long artistId) {
 

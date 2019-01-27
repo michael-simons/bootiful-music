@@ -135,6 +135,15 @@ public class ArtistService {
 	}
 
 	@Transactional
+	public void deassociate(ArtistEntity artist1, ArtistEntity artist2) {
+
+		var cypher
+				= " MATCH (artist1:Artist {name: $artistName1}) - [r:ASSOCIATED_WITH] - (artist2:Artist {name: $artistName2})"
+				+ " DELETE r";
+		session.query(cypher, Map.of("artistName1", artist1.getName(), "artistName2", artist2.getName()));
+	}
+
+	@Transactional
 	public List<ArtistEntity> findAssociatedArtists(ArtistEntity artist) {
 
 		var cypher = "MATCH (:Artist {name: $artistName}) - [:ASSOCIATED_WITH] - (another:Artist) RETURN another";

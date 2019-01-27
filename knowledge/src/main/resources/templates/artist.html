@@ -65,17 +65,25 @@
                 <div class="col-12"> <!-- ASSOCIATED ARTISTS -->
 
                     <h2 th:text="#{artist.associated-artists}">Placeholder</h2>
-                    <table th:fragment="listOfAssociatedArtists(theArtists)" th:with="theArtists=${theArtists} ?: ${associatedArtists}" class="table table-sm table-striped table-hover">
+                    <table th:fragment="listOfAssociatedArtists(theArtists)"
+                           th:with="theArtists=${theArtists} ?: ${associatedArtists}, includeDeleteButton=${includeDeleteButton} ?: true"
+                           class="table table-sm table-striped table-hover">
                         <thead class="thead-dark">
                             <tr>
                                 <th scope="col" th:text="#{artist.name}">Placeholder</th>
                                 <th scope="col"></th>
+                                <th th:if="${includeDeleteButton}" scope="col"></th>
                             </tr>
                         </thead>
                         <tbody>
                             <tr th:each="associatedArtist : ${theArtists}">
                                 <th scope="row" th:text="${associatedArtist.name}">Placeholder</th>
                                 <td><a href="#" th:href="@{/artists/{artistId}(artistId=${associatedArtist.id})}" th:text="#{artists.edit}">Placeholder</a></td>
+                                <td th:if="${includeDeleteButton}">
+                                    <form method="post" th:method="delete" th:action="@{/artists/{artistId1}/deassociateFrom(artistId1=${artistCmd.id},artistId=${associatedArtist.id})}">
+                                        <button type="submit" class="text-danger btn-link p-0 border-0" th:text="#{artists.delete}">Placeholder</button>
+                                    </form>
+                                </td>
                             </tr>
                         </tbody>
                     </table>
@@ -101,7 +109,7 @@
                 <div class="col-12" th:unless="${recommendedArtists.empty}"> <!-- RECOMMENDED ARTISTS -->
 
                     <h2 th:text="#{artist.recommended-artists}">Placeholder</h2>
-                    <div th:replace=":: listOfAssociatedArtists(${recommendedArtists})"></div>
+                    <div th:replace=":: listOfAssociatedArtists(theArtists = ${recommendedArtists}, includeDeleteButton = false)"></div>
                 </div>
             </div>
 
