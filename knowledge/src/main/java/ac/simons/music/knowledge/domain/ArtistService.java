@@ -25,6 +25,7 @@ import lombok.RequiredArgsConstructor;
 
 import java.time.Year;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -235,6 +236,35 @@ public class ArtistService {
 
 	public List<Membership> findAllBandsByMember(@NonNull  SoloArtistEntity member) {
 		return bandRepository.findAllBandsByMember(member.getId());
+	}
+
+	/**
+	 * This returns a distinct list of artists that are not related on the first level with the given artist but
+	 * might be of interest.
+	 *
+	 * @param artist
+	 * @return
+	 */
+	public List<ArtistEntity> recommededArtistsFor(ArtistEntity artist) {
+
+		var cypher
+			= " MATCH (src:Artist)"
+			+ " WHERE id(src) = $id"
+            + " WITH src"
+			+ " MATCH (src) - [:ASSOCIATED_WITH|HAS_MEMBER*..2] - (associated:Artist)"
+			+ " OPTIONAL MATCH (associated) <- [:ASSOCIATED_WITH|HAS_MEMBER] - (ternary:Band)"
+			+ " WITH src, collect(associated) + collect(ternary) AS recommendations"
+			+ " UNWIND recommendations as recommended"
+			+ " MATCH (recommended)"
+			+ " WHERE NOT (src) - [:ASSOCIATED_WITH|HAS_MEMBER] - (recommended)"
+			+ "   AND (src) <> (recommended)"
+			+ " RETURN DISTINCT recommended"
+			+ " ORDER BY recommended.name";
+
+		final List<ArtistEntity> recommendedArtists = new ArrayList<>();
+		session.query(ArtistEntity.class, cypher, Map.of("id", artist.getId()))
+				.forEach(recommendedArtists::add);
+		return recommendedArtists;
 	}
 
 	private ArtistEntity updateWikipediaLinksFor(long artistId, WikidataClient.LinkResult linkResult) {

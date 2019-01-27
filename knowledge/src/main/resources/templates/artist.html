@@ -58,41 +58,54 @@
         </div>
     </div>
 
-    <div class="row" th:if="${!artistCmd.new}">
+    <div class="row" th:unless="${artistCmd.new}">
         <div class="col-6">
-            <h2 th:text="#{artist.associated-artists}">Placeholder</h2>
-            <table class="table table-sm table-striped table-hover">
-                <thead class="thead-dark">
-                <tr>
-                    <th scope="col" th:text="#{artist.name}">Placeholder</th>
-                    <th scope="col"></th>
-                </tr>
-                </thead>
-                <tbody>
-                <tr th:each="associatedArtist : ${associatedArtists}">
-                    <th scope="row" th:text="${associatedArtist.name}">Placeholder</th>
-                    </td>
-                    <td><a href="#" th:href="@{/artists/{artistId}(artistId=${associatedArtist.id})}"
-                           th:text="#{artists.edit}">Placeholder</a></td>
-                </tr>
-                </tbody>
-            </table>
 
-            <form th:if="${notAssociatedArtists != null}"
-                  method="post" action="#"
-                  th:action="@{/artists/{artistId}/associateWith(artistId=${artistCmd.id})}" th:object="${newMemberForm}">
-                <div class="form-group">
-                    <label for="new-associated-artist" th:text="#{artist.name}">Placeholder</label>
-                    <select class="form-control" id="new-associated-artist" th:field="*{artistId}">
-                        <option value=""></option>
-                        <option th:each="notAssociatedArtist : ${notAssociatedArtists}"
-                                th:value="${notAssociatedArtist.id}"
-                                th:text="${notAssociatedArtist.name}">Placeholder
-                        </option>
-                    </select>
+            <div class="row">
+                <div class="col-12"> <!-- ASSOCIATED ARTISTS -->
+
+                    <h2 th:text="#{artist.associated-artists}">Placeholder</h2>
+                    <table th:fragment="listOfAssociatedArtists(theArtists)" th:with="theArtists=${theArtists} ?: ${associatedArtists}" class="table table-sm table-striped table-hover">
+                        <thead class="thead-dark">
+                            <tr>
+                                <th scope="col" th:text="#{artist.name}">Placeholder</th>
+                                <th scope="col"></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="associatedArtist : ${theArtists}">
+                                <th scope="row" th:text="${associatedArtist.name}">Placeholder</th>
+                                <td><a href="#" th:href="@{/artists/{artistId}(artistId=${associatedArtist.id})}" th:text="#{artists.edit}">Placeholder</a></td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                    <form th:if="${notAssociatedArtists != null}"
+                        method="post" action="#"
+                        th:action="@{/artists/{artistId}/associateWith(artistId=${artistCmd.id})}" th:object="${newMemberForm}">
+
+                        <div class="form-group">
+                            <label for="new-associated-artist" th:text="#{artist.name}">Placeholder</label>
+                            <select class="form-control" id="new-associated-artist" th:field="*{artistId}">
+                                <option value=""></option>
+                                <option th:each="notAssociatedArtist : ${notAssociatedArtists}"
+                                    th:value="${notAssociatedArtist.id}"
+                                    th:text="${notAssociatedArtist.name}">Placeholder
+                                </option>
+                            </select>
+                        </div>
+                        <button type="submit" class="btn btn-primary" th:text="#{common.save}">Submit</button>
+                    </form>
                 </div>
-                <button type="submit" class="btn btn-primary" th:text="#{common.save}">Submit</button>
-            </form>
+
+                <div class="col-12" th:unless="${recommendedArtists.empty}"> <!-- RECOMMENDED ARTISTS -->
+
+                    <h2 th:text="#{artist.recommended-artists}">Placeholder</h2>
+                    <div th:replace=":: listOfAssociatedArtists(${recommendedArtists})"></div>
+                </div>
+            </div>
+
+
         </div>
 
         <div class="col-6" th:if="${artistCmd.type == T(ac.simons.music.knowledge.web.ArtistController.ArtistType).BAND}">
@@ -111,7 +124,6 @@
                     <th scope="row" th:text="${member.name}">Placeholder</th>
                     <td scope="row" th:text="${member.joinedIn}">Placeholder</td>
                     <td scope="row" th:text="${member.leftIn}">Placeholder</td>
-                    </td>
                     <td><a href="#" th:href="@{/artists/{artistId}(artistId=${member.id})}"
                            th:text="#{artists.edit}">Placeholder</a></td>
                 </tr>
@@ -148,28 +160,27 @@
             <h2 th:text="#{soloArtist.memberOf}">Placeholder</h2>
             <table class="table table-sm table-striped table-hover">
                 <thead class="thead-dark">
-                <tr>
-                    <th scope="col" th:text="#{artist.name}">Placeholder</th>
-                    <th scope="col" th:text="#{member.joined-in}">Placeholder</th>
-                    <th scope="col" th:text="#{member.left-in}">Placeholder</th>
-                    <th scope="col"></th>
-                </tr>
+                    <tr>
+                        <th scope="col" th:text="#{artist.name}">Placeholder</th>
+                        <th scope="col" th:text="#{member.joined-in}">Placeholder</th>
+                        <th scope="col" th:text="#{member.left-in}">Placeholder</th>
+                        <th scope="col"></th>
+                    </tr>
                 </thead>
                 <tbody>
-                <tr th:each="member : ${memberships}">
-                    <th scope="row" th:text="${member.band.name}">Placeholder</th>
-                    <td scope="row" th:text="${member.joinedIn}">Placeholder</td>
-                    <td scope="row" th:text="${member.leftIn}">Placeholder</td>
-                    </td>
-                    <td><a href="#" th:href="@{/artists/{artistId}(artistId=${member.band.id})}"
-                           th:text="#{artists.edit}">Placeholder</a></td>
-                </tr>
+                    <tr th:each="member : ${memberships}">
+                        <th scope="row" th:text="${member.band.name}">Placeholder</th>
+                        <td scope="row" th:text="${member.joinedIn}">Placeholder</td>
+                        <td scope="row" th:text="${member.leftIn}">Placeholder</td>
+                        <td><a href="#" th:href="@{/artists/{artistId}(artistId=${member.band.id})}"
+                               th:text="#{artists.edit}">Placeholder</a></td>
+                    </tr>
                 </tbody>
             </table>
         </div>
     </div>
 
-    <div class="row" th:if="${!artistCmd.new}">
+    <div class="row" th:unless="${artistCmd.new}">
         <div class="col-6" th:if="${#lists.size(albums) > 0}">
             <h2 th:text="#{albums}">Placeholder</h2>
             <table class="table table-sm table-striped table-hover" >
@@ -184,14 +195,13 @@
                 <tr th:each="album : ${albums}">
                     <th scope="row" th:text="${album.name}">Placeholder</th>
                     <td th:text="${album.releasedIn}">Placeholder</td>
-                    <td><a href="#" th:href="@{/albums/{albumId}(albumId=${album.id})}" th:text="#{albums.edit}">Placeholder</a>
-                    </td>
+                    <td><a href="#" th:href="@{/albums/{albumId}(albumId=${album.id})}" th:text="#{albums.edit}">Placeholder</a></td>
                 </tr>
                 </tbody>
             </table>
         </div>
 
-        <div class="col-4">
+        <div class="col-4" th:unless="${wikipediaArticles.empty}">
             <h2 th:text="#{common.wikipedia}">Placeholder</h2>
             <ul th:each="wikipediaArticle : ${wikipediaArticles}">
                 <li><a th:href="@{${wikipediaArticle.url}}" th:text="${wikipediaArticle.title} + ' (' + ${wikipediaArticle.site} + ')'">Placeholder</a></li>
@@ -199,7 +209,7 @@
         </div>
     </div>
 
-    <div class="row" th:if="${!artistCmd.new && #lists.size(tours)  > 0}">
+    <div class="row" th:unless="${artistCmd.new || tours.empty}">
         <div class="col">
             <h2 th:text="#{on-tour}">Placeholder</h2>
 
