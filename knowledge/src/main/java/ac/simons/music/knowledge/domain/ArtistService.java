@@ -92,7 +92,8 @@ public class ArtistService {
 		var cypher = ""
 			+ "MATCH (a:Artist) "
 			+ "WHERE a.name =~ $name "
-			+ "WITH a OPTIONAL MATCH p=(a)-[*0..1]-(c:Country) "
+			+ "WITH a "
+			+ "OPTIONAL MATCH p=(a)-[:FOUNDED_IN|BORN_IN]->(c:Country) "
 			+ "RETURN a, p ORDER BY a.name";
 
 		UnaryOperator<String> format = s -> String.format("(?i).*%s.*", s);
