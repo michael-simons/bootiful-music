@@ -143,6 +143,30 @@
                 <button type="submit" class="btn btn-primary" th:text="#{common.save}">Submit</button>
             </form>
         </div>
+
+        <div class="col-6" th:if="${artistCmd.type == T(ac.simons.music.knowledge.web.ArtistController.ArtistType).SOLO_ARTIST}">
+            <h2 th:text="#{soloArtist.memberOf}">Placeholder</h2>
+            <table class="table table-sm table-striped table-hover">
+                <thead class="thead-dark">
+                <tr>
+                    <th scope="col" th:text="#{artist.name}">Placeholder</th>
+                    <th scope="col" th:text="#{member.joined-in}">Placeholder</th>
+                    <th scope="col" th:text="#{member.left-in}">Placeholder</th>
+                    <th scope="col"></th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="member : ${memberships}">
+                    <th scope="row" th:text="${member.band.name}">Placeholder</th>
+                    <td scope="row" th:text="${member.joinedIn}">Placeholder</td>
+                    <td scope="row" th:text="${member.leftIn}">Placeholder</td>
+                    </td>
+                    <td><a href="#" th:href="@{/artists/{artistId}(artistId=${member.band.id})}"
+                           th:text="#{artists.edit}">Placeholder</a></td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
     </div>
 
     <div class="row" th:if="${!artistCmd.new}">

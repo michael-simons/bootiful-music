@@ -15,24 +15,26 @@
  */
 package ac.simons.music.knowledge.domain;
 
-import java.util.List;
+import java.time.Year;
 
-import org.springframework.data.domain.Sort;
-import org.springframework.data.neo4j.annotation.Query;
-import org.springframework.data.neo4j.repository.Neo4jRepository;
+import org.neo4j.ogm.annotation.typeconversion.Convert;
+import org.springframework.data.neo4j.annotation.QueryResult;
+
+import ac.simons.music.knowledge.support.YearConverter;
+import lombok.Data;
 
 /**
  * @author Michael J. Simons
  */
-interface BandRepository extends Neo4jRepository<BandEntity, Long> {
-	List<BandEntity> findAll(Sort sort);
+@QueryResult
+@Data
+public class Membership {
 
-	@Query(value
-			= " MATCH (m:SoloArtist)"
-			+ " MATCH (b:Band) - [r:HAS_MEMBER] -> (m)"
-			+ " WHERE id(m) = $memberId"
-			+ " RETURN b as band, r.joinedIn as joinedIn, r.leftIn as leftIn"
-			+ " ORDER BY r.joinedIn, r.leftIn, b.name"
-	)
-	List<Membership> findAllBandsByMember(long memberId);
+	private BandEntity band;
+
+	@Convert(YearConverter.class)
+	private Year joinedIn;
+
+	@Convert(YearConverter.class)
+	private Year leftIn;
 }

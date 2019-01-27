@@ -55,6 +55,7 @@ import ac.simons.music.knowledge.domain.ArtistService;
 import ac.simons.music.knowledge.domain.BandEntity;
 import ac.simons.music.knowledge.domain.BandEntity.Member;
 import ac.simons.music.knowledge.domain.CountryEntity;
+import ac.simons.music.knowledge.domain.Membership;
 import ac.simons.music.knowledge.domain.SoloArtistEntity;
 import ac.simons.music.knowledge.domain.YearEntity;
 import lombok.Data;
@@ -118,7 +119,8 @@ public class ArtistController {
 
 		var artist = this.artistService.findArtistById(artistId)
 				.orElseThrow(() -> new NodeNotFoundException(ArtistEntity.class, artistId));
-		var members = (artist instanceof BandEntity) ? ((BandEntity) artist).getMember() : List.<Member>of();
+		var members = (artist instanceof BandEntity) ? ((BandEntity) artist).getMember() : Collections.<Member>emptyList();
+		var memberships = (artist instanceof SoloArtistEntity) ? this.artistService.findAllBandsByMember((SoloArtistEntity) artist) : Collections.<Membership>emptyList();
 
 		var soloArtists = this.artistService.findAllSoloArtists();
 		var associatedArtists = this.artistService.findAssociatedArtists(artist);
@@ -131,6 +133,7 @@ public class ArtistController {
 		var model = Map.of(
 				"artistCmd", new ArtistCmd(artist),
 				"members", members,
+				"memberships", memberships,
 				"soloArtists", soloArtists,
 				"associatedArtists", associatedArtists,
 				"notAssociatedArtists", notAssociatedArtists,

@@ -25,7 +25,6 @@ import lombok.RequiredArgsConstructor;
 
 import java.time.Year;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -34,6 +33,7 @@ import java.util.regex.Pattern;
 
 import org.neo4j.ogm.session.Session;
 import org.springframework.data.domain.Sort;
+import org.springframework.lang.NonNull;
 import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -231,6 +231,10 @@ public class ArtistService {
 	public BandEntity addMember(final BandEntity band, final SoloArtistEntity newMember, final Year joinedIn,
 		@Nullable final Year leftIn) {
 		return this.bandRepository.save(band.addMember(newMember, joinedIn, leftIn));
+	}
+
+	public List<Membership> findAllBandsByMember(@NonNull  SoloArtistEntity member) {
+		return bandRepository.findAllBandsByMember(member.getId());
 	}
 
 	private ArtistEntity updateWikipediaLinksFor(long artistId, WikidataClient.LinkResult linkResult) {
