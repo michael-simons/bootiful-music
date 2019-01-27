@@ -30,6 +30,8 @@ import org.springframework.data.repository.query.Param;
 interface AlbumRepository extends Neo4jRepository<AlbumEntity, Long> {
 	Optional<AlbumEntity> findOneByArtistNameAndName(String artistName, String name);
 
+	List<AlbumEntity> findAllByArtistName(String artistName, Sort sort, @Depth int depth);
+
 	List<AlbumEntity> findAllByArtistNameMatchesRegex(String artistName, Sort sort, @Depth int depth);
 
 	List<AlbumEntity> findAllByNameMatchesRegex(String name, Sort sort, @Depth int depth);
@@ -61,8 +63,4 @@ interface AlbumRepository extends Neo4jRepository<AlbumEntity, Long> {
 	List<ReleasesByYear> getNumberOfReleasesByYear();
 
 	List<AlbumEntity> findAllByGenreNameOrderByName(String name, @Depth int depth);
-
-	// Careful with an implicity group by here i.e
-	// + " RETURN decade.value as decade, year.value as year, sum(releasesByYear)"
-	// or similar
 }

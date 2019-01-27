@@ -57,7 +57,7 @@ public class AlbumController {
 	@GetMapping(value = { "/by-artist" }, produces = MediaType.TEXT_HTML_VALUE)
 	public ModelAndView byArtist(@RequestParam final String artist) {
 
-		var albums = mapAlbumEntities(this.albumService.findAllAlbumsByArtist(artist));
+		var albums = mapAlbumEntities(this.albumService.findAllAlbumsByArtistName(artist));
 		return new ModelAndView("albums", Map.of("artist", artist, "albums", albums));
 	}
 

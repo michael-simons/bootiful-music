@@ -33,7 +33,11 @@ import org.springframework.stereotype.Service;
 public class AlbumService {
 	private final AlbumRepository albumRepository;
 
-	public List<AlbumEntity> findAllAlbumsByArtist(String artist) {
+	public List<AlbumEntity> findAllAlbumsByArtist(ArtistEntity artist) {
+		return this.albumRepository.findAllByArtistName(artist.getName(), Sort.by("name").ascending(), 1);
+	}
+
+	public List<AlbumEntity> findAllAlbumsByArtistName(String artist) {
 		return this.albumRepository.findAllByArtistNameMatchesRegex(createRegex(artist), Sort.by("name").ascending(), 1);
 	}
 

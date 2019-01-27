@@ -127,7 +127,7 @@ public class ArtistController {
 		var notAssociatedArtists = this.artistService.findArtistsNotAssociatedWith(artist);
 		var wikipediaArticles = artist.getWikipediaArticles().stream()
 				.filter(a -> List.of("dewiki", "enwiki").contains(a.getSite())).collect(toList());
-		var albums = mapAlbumEntities(this.albumService.findAllAlbumsByArtist(artist.getName()));
+		var albums = mapAlbumEntities(this.albumService.findAllAlbumsByArtist(artist));
 		var tours = this.artistService.findToursByArtist(artist);
 
 		var model = Map.of(
