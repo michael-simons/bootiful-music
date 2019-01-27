@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 the original author or authors.
+ * Copyright 2018-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,15 +21,12 @@ import java.util.Optional;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.neo4j.annotation.Depth;
 import org.springframework.data.neo4j.annotation.Query;
-import org.springframework.data.neo4j.repository.Neo4jRepository;
-import org.springframework.data.repository.query.Param;
+import org.springframework.data.repository.Repository;
 
 /**
  * @author Michael J. Simons
  */
-interface AlbumRepository extends Neo4jRepository<AlbumEntity, Long> {
-	Optional<AlbumEntity> findOneByArtistNameAndName(String artistName, String name);
-
+interface AlbumRepository extends Repository<AlbumEntity, Long> {
 	List<AlbumEntity> findAllByArtistName(String artistName, Sort sort, @Depth int depth);
 
 	List<AlbumEntity> findAllByArtistNameMatchesRegex(String artistName, Sort sort, @Depth int depth);
@@ -39,28 +36,30 @@ interface AlbumRepository extends Neo4jRepository<AlbumEntity, Long> {
 	List<AlbumEntity> findAllByReleasedInValue(long value, Sort sort, @Depth int depth);
 
 	@Query(value
-		= " MATCH (album:Album) - [c:CONTAINS] -> (track:Track) WHERE id(album) = $albumId"
-		+ " RETURN id(track) AS id, track.name AS name, c.discNumber AS discNumber, c.trackNumber AS trackNumber"
-		+ " ORDER BY c.discNumber ASC, c.trackNumber ASC"
+			= " MATCH (album:Album) - [c:CONTAINS] -> (track:Track) WHERE id(album) = $albumId"
+			+ " RETURN id(track) AS id, track.name AS name, c.discNumber AS discNumber, c.trackNumber AS trackNumber"
+			+ " ORDER BY c.discNumber ASC, c.trackNumber ASC"
 	)
 	List<AlbumTrack> findAllAlbumTracks(long albumId);
 
 	@Query(value
-		= " MATCH (album:Album) - [:CONTAINS] -> (track:Track)"
-		+ " MATCH p=(album) - [*1] - ()"
-		+ " WHERE id(track) = $trackId"
-		+ "   AND ALL(relationship IN relationships(p) WHERE type(relationship) <> 'CONTAINS')"
-		+ " RETURN p"
+			= " MATCH (album:Album) - [:CONTAINS] -> (track:Track)"
+			+ " MATCH p=(album) - [*1] - ()"
+			+ " WHERE id(track) = $trackId"
+			+ "   AND ALL(relationship IN relationships(p) WHERE type(relationship) <> 'CONTAINS')"
+			+ " RETURN p"
 	)
 	List<AlbumEntity> findAllByTrack(long trackId);
 
 	@Query(value
-		= " MATCH (year:Year)"
-		+ " WITH year, size( (year) <- [:RELEASED_IN] - (:Album)) AS releasesByYear"
-		+ " MATCH (year) - [:PART_OF] -> (decade:Decade)"
-		+ " RETURN decade.value AS decade, year.value AS year, releasesByYear AS numberOfReleases"
+			= " MATCH (year:Year)"
+			+ " WITH year, size( (year) <- [:RELEASED_IN] - (:Album)) AS releasesByYear"
+			+ " MATCH (year) - [:PART_OF] -> (decade:Decade)"
+			+ " RETURN decade.value AS decade, year.value AS year, releasesByYear AS numberOfReleases"
 	)
 	List<ReleasesByYear> getNumberOfReleasesByYear();
 
 	List<AlbumEntity> findAllByGenreNameOrderByName(String name, @Depth int depth);
+
+	Optional<AlbumEntity> findById(Long id);
 }

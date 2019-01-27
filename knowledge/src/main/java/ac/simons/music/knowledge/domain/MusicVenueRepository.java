@@ -18,12 +18,12 @@ package ac.simons.music.knowledge.domain;
 import java.util.List;
 
 import org.springframework.data.neo4j.annotation.Query;
-import org.springframework.data.neo4j.repository.Neo4jRepository;
+import org.springframework.data.repository.Repository;
 
 /**
  * @author Michael J. Simons
  */
-public interface MusicVenueRepository extends Neo4jRepository<MusicVenueEntity, Long> {
+public interface MusicVenueRepository extends Repository<MusicVenueEntity, Long> {
 
 	@Query(value
 			= " MATCH (m:MusicVenue)"

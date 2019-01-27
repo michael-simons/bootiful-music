@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 the original author or authors.
+ * Copyright 2018-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,15 +16,22 @@
 package ac.simons.music.knowledge.domain;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.data.domain.Sort;
+import org.springframework.data.neo4j.annotation.Depth;
 import org.springframework.data.neo4j.annotation.Query;
 import org.springframework.data.neo4j.repository.Neo4jRepository;
+import org.springframework.data.repository.Repository;
 
 /**
  * @author Michael J. Simons
  */
-interface BandRepository extends Neo4jRepository<BandEntity, Long> {
+interface BandRepository extends Repository<BandEntity, Long> {
+	BandEntity save(BandEntity band);
+
+	Optional<BandEntity> findById(Long id, @Depth int depth);
+
 	List<BandEntity> findAll(Sort sort);
 
 	@Query(value

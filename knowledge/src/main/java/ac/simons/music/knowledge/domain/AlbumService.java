@@ -50,7 +50,7 @@ public class AlbumService {
 	}
 
 	public Optional<AlbumEntity> findAlbumById(Long id) {
-		return this.albumRepository.findById(id, 1);
+		return this.albumRepository.findById(id);
 	}
 
 	public List<AlbumTrack> findAllTracksContainedOn(AlbumEntity album) {

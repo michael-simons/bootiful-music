@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 the original author or authors.
+ * Copyright 2018-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,15 +16,19 @@
 package ac.simons.music.knowledge.domain;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.data.neo4j.annotation.Query;
-import org.springframework.data.neo4j.repository.Neo4jRepository;
-import org.springframework.data.repository.query.Param;
+import org.springframework.data.repository.Repository;
 
 /**
  * @author Michael J. Simons
  */
-interface TrackRepository extends Neo4jRepository<TrackEntity, Long> {
+interface TrackRepository extends Repository<TrackEntity, Long> {
+
+	TrackEntity save(TrackEntity trackEntity);
+
+	Optional<TrackEntity> findById(Long aLong);
 
 	/**
 	 * Returns a list of tracks that have been played together with the source track at least in
@@ -80,5 +84,4 @@ interface TrackRepository extends Neo4jRepository<TrackEntity, Long> {
 		long monthsPlayedTogether,
 		long limit
 	);
-
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 the original author or authors.
+ * Copyright 2018-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,12 +19,15 @@ import java.util.List;
 import java.util.Optional;
 
 import org.springframework.data.neo4j.annotation.Query;
-import org.springframework.data.neo4j.repository.Neo4jRepository;
+import org.springframework.data.repository.Repository;
 
 /**
  * @author Michael J. Simons
  */
-public interface CountryRepository extends Neo4jRepository<CountryEntity, Long> {
+public interface CountryRepository extends Repository<CountryEntity, Long> {
+
+	CountryEntity save(CountryEntity countryEntity);
+
 	Optional<CountryEntity> findByCode(String code);
 
 	@Query("MATCH (a:Album) - [:RELEASED_BY] -> (b:Band) - [:FOUNDED_IN] -> (:Country {code: :#{#country.code}}) "

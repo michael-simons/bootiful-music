@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 the original author or authors.
+ * Copyright 2018-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,14 +16,18 @@
 package ac.simons.music.knowledge.domain;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.data.neo4j.annotation.Query;
 import org.springframework.data.neo4j.repository.Neo4jRepository;
+import org.springframework.data.repository.Repository;
 
 /**
  * @author Michael J. Simons
  */
-public interface TourRepository extends Neo4jRepository<TourEntity, Long> {
+public interface TourRepository extends Repository<TourEntity, Long> {
+
+	Optional<TourEntity> findById(Long tourId);
 
 	@Query(value
 			= " MATCH (a:Artist) - [:WAS_ON] -> (t:Tour) - [p:HAD_PART_OF_ITINERARY] -> (m:MusicVenue)"
