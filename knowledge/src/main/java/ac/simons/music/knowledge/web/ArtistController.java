@@ -125,7 +125,7 @@ public class ArtistController {
 		var soloArtists = this.artistService.findAllSoloArtists();
 		var associatedArtists = this.artistService.findAssociatedArtists(artist);
 		var notAssociatedArtists = this.artistService.findArtistsNotAssociatedWith(artist);
-		var recommendedArtists = this.artistService.recommededArtistsFor(artist);
+		var recommendations = this.artistService.recommededArtistsFor(artist);
 		var wikipediaArticles = artist.getWikipediaArticles().stream()
 				.filter(a -> List.of("dewiki", "enwiki").contains(a.getSite())).collect(toList());
 		var albums = mapAlbumEntities(this.albumService.findAllAlbumsByArtist(artist));
@@ -138,7 +138,7 @@ public class ArtistController {
 				"soloArtists", soloArtists,
 				"associatedArtists", associatedArtists,
 				"notAssociatedArtists", notAssociatedArtists,
-				"recommendedArtists", recommendedArtists,
+				"recommendations", recommendations,
 				"wikipediaArticles", wikipediaArticles,
 				"albums", albums,
 				"tours", tours

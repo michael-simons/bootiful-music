@@ -29,8 +29,13 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
+import java.util.TreeSet;
 import java.util.function.UnaryOperator;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
 
 import org.neo4j.ogm.session.Session;
 import org.springframework.data.domain.Sort;
@@ -248,14 +253,16 @@ public class ArtistService {
 	}
 
 	/**
-	 * This returns a distinct list of artists that are not related on the first level with the given artist but
-	 * might be of interest.
+	 * This returns a distinct list of recommendations for other artists.
 	 *
 	 * @param artist
 	 * @return
 	 */
-	public List<ArtistEntity> recommededArtistsFor(ArtistEntity artist) {
+	public Set<Recommendation> recommededArtistsFor(ArtistEntity artist) {
 
+		var parameters = Map.of("id", artist.getId());
+
+		// First recommended artists that are not related on the first level with the given artist but might be of interest.
 		var cypher
 			= " MATCH (src:Artist)"
 			+ " WHERE id(src) = $id"
@@ -267,13 +274,38 @@ public class ArtistService {
 			+ " MATCH (recommended)"
 			+ " WHERE NOT (src) - [:ASSOCIATED_WITH|HAS_MEMBER] - (recommended)"
 			+ "   AND (src) <> (recommended)"
-			+ " RETURN DISTINCT recommended"
+			+ " RETURN DISTINCT recommended AS recommendedArtist, "
+			+ "                 '' AS reason"
 			+ " ORDER BY recommended.name";
+		var associatedArtists = session.query(ArtistEntity.class, cypher, parameters);
 
-		final List<ArtistEntity> recommendedArtists = new ArrayList<>();
-		session.query(ArtistEntity.class, cypher, Map.of("id", artist.getId()))
-				.forEach(recommendedArtists::add);
-		return recommendedArtists;
+		// Then recommendations based on similar subgenres
+		cypher
+			= " MATCH (src:Artist),"
+			+ "       (src)-[:FOUNDED_IN|:BORN_IN]->(country:Country),"
+			+ "       (album:Album) - [:RELEASED_BY] -> (src),"
+			+ "       (album)-[:HAS]->(genre:Genre),"
+			+ "       (album)-[:RELEASED_IN|PART_OF*2]->(decade:Decade)"
+			+ " WHERE id(src) = $id"
+			+ " WITH src, country, genre, decade,"
+			+ " COUNT(*) AS frequencyGenre"
+			+ " ORDER BY frequencyGenre DESC"
+			+ " WITH *"
+			+ " MATCH (otherAlbums) - [:RELEASED_BY] -> (recommended:Artist) - [:FOUNDED_IN|:BORN_IN]->(country)"
+			+ " MATCH (decade) <-[:RELEASED_IN|PART_OF*2] - (otherAlbums) - [:HAS] -> (genre)"
+			+ " WHERE NOT (src) - [:ASSOCIATED_WITH|HAS_MEMBER] - (recommended)"
+			+ "       AND (src) <> (recommended)"
+			+ " RETURN DISTINCT recommended AS recommendedArtist, "
+			+ "                 decade.value + ' ' + country.name + '  ' + genre.name AS reason"
+			+ " ORDER BY recommended.name";
+		var recommendedArtists = session.query(cypher, parameters);
+
+		Set<Recommendation> recommendations = new TreeSet<>(comparing(r -> r.getRecommendedArtist().getName()));
+		recommendations.addAll(StreamSupport.stream(associatedArtists.spliterator(), false).map(Recommendation::new).collect(toList()));
+		recommendations.addAll(StreamSupport.stream(recommendedArtists.spliterator(), false)
+			.map(row -> new Recommendation((ArtistEntity)row.get("recommendedArtist"), (String)row.get("reason"))).collect(toList()));
+
+		return recommendations;
 	}
 
 	private ArtistEntity updateWikipediaLinksFor(long artistId, WikidataClient.LinkResult linkResult) {
