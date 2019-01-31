@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 the original author or authors.
+ * Copyright 2018-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,8 +27,6 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.RequiredArgsConstructor;
 
-import java.util.Comparator;
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -43,6 +41,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.ModelAndView;
 
 /**
@@ -60,16 +59,22 @@ public class GenreController {
 	@GetMapping(value = { "", "/" }, produces = MediaType.TEXT_HTML_VALUE)
 	public ModelAndView genres() {
 
+		var model = genresModel();
+		return new ModelAndView("genres", model);
+	}
+
+	@GetMapping(value = { "", "/" }, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+	@ResponseBody
+	public Map<String, Object> genresModel() {
+
 		var genres = this.genreRepository.findAll(Sort.by("name").ascending());
 		var allSubgrenes = genreRepository.findAllSubgrenes();
 		var top10Subgenres = allSubgrenes.stream().sorted(comparingLong(Subgenre::getFrequency).reversed()).limit(10).collect(toList());
-		var model = Map.of(
-			"genres", genres,
-			"subgenres", allSubgrenes,
-			"top10Subgenres", top10Subgenres
+		return Map.of(
+				"genres", genres,
+				"subgenres", allSubgrenes,
+				"top10Subgenres", top10Subgenres
 		);
-
-		return new ModelAndView("genres", model);
 	}
 
 	@GetMapping(value = "/new", produces = MediaType.TEXT_HTML_VALUE)
