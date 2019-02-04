@@ -26,15 +26,15 @@ import org.springframework.data.neo4j.annotation.QueryResult;
  */
 @QueryResult
 @Data
-public class Subgenre {
+public class Microgenre {
 	private String name;
 
 	private Long frequency;
 
-	private List<AlbumWithSubgenre> albums;
+	private List<AlbumWithMicrogenre> albums;
 
 	@Data
-	static class AlbumWithSubgenre {
+	static class AlbumWithMicrogenre {
 		private String name;
 
 		private Long frequency;

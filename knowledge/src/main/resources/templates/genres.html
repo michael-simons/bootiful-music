@@ -5,7 +5,7 @@
 <head>
     <title th:text="#{genres}">Placeholder</title>
     <script th:inline="javascript">
-        var subgenres = /*[[${subgenres}]]*/ {};
+        var microgenres = /*[[${microgenres}]]*/ {};
     </script>
 </head>
 <body>
@@ -26,7 +26,7 @@
                 </tr>
                 </thead>
                 <tbody>
-                <tr th:each="genre : ${top10Subgenres}">
+                <tr th:each="genre : ${top10Microgenres}">
                     <td th:text="${genre.name}">Placeholder</td>
                     <td th:text="${genre.frequency}">Placeholder</a></td>
                 </tr>
@@ -47,21 +47,23 @@
     </div>
     <div class="row">
         <div class="col">
-            <table class="table table-sm table-striped table-hover">
-                <thead class="thead-dark">
-                <tr>
-                    <th scope="col" th:text="#{genre.name}">Placeholder</th>
-                    <th scope="col"></th>
-                </tr>
-                </thead>
-                <tbody>
-                <tr th:each="genre : ${genres}">
-                    <th scope="row" th:text="${genre.name}">Placeholder</th>
-                    <td><a href="#" th:href="@{/genres/{genreId}(genreId=${genre.id})}"
-                           th:text="#{genres.edit}">Placeholder</a></td>
-                </tr>
-                </tbody>
-            </table>
+            <div th:fragment="listOfGenres(theGenres)" th:with="theGenres=${theGenres} ?: ${genres}" th:remove="tag">
+                <table class="table table-sm table-striped table-hover">
+                    <thead class="thead-dark">
+                    <tr>
+                        <th scope="col" th:text="#{genre.name}">Placeholder</th>
+                        <th scope="col"></th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="genre : ${theGenres}">
+                        <th scope="row" th:text="${genre.name}">Placeholder</th>
+                        <td><a href="#" th:href="@{/genres/{genreId}(genreId=${genre.id})}"
+                               th:text="#{genres.edit}">Placeholder</a></td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
         </div>
     </div>
 </div>

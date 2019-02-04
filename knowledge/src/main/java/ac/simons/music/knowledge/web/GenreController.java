@@ -19,30 +19,31 @@ import static ac.simons.music.knowledge.web.AlbumController.mapAlbumEntities;
 import static java.util.Comparator.comparingLong;
 import static java.util.stream.Collectors.toList;
 
-import ac.simons.music.knowledge.domain.AlbumService;
-import ac.simons.music.knowledge.domain.GenreEntity;
-import ac.simons.music.knowledge.domain.GenreRepository;
-import ac.simons.music.knowledge.domain.Subgenre;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.RequiredArgsConstructor;
-
 import java.util.Map;
 import java.util.Optional;
 
 import javax.validation.Valid;
 import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
 
-import org.springframework.data.domain.Sort;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.ModelAndView;
+
+import ac.simons.music.knowledge.domain.AlbumService;
+import ac.simons.music.knowledge.domain.GenreEntity;
+import ac.simons.music.knowledge.domain.GenreService;
+import ac.simons.music.knowledge.domain.Microgenre;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.RequiredArgsConstructor;
 
 /**
  * @author Michael J. Simons
@@ -52,28 +53,28 @@ import org.springframework.web.servlet.ModelAndView;
 @RequiredArgsConstructor
 public class GenreController {
 
-	private final GenreRepository genreRepository;
+	private final GenreService genreService;
 
 	private final AlbumService albumService;
 
-	@GetMapping(value = { "", "/" }, produces = MediaType.TEXT_HTML_VALUE)
+	@GetMapping(value = {"", "/"}, produces = MediaType.TEXT_HTML_VALUE)
 	public ModelAndView genres() {
 
 		var model = genresModel();
 		return new ModelAndView("genres", model);
 	}
 
-	@GetMapping(value = { "", "/" }, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+	@GetMapping(value = {"", "/"}, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
 	@ResponseBody
 	public Map<String, Object> genresModel() {
 
-		var genres = this.genreRepository.findAll(Sort.by("name").ascending());
-		var allSubgrenes = genreRepository.findAllSubgrenes();
-		var top10Subgenres = allSubgrenes.stream().sorted(comparingLong(Subgenre::getFrequency).reversed()).limit(10).collect(toList());
+		var genres = this.genreService.findAllWithoutParent();
+		var allMicrogenres = genreService.findAllMicrogrenes();
+		var top10Microgenres = allMicrogenres.stream().sorted(comparingLong(Microgenre::getFrequency).reversed()).limit(10).collect(toList());
 		return Map.of(
 				"genres", genres,
-				"subgenres", allSubgrenes,
-				"top10Subgenres", top10Subgenres
+				"microgenres", allMicrogenres,
+				"top10Microgenres", top10Microgenres
 		);
 	}
 
@@ -85,31 +86,51 @@ public class GenreController {
 	@GetMapping(value = "/{genreId}", produces = MediaType.TEXT_HTML_VALUE)
 	public ModelAndView genre(@PathVariable final Long genreId) {
 
-		var genre = this.genreRepository.findById(genreId)
-			.orElseThrow(() -> new NodeNotFoundException(GenreEntity.class, genreId));
+		var genre = this.genreService.findById(genreId)
+				.orElseThrow(() -> new NodeNotFoundException(GenreEntity.class, genreId));
+		var possibleSubgenres = this.genreService.findAllPossibleSubgenres(genre);
 
 		var model = Map.of(
-			"genreCmd", new GenreCmd(genre),
-			"genre", genre,
-			"albums", mapAlbumEntities(albumService.findAllAlbumsWithGenre(genre))
+				"genreCmd", new GenreCmd(genre),
+				"subgenres", genre.getSubgenres(),
+				"possibleSubgenres", possibleSubgenres,
+				"albums", mapAlbumEntities(albumService.findAllAlbumsWithGenre(genre))
 		);
 		return new ModelAndView("genre", model);
 	}
 
-	@PostMapping(value = { "", "/" }, produces = MediaType.TEXT_HTML_VALUE)
+	@PostMapping(value = {"", "/"}, produces = MediaType.TEXT_HTML_VALUE)
 	public String genre(@Valid final GenreCmd genreForm, final BindingResult genreBindingResult) {
 		if (genreBindingResult.hasErrors()) {
 			return "genre";
 		}
 
 		var genre = Optional.ofNullable(genreForm.getId())
-			.flatMap(genreRepository::findById)
-			.map(existingGenre -> {
-				existingGenre.setName(genreForm.getName());
-				return existingGenre;
-			}).orElseGet(() -> new GenreEntity(genreForm.getName()));
-		genre = this.genreRepository.save(genre);
+				.flatMap(genreService::findById)
+				.map(existingGenre -> {
+					existingGenre.setName(genreForm.getName());
+					return existingGenre;
+				}).orElseGet(() -> new GenreEntity(genreForm.getName()));
+		genre = this.genreService.save(genre);
 
+		return String.format("redirect:/genres/%d", genre.getId());
+	}
+
+	@ModelAttribute(name = "newSubgenreForm")
+	NewSubGenreCmd newSubgenreForm() {
+		return new NewSubGenreCmd();
+	}
+
+	@PostMapping(value = "/{genreId}/addSubgenre", produces = MediaType.TEXT_HTML_VALUE)
+	public String associateWith(@PathVariable final Long genreId, @Valid final NewSubGenreCmd newSubGenreCmd, final BindingResult newSubGenreCmdBindingResult) {
+		var genre = this.genreService.findById(genreId)
+				.orElseThrow(() -> new NodeNotFoundException(GenreEntity.class, genreId));
+
+		if (!newSubGenreCmdBindingResult.hasErrors()) {
+			var newSubGenre = this.genreService.findById(newSubGenreCmd.genreId)
+					.orElseThrow(() -> new NodeNotFoundException(GenreEntity.class, newSubGenreCmd.genreId));
+			this.genreService.addSubgenre(genre, newSubGenre);
+		}
 		return String.format("redirect:/genres/%d", genre.getId());
 	}
 
@@ -126,5 +147,15 @@ public class GenreController {
 			this.id = genreEntity.getId();
 			this.name = genreEntity.getName();
 		}
+
+		public boolean isNew() {
+			return this.id == null;
+		}
+	}
+
+	@Data
+	static class NewSubGenreCmd {
+		@NotNull
+		private Long genreId;
 	}
 }

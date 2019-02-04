@@ -50,7 +50,7 @@ function displayNumberOfReleasesByYear() {
         .text(d => d);
 }
 
-function displaySubgenres() {
+function displayMicrogenres() {
 
     const forceSimulation = function (nodes, links) {
         return d3.forceSimulation(nodes)
@@ -88,9 +88,9 @@ function displaySubgenres() {
     const links = [];
     const nodes = [];
 
-    for (let i = 0; i < subgenres.length; ++i) {
-        const g = subgenres[i];
-        nodes.push({id: g.name, group: 'subgrene'});
+    for (let i = 0; i < microgenres.length; ++i) {
+        const g = microgenres[i];
+        nodes.push({id: g.name, group: 'microgenre'});
 
         const maxFrequency = Math.max(...g.albums.map(a => a.frequency));
 
@@ -273,9 +273,9 @@ $(document).ready(function () {
         window.addEventListener("resize", displayNumberOfReleasesByYear);
     }
 
-    if (window.subgenres !== undefined) {
-        displaySubgenres();
-        window.addEventListener("resize", displaySubgenres);
+    if (window.microgenres !== undefined) {
+        displayMicrogenres();
+        window.addEventListener("resize", displayMicrogenres);
     }
 
     if ($('#map')) {

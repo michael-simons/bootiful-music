@@ -18,20 +18,24 @@ package ac.simons.music.knowledge.domain;
 import java.util.List;
 import java.util.Optional;
 
-import org.springframework.data.domain.Sort;
 import org.springframework.data.neo4j.annotation.Query;
 import org.springframework.data.repository.Repository;
 
 /**
  * @author Michael J. Simons
  */
-public interface GenreRepository extends Repository<GenreEntity, Long> {
+interface GenreRepository extends Repository<GenreEntity, Long> {
 
 	GenreEntity save(GenreEntity genre);
 
 	Optional<GenreEntity> findById(Long genreId);
 
-	List<GenreEntity> findAll(Sort sortOrder);
+	@Query(value
+			= " MATCH (src:Genre)"
+			+ " WHERE NOT (src) - [:IS_SUBGENRE_OF] -> (:Genre)"
+			+ " RETURN src ORDER BY src.name ASC"
+	)
+	List<GenreEntity> findAllWithoutParent();
 
 	@Query(value
 		= " MATCH (a:Album)-[:CONTAINS]->(track)-[pc:HAS_BEEN_PLAYED_IN]->(),"
@@ -47,5 +51,15 @@ public interface GenreRepository extends Repository<GenreEntity, Long> {
 		+ "         frequencyGenre as frequency,"
 		+ "         albums"
 	)
-	List<Subgenre> findAllSubgrenes();
+	List<Microgenre> findAllMicrogrenes();
+
+	@Query(value
+		= " MATCH (src:Genre)"
+		+ " MATCH (other:Genre)"
+		+ " WHERE id(src) = $id"
+		+ "   AND NOT (other) - [:IS_SUBGENRE_OF] -> (src)"
+		+ "   AND src <> other"
+		+ " RETURN other ORDER BY other.name ASC"
+	)
+	List<GenreEntity> findAllPossibleSubgenres(long id);
 }
