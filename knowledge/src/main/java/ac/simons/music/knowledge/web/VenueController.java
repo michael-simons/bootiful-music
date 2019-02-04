@@ -15,8 +15,9 @@
  */
 package ac.simons.music.knowledge.web;
 
+import static java.util.Collections.*;
+
 import java.util.List;
-import java.util.Map;
 
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
@@ -42,7 +43,7 @@ public class VenueController {
 
 	@GetMapping(value = {"", "/"}, produces = MediaType.TEXT_HTML_VALUE)
 	public ModelAndView venues() {
-		return new ModelAndView("venues", Map.of());
+		return new ModelAndView("venues", emptyMap());
 	}
 
 	@GetMapping(value = {"", "/"}, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
