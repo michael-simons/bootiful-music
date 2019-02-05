@@ -66,7 +66,7 @@ public class AlbumService {
 	}
 
 	public List<AlbumEntity> findAllAlbumsWithGenre(GenreEntity genre) {
-		return albumRepository.findAllByGenreNameOrderByName(genre.getName(), 1);
+		return albumRepository.findAllByGenre(genre.getId());
 	}
 
 	private static String createRegex(String value) {

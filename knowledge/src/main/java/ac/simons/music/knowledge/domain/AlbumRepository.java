@@ -59,7 +59,17 @@ interface AlbumRepository extends Repository<AlbumEntity, Long> {
 	)
 	List<ReleasesByYear> getNumberOfReleasesByYear();
 
-	List<AlbumEntity> findAllByGenreNameOrderByName(String name, @Depth int depth);
+	@Query(value
+			= " MATCH (s:Genre) - [:IS_SUBGENRE_OF] -> (t:Genre)"
+			+ " WHERE id(t) = $genreId"
+			+ " WITH COLLECT(t) + s AS genres "
+			+ " UNWIND genres as g "
+			+ " MATCH (a:Album) - [h:HAS] -> (g)"
+			+ " MATCH (a) - [ri:RELEASED_IN] -> (y:Year)"
+			+ " MATCH (a) - [rb:RELEASED_BY] -> (ar:Artist)"
+			+ " RETURN * ORDER BY a.name ASC"
+	)
+	List<AlbumEntity> findAllByGenre(long genreId);
 
 	Optional<AlbumEntity> findById(Long id);
 }
