@@ -16,9 +16,12 @@
 package ac.simons.music.knowledge.web;
 
 import static ac.simons.music.knowledge.web.AlbumController.mapAlbumEntities;
+import static java.util.Comparator.comparing;
 import static java.util.Comparator.comparingLong;
 import static java.util.stream.Collectors.toList;
 
+import java.util.Comparator;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -88,11 +91,12 @@ public class GenreController {
 
 		var genre = this.genreService.findById(genreId)
 				.orElseThrow(() -> new NodeNotFoundException(GenreEntity.class, genreId));
+		var subgenres = genre.getSubgenres().stream().sorted(comparing(GenreEntity::getName)).collect(toList());
 		var possibleSubgenres = this.genreService.findAllPossibleSubgenres(genre);
 
 		var model = Map.of(
 				"genreCmd", new GenreCmd(genre),
-				"subgenres", genre.getSubgenres(),
+				"subgenres", subgenres,
 				"possibleSubgenres", possibleSubgenres,
 				"albums", mapAlbumEntities(albumService.findAllAlbumsWithGenre(genre))
 		);
