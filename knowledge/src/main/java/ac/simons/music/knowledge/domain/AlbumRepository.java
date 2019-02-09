@@ -60,9 +60,10 @@ interface AlbumRepository extends Repository<AlbumEntity, Long> {
 	List<ReleasesByYear> getNumberOfReleasesByYear();
 
 	@Query(value
-			= " MATCH (s:Genre) - [:IS_SUBGENRE_OF] -> (t:Genre)"
+			= " MATCH (t:Genre)"
 			+ " WHERE id(t) = $genreId"
-			+ " WITH COLLECT(t) + s AS genres "
+			+ " OPTIONAL MATCH (s:Genre) - [:IS_SUBGENRE_OF*1..] -> (t)"
+			+ " WITH COLLECT(s) + t AS genres "
 			+ " UNWIND genres as g "
 			+ " MATCH (a:Album) - [h:HAS] -> (g)"
 			+ " MATCH (a) - [ri:RELEASED_IN] -> (y:Year)"
