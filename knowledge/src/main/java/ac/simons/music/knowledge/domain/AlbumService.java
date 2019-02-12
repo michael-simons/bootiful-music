@@ -24,6 +24,7 @@ import java.util.regex.Pattern;
 
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  * @author Michael J. Simons
@@ -67,6 +68,12 @@ public class AlbumService {
 
 	public List<AlbumEntity> findAllAlbumsWithGenre(GenreEntity genre) {
 		return albumRepository.findAllByGenre(genre.getId());
+	}
+
+	@Transactional
+	public AlbumEntity updateGenre(final AlbumEntity album, final GenreEntity newGenre) {
+		album.setGenre(newGenre);
+		return this.albumRepository.save(album);
 	}
 
 	private static String createRegex(String value) {

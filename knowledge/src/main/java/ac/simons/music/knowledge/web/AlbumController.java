@@ -19,20 +19,31 @@ import static java.util.stream.Collectors.*;
 
 import ac.simons.music.knowledge.domain.AlbumEntity;
 import ac.simons.music.knowledge.domain.AlbumService;
+import ac.simons.music.knowledge.domain.ArtistEntity;
+import ac.simons.music.knowledge.domain.GenreEntity;
+import ac.simons.music.knowledge.domain.GenreService;
+import ac.simons.music.knowledge.domain.SoloArtistEntity;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
 
 import java.time.Year;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
+import java.util.Optional;
 
+import javax.validation.Valid;
 import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
 
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.ModelAndView;
@@ -48,6 +59,13 @@ public class AlbumController {
 		.thenComparing(AlbumCmd::getName);
 
 	private final AlbumService albumService;
+
+	private final GenreService genreService;
+
+	@ModelAttribute("genres")
+	public List<GenreEntity> genres() {
+		return this.genreService.findAll();
+	}
 
 	@GetMapping(value = { "", "/" }, produces = MediaType.TEXT_HTML_VALUE)
 	public ModelAndView albums() {
@@ -80,12 +98,29 @@ public class AlbumController {
 
 		var album = this.albumService.findAlbumById(albumId)
 			.orElseThrow(() -> new NodeNotFoundException(AlbumEntity.class, albumId));
+		var genres = this.genreService.findAll();
 
 		var model = Map.of(
 			"albumCmd", new AlbumCmd(album),
-			"tracks", this.albumService.findAllTracksContainedOn(album)
+			"tracks", this.albumService.findAllTracksContainedOn(album),
+			"genres", genres
 		);
 		return new ModelAndView("album", model);
+	}
+
+	@PostMapping(value = {"", "/"}, produces = MediaType.TEXT_HTML_VALUE)
+	public Object album(@Valid final AlbumCmd albumCmd, final BindingResult albumBindingResult) {
+		if (albumBindingResult.hasErrors()) {
+			return "album";
+		}
+
+		var album = this.albumService.findAlbumById(albumCmd.getId())
+				.orElseThrow(() -> new NodeNotFoundException(AlbumEntity.class, albumCmd.getId()));
+		var genre = this.genreService.findById(albumCmd.getGenreId())
+					.orElseThrow(() -> new NodeNotFoundException(GenreEntity.class, albumCmd.getId()));
+
+		album = albumService.updateGenre(album, genre);
+		return String.format("redirect:/albums/%d", album.getId());
 	}
 
 	static List<AlbumCmd> mapAlbumEntities(List<AlbumEntity> albums) {
@@ -100,7 +135,7 @@ public class AlbumController {
 	static class AlbumCmd {
 		private Long id;
 
-		@NotBlank
+		@NotNull
 		private Long artistId;
 
 		private String artist;
@@ -108,10 +143,10 @@ public class AlbumController {
 		@NotBlank
 		private String name;
 
-		@NotBlank
+		@NotNull
 		private Year releasedIn;
 
-		@NotBlank
+		@NotNull
 		private Long genreId;
 
 		private String genre;

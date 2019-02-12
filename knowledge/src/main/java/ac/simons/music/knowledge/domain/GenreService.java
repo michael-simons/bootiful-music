@@ -18,6 +18,7 @@ package ac.simons.music.knowledge.domain;
 import java.util.List;
 import java.util.Optional;
 
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -45,6 +46,10 @@ public class GenreService {
 
 	public Optional<GenreEntity> findById(Long genreId) {
 		return genreRepository.findById(genreId);
+	}
+
+	public List<GenreEntity> findAll() {
+		return genreRepository.findAll(Sort.by("name").ascending());
 	}
 
 	public List<GenreEntity> findAllWithoutParent() {

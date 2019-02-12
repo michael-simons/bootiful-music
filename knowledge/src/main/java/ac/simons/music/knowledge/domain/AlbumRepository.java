@@ -73,4 +73,6 @@ interface AlbumRepository extends Repository<AlbumEntity, Long> {
 	List<AlbumEntity> findAllByGenre(long genreId);
 
 	Optional<AlbumEntity> findById(Long id);
+
+	AlbumEntity save(AlbumEntity album);
 }

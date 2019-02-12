@@ -18,6 +18,7 @@ package ac.simons.music.knowledge.domain;
 import java.util.List;
 import java.util.Optional;
 
+import org.springframework.data.domain.Sort;
 import org.springframework.data.neo4j.annotation.Query;
 import org.springframework.data.repository.Repository;
 
@@ -62,4 +63,6 @@ interface GenreRepository extends Repository<GenreEntity, Long> {
 		+ " RETURN other ORDER BY other.name ASC"
 	)
 	List<GenreEntity> findAllPossibleSubgenres(long id);
+
+	List<GenreEntity> findAll(Sort sort);
 }
