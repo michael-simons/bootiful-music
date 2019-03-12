@@ -1,0 +1,12 @@
+version: '3.7'
+
+services:
+  knowledgedb:
+      ports:
+        - "7475:7474"
+        - "7690:7687"
+      links:
+        - statsdb
+  knowledge:
+      ports:
+        - "8085:8080"
