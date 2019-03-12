@@ -103,27 +103,6 @@
                         <button type="submit" class="btn btn-primary" th:text="#{common.save}">Submit</button>
                     </form>
                 </div>
-
-                <div class="col-12" th:unless="${recommendations.empty}"> <!-- RECOMMENDED ARTISTS -->
-
-                    <h2 th:text="#{artist.recommended-artists}">Placeholder</h2>
-                    <table class="table table-sm table-striped table-hover">
-                        <thead class="thead-dark">
-                        <tr>
-                            <th scope="col" th:text="#{artist.name}">Placeholder</th>
-                            <th scope="col"></th>
-                            <th scope="col"></th>
-                        </tr>
-                        </thead>
-                        <tbody>
-                        <tr th:each="recommendation : ${recommendations}">
-                            <th scope="row" th:text="${recommendation.recommendedArtist.name}">Placeholder</th>
-                            <td th:text="${recommendation.reason}">Placeholder</td>
-                            <td><a href="#" th:href="@{/artists/{artistId}(artistId=${recommendation.recommendedArtist.id})}" th:text="#{artists.edit}">Placeholder</a></td>
-                        </tr>
-                        </tbody>
-                    </table>
-                </div>
             </div>
 
 
@@ -227,6 +206,76 @@
             <ul th:each="wikipediaArticle : ${wikipediaArticles}">
                 <li><a th:href="@{${wikipediaArticle.url}}" th:text="${wikipediaArticle.title} + ' (' + ${wikipediaArticle.site} + ')'">Placeholder</a></li>
             </ul>
+        </div>
+    </div>
+
+    <div class="row" th:unless="${artistCmd.new or recommendations.empty}">
+        <div class="col-6"> <!-- RECOMMENDED ARTISTS -->
+
+            <h2 th:text="#{artist.recommended-artists}">Placeholder</h2>
+            <table class="table table-sm table-striped table-hover">
+                <thead class="thead-dark">
+                <tr>
+                    <th scope="col" th:text="#{artist.name}">Placeholder</th>
+                    <th scope="col"></th>
+                    <th scope="col"></th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="recommendation : ${recommendations}">
+                    <th scope="row" th:text="${recommendation.recommendedArtist.name}">Placeholder</th>
+                    <td th:text="${recommendation.reason}">Placeholder</td>
+                    <td><a href="#" th:href="@{/artists/{artistId}(artistId=${recommendation.recommendedArtist.id})}"
+                           th:text="#{artists.edit}">Placeholder</a></td>
+                </tr>
+                </tbody>
+            </table>
+
+            <p>
+                <a class="btn btn-light" data-toggle="collapse" href="#recommendedArtistsQuery" role="button"
+                   aria-expanded="false" aria-controls="recommendedArtistsQuery" th:text="#{common.show-query}">Placeholder</a>
+            </p>
+        </div>
+        <div class="col-12 collapse" id="recommendedArtistsQuery">
+            <pre>
+// First recommended artists that are not related on the first level with the given artist but might be of interest.
+var cypher
+    = " MATCH (src:Artist)"
+    + " WHERE id(src) = $id"
+    + " WITH src"
+    + " MATCH (src) - [:ASSOCIATED_WITH|HAS_MEMBER*..2] - (associated:Artist)"
+    + " OPTIONAL MATCH (associated) &lt;- [:ASSOCIATED_WITH|HAS_MEMBER] - (ternary:Band)"
+    + " WITH src, collect(associated) + collect(ternary) AS recommendations"
+    + " UNWIND recommendations as recommended"
+    + " MATCH (recommended)"
+    + " WHERE NOT (src) - [:ASSOCIATED_WITH|HAS_MEMBER] - (recommended)"
+    + "   AND (src) &lt;&gt; (recommended)"
+    + " RETURN DISTINCT recommended AS recommendedArtist, "
+    + "                 '' AS reason"
+    + " ORDER BY recommended.name";
+var associatedArtists = session.query(ArtistEntity.class, cypher, parameters);
+
+// Then recommendations based on similar subgenres
+cypher
+    = " MATCH (src:Artist),"
+    + "       (src)-[:FOUNDED_IN|:BORN_IN]-&gt;(country:Country),"
+    + "       (album:Album) - [:RELEASED_BY] -&gt; (src),"
+    + "       (album)-[:HAS]-&gt;(genre:Genre),"
+    + "       (album)-[:RELEASED_IN|PART_OF*2]-&gt;(decade:Decade)"
+    + " WHERE id(src) = $id"
+    + " WITH src, country, genre, decade,"
+    + " COUNT(*) AS frequencyGenre"
+    + " ORDER BY frequencyGenre DESC"
+    + " WITH *"
+    + " MATCH (otherAlbums) - [:RELEASED_BY] -&gt; (recommended:Artist) - [:FOUNDED_IN|:BORN_IN]-&gt;(country)"
+    + " MATCH (decade) &lt;-[:RELEASED_IN|PART_OF*2] - (otherAlbums) - [:HAS] -&gt; (genre)"
+    + " WHERE NOT (src) - [:ASSOCIATED_WITH|HAS_MEMBER] - (recommended)"
+    + "       AND (src) &lt;&gt; (recommended)"
+    + " RETURN DISTINCT recommended AS recommendedArtist, "
+    + "                 decade.value + ' ' + country.name + '  ' + genre.name AS reason"
+    + " ORDER BY recommended.name";
+var recommendedArtists = session.query(cypher, parameters);
+            </pre>
         </div>
     </div>
 

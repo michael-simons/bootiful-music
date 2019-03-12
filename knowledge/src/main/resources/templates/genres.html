@@ -38,6 +38,33 @@
         </div>
     </div>
 
+    <div class="row">
+        <div class="col-12">
+            <p>
+                <a class="btn btn-light" data-toggle="collapse" href="#microgenreQuery" role="button"
+                   aria-expanded="false" aria-controls="microgenreQuery" th:text="#{common.show-query}">Placeholder</a>
+            </p>
+            <div class="collapse" id="microgenreQuery">
+            <pre>
+@Query(value
+	= " MATCH (a:Album)-[:CONTAINS]-&gt;(track)-[pc:HAS_BEEN_PLAYED_IN]-&gt;(),"
+	+ "       (a)-[:RELEASED_BY]-&gt;(artist)"
+	+ "  WITH artist, a, sum(pc.value) AS frequencyAlbum"
+	+ " MATCH (a)-[:HAS]-&gt;(g:Genre),"
+	+ "       (a)-[:RELEASED_IN]-&gt;(:Year)-[:PART_OF]-&gt;(d:Decade),"
+	+ "       (artist)-[:FOUNDED_IN|:BORN_IN]-&gt;(c:Country)"
+	+ "  WITH g, d, c, "
+	+ "       sum(frequencyAlbum) AS frequencyGenre, "
+	+ "       collect({name: artist.name + ': '  + a.name, frequency: frequencyAlbum}) AS albums"
+	+ "  RETURN d.value + ' ' + c.name + '  ' + g.name  AS name,"
+	+ "         frequencyGenre as frequency,"
+	+ "         albums"
+)
+List&lt;Microgenre&gt; findAllMicrogrenes();
+            </pre>
+            </div>
+        </div>
+    </div>
 
     <div class="row">
         <div class="col">
