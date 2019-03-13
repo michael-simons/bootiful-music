@@ -36,9 +36,6 @@ services:
         - ./var/knowledgedb/plugins:/plugins
       secrets:
         - knowledgedb_auth_file
-      ports:
-        - "7474:7474"
-        - "7687:7687"
       expose:
         - "2004"
       links:
@@ -53,8 +50,6 @@ services:
         - SPRING_DATA_NEO4J_URI=bolt://knowledgedb:7687
       secrets:
         - knowledgedb_auth_file
-      ports:
-        - "8080:8080"
       links:
         - knowledgedb
   prometheus:

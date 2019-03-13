@@ -211,7 +211,7 @@ There's a Docker module and a Docker Compose file to help you with that.
 
 NOTE: As this example uses Neo4j Enterprise edition, you have to accept the license by putting in a file named `neo4j-enterprise.env` into the `docker` directory containing the line `NEO4J_ACCEPT_LICENSE_AGREEMENT=yes`!
 
-Please run `(cd docker && docker-compose up -d)` from the root of this project.
+Please run `(cd docker && docker-compose -f docker-compose.yml -f docker-compose.default.yml up)` from the root of this project.
 To stop the processes, use  `(cd docker && docker-compose stop)`.
 This brings up both a PostgreSQL instance as well as a Neo4j instance with https://neo4j-contrib.github.io/neo4j-apoc-procedures/[APOC] already installed.
 The modules itself can be build without running databases.
