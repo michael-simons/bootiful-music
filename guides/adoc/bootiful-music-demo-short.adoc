@@ -1,0 +1,132 @@
+= Some examples
+
+== Simple reads
+
+"Give me all the artists"
+
+[source,cypher,subs=attributes]
+----
+MATCH (a:Artist) RETURN a
+----
+
+== Run the import based on APOC (1)
+
+Artist and album data
+
+[source,cypher,subs=attributes]
+----
+CREATE CONSTRAINT ON (a:Artist) ASSERT a.name IS UNIQUE
+----
+
+[source,cypher,subs=attributes]
+----
+WITH "jdbc:postgresql://localhost:5432/bootiful-music?currentSchema=dev&user=statsdb-dev&password=dev" as url,
+     "SELECT DISTINCT a.name as artist_name, t.album, g.name as genre_name, t.year
+      FROM tracks t JOIN artists a ON a.id = t.artist_id JOIN genres g ON g.id = t.genre_id
+      WHERE t.compilation = 'f'" as sql
+CALL apoc.load.jdbc(url,sql) YIELD row
+MERGE (decade:Decade {value: row.year-row.year%10})
+MERGE (year:Year {value: row.year})
+MERGE (year) - [:PART_OF] -> (decade)
+MERGE (artist:Artist {name: row.artist_name})
+MERGE (album:Album {name: row.album}) - [:RELEASED_BY] -> (artist)
+MERGE (genre:Genre {name: row.genre_name})
+MERGE (album) - [:HAS] -> (genre)
+MERGE (album) - [:RELEASED_IN] -> (year)
+----
+
+== Run the import based on APOC (2)
+
+Track data
+
+[source,cypher,subs=attributes]
+----
+WITH "jdbc:postgresql://localhost:5432/bootiful-music?currentSchema=dev&user=statsdb-dev&password=dev" as url,
+     "
+       SELECT a.name as artist_name, t.album as album_name, t.name as track_name, t.disc_number as disc_number, t.track_number as track_number
+       FROM tracks t JOIN artists a ON a.id = t.artist_id  JOIN genres g ON g.id = t.genre_id
+       WHERE t.compilation = 'f'
+     " as sql
+CALL apoc.load.jdbc(url,sql) YIELD row
+MATCH (album:Album {name: row.album_name}) - [:RELEASED_BY] -> (artist:Artist {name: row.artist_name})
+OPTIONAL MATCH (possibleTrack:Track {name: row.track_name}) <- [:CONTAINS] - (:Album) - [:RELEASED_BY] -> (artist)
+FOREACH( _ IN CASE WHEN possibleTrack IS NULL THEN ['create_track_and_add_relation'] ELSE [] END |
+  CREATE (newTrack:Track {name: row.track_name, createdAt: localdatetime()})
+  MERGE (album) - [:CONTAINS {disc_number: row.disc_number, track_number: row.track_number}] -> (newTrack)
+)
+FOREACH( _ IN CASE WHEN possibleTrack IS NOT NULL THEN ['add_relation'] ELSE [] END |
+  MERGE (album) - [:CONTAINS {disc_number: row.disc_number, track_number: row.track_number}] -> (possibleTrack)
+)
+return album
+----
+
+== Some queries
+
+"Give me all the artists that have covered we will rock you"
+
+[source,cypher,subs=attributes]
+----
+MATCH (k:Artist) <- [:RELEASED_BY] - (a:Album),
+      (a) - [:CONTAINS] -> (t:Track)
+WHERE t.name =~ 'We Will Rock You.*'
+RETURN DISTINCT k.name
+----
+
+== Some queries
+
+"Favorite decades"
+
+[source,cypher,subs=attributes]
+----
+MATCH (d:Decade) <- [:PART_OF] - (y) <- [:RELEASED_IN] - (a:Album)
+RETURN d.value, count(a)
+ORDER by d.value asc
+----
+
+== Recommendations
+
+Based on genre and year
+
+[source,cypher,subs=attributes]
+----
+MATCH (s:Artist {name: 'Antilopen Gang'})
+match (s)<-[:RELEASED_BY]-()-[:HAS]->(g:Genre)<-[:HAS]-()-[:RELEASED_BY]->(a)
+WHERE a<>s
+WITH s,a, count(*) as genreScore
+match (s)<-[:RELEASED_BY]-()-[:RELEASED_IN]->(:Year)<-[:RELEASED_IN]-()-[:RELEASED_BY]->(a)
+WITH s,a,genreScore, count(*) as yearScore
+RETURN a.name, genreScore*0.5 + yearScore *0.25 as score
+ORDER BY score desc limit 10;
+----
+
+== How come?
+
+[source,cypher,subs=attributes]
+----
+match (a:Album) - [:RELEASED_BY] -> (k {name: 'Antilopen Gang'}), (a) - [:HAS] -> (g)
+return a, g
+----
+
+[source,cypher,subs=attributes]
+----
+MATCH (s:Artist {name: 'Antilopen Gang'})
+match (s)<-[:RELEASED_BY]-()-[:HAS]->(g:Genre)<-[:HAS]-()-[:RELEASED_BY]->(a)
+WHERE a<>s
+RETURN a.name, g.name
+----
+
+== Similarity
+
+[source,cypher,subs=attributes]
+----
+MATCH (a1:Artist {name: 'Antilopen Gang'})<-[:RELEASED_BY]-(a)-[:HAS]->(genre1)
+WITH a1, collect(id(genre1)) AS a1Genres
+MATCH (a2:Artist)<-[:RELEASED_BY]-(a)-[:HAS]->(genre2) WHERE a1 <> a2
+WITH a1, a1Genres, a2, collect(id(genre2)) AS a2Genres
+WITH  a1.name AS from,
+      a2.name AS to,
+      algo.similarity.jaccard(a1Genres, a2Genres) AS similarity
+      WHERE similarity > 0
+      RETURN *
+ORDER BY similarity DESC
+----

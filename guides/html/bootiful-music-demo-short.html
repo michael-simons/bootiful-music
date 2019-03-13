@@ -1,0 +1,258 @@
+<style type="text/css" media="screen">
+/*
+.nodes-image {
+	margin:-100;
+}
+*/	
+@import url("//maxcdn.bootstrapcdn.com/font-awesome/4.4.0/css/font-awesome.min.css");
+
+.imageblock .content img, .image img {max-width: 900px;max-height: 300px;}
+.deck h3, .deck h4 {display: block !important;margin-bottom:8px;margin-top:5px;}
+.listingblock {margin:8px;}
+.pull-bottom {position:relative;bottom:1em;}
+.admonitionblock td.icon [class^="fa icon-"]{font-size:2.5em;text-shadow:1px 1px 2px rgba(0,0,0,.5);cursor:default}
+.admonitionblock td.icon .icon-note:before{content:"\f05a";color:#19407c}
+.admonitionblock td.icon .icon-tip:before{content:"\f0eb";text-shadow:1px 1px 2px rgba(155,155,0,.8);color:#111}
+.admonitionblock td.icon .icon-warning:before{content:"\f071";color:#bf6900}
+.admonitionblock td.icon .icon-caution:before{content:"\f06d";color:#bf3400}
+.admonitionblock td.icon .icon-important:before{content:"\f06a";color:#bf0000}
+.admonitionblock.note.speaker { display:none; }
+</style>
+<style type="text/css" media="screen">
+/* #editor.maximize-editor .CodeMirror-code { font-size:24px; line-height:26px; } */
+</style>
+<article class="guide" ng-controller="AdLibDataController">
+  <carousel class="deck container-fluid">
+    <!--slide class="row-fluid">
+      <div class="col-sm-3">
+        <h3>Some examples</h3>
+        <p class="lead">Information</p>
+			<!dl>
+				
+				
+				
+				
+				
+			</dl>
+		</div>
+      <div class="col-sm-9">
+        <figure>
+          <img style="width:300px" src=""/>
+        </figure>
+      </div>
+    </slide-->
+    
+
+
+   <h4>Some examples</h4>
+   
+
+
+<slide class="row-fluid">
+  <div class="col-sm-12">
+    <h3>Simple reads</h3>
+    <br/>
+    <div>
+      <div class="paragraph">
+<p>"Give me all the artists"</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre mode="cypher"  class="highlight pre-scrollable programlisting cm-s-neo code runnable standalone-example ng-binding" data-lang="cypher" lang="cypher"><!--code class="cypher language-cypher"-->MATCH (a:Artist) RETURN a<!--/code--></pre>
+</div>
+</div>
+	</div>
+  </div>
+</slide>
+
+
+
+<slide class="row-fluid">
+  <div class="col-sm-12">
+    <h3>Run the import based on APOC (1)</h3>
+    <br/>
+    <div>
+      <div class="paragraph">
+<p>Artist and album data</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre mode="cypher"  class="highlight pre-scrollable programlisting cm-s-neo code runnable standalone-example ng-binding" data-lang="cypher" lang="cypher"><!--code class="cypher language-cypher"-->CREATE CONSTRAINT ON (a:Artist) ASSERT a.name IS UNIQUE<!--/code--></pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre mode="cypher"  class="highlight pre-scrollable programlisting cm-s-neo code runnable standalone-example ng-binding" data-lang="cypher" lang="cypher"><!--code class="cypher language-cypher"-->WITH "jdbc:postgresql://localhost:5432/bootiful-music?currentSchema=dev&user=statsdb-dev&password=dev" as url,
+     "SELECT DISTINCT a.name as artist_name, t.album, g.name as genre_name, t.year
+      FROM tracks t JOIN artists a ON a.id = t.artist_id JOIN genres g ON g.id = t.genre_id
+      WHERE t.compilation = 'f'" as sql
+CALL apoc.load.jdbc(url,sql) YIELD row
+MERGE (decade:Decade {value: row.year-row.year%10})
+MERGE (year:Year {value: row.year})
+MERGE (year) - [:PART_OF] -> (decade)
+MERGE (artist:Artist {name: row.artist_name})
+MERGE (album:Album {name: row.album}) - [:RELEASED_BY] -> (artist)
+MERGE (genre:Genre {name: row.genre_name})
+MERGE (album) - [:HAS] -> (genre)
+MERGE (album) - [:RELEASED_IN] -> (year)<!--/code--></pre>
+</div>
+</div>
+	</div>
+  </div>
+</slide>
+
+
+
+<slide class="row-fluid">
+  <div class="col-sm-12">
+    <h3>Run the import based on APOC (2)</h3>
+    <br/>
+    <div>
+      <div class="paragraph">
+<p>Track data</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre mode="cypher"  class="highlight pre-scrollable programlisting cm-s-neo code runnable standalone-example ng-binding" data-lang="cypher" lang="cypher"><!--code class="cypher language-cypher"-->WITH "jdbc:postgresql://localhost:5432/bootiful-music?currentSchema=dev&user=statsdb-dev&password=dev" as url,
+     "
+       SELECT a.name as artist_name, t.album as album_name, t.name as track_name, t.disc_number as disc_number, t.track_number as track_number
+       FROM tracks t JOIN artists a ON a.id = t.artist_id  JOIN genres g ON g.id = t.genre_id
+       WHERE t.compilation = 'f'
+     " as sql
+CALL apoc.load.jdbc(url,sql) YIELD row
+MATCH (album:Album {name: row.album_name}) - [:RELEASED_BY] -> (artist:Artist {name: row.artist_name})
+OPTIONAL MATCH (possibleTrack:Track {name: row.track_name}) <- [:CONTAINS] - (:Album) - [:RELEASED_BY] -> (artist)
+FOREACH( _ IN CASE WHEN possibleTrack IS NULL THEN ['create_track_and_add_relation'] ELSE [] END |
+  CREATE (newTrack:Track {name: row.track_name, createdAt: localdatetime()})
+  MERGE (album) - [:CONTAINS {disc_number: row.disc_number, track_number: row.track_number}] -> (newTrack)
+)
+FOREACH( _ IN CASE WHEN possibleTrack IS NOT NULL THEN ['add_relation'] ELSE [] END |
+  MERGE (album) - [:CONTAINS {disc_number: row.disc_number, track_number: row.track_number}] -> (possibleTrack)
+)
+return album<!--/code--></pre>
+</div>
+</div>
+	</div>
+  </div>
+</slide>
+
+
+
+<slide class="row-fluid">
+  <div class="col-sm-12">
+    <h3>Some queries</h3>
+    <br/>
+    <div>
+      <div class="paragraph">
+<p>"Give me all the artists that have covered we will rock you"</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre mode="cypher"  class="highlight pre-scrollable programlisting cm-s-neo code runnable standalone-example ng-binding" data-lang="cypher" lang="cypher"><!--code class="cypher language-cypher"-->MATCH (k:Artist) <- [:RELEASED_BY] - (a:Album),
+      (a) - [:CONTAINS] -> (t:Track)
+WHERE t.name =~ 'We Will Rock You.*'
+RETURN DISTINCT k.name<!--/code--></pre>
+</div>
+</div>
+	</div>
+  </div>
+</slide>
+
+
+
+<slide class="row-fluid">
+  <div class="col-sm-12">
+    <h3>Some queries</h3>
+    <br/>
+    <div>
+      <div class="paragraph">
+<p>"Favorite decades"</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre mode="cypher"  class="highlight pre-scrollable programlisting cm-s-neo code runnable standalone-example ng-binding" data-lang="cypher" lang="cypher"><!--code class="cypher language-cypher"-->MATCH (d:Decade) <- [:PART_OF] - (y) <- [:RELEASED_IN] - (a:Album)
+RETURN d.value, count(a)
+ORDER by d.value asc<!--/code--></pre>
+</div>
+</div>
+	</div>
+  </div>
+</slide>
+
+
+
+<slide class="row-fluid">
+  <div class="col-sm-12">
+    <h3>Recommendations</h3>
+    <br/>
+    <div>
+      <div class="paragraph">
+<p>Based on genre and year</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre mode="cypher"  class="highlight pre-scrollable programlisting cm-s-neo code runnable standalone-example ng-binding" data-lang="cypher" lang="cypher"><!--code class="cypher language-cypher"-->MATCH (s:Artist {name: 'Antilopen Gang'})
+match (s)<-[:RELEASED_BY]-()-[:HAS]->(g:Genre)<-[:HAS]-()-[:RELEASED_BY]->(a)
+WHERE a<>s
+WITH s,a, count(*) as genreScore
+match (s)<-[:RELEASED_BY]-()-[:RELEASED_IN]->(:Year)<-[:RELEASED_IN]-()-[:RELEASED_BY]->(a)
+WITH s,a,genreScore, count(*) as yearScore
+RETURN a.name, genreScore*0.5 + yearScore *0.25 as score
+ORDER BY score desc limit 10;<!--/code--></pre>
+</div>
+</div>
+	</div>
+  </div>
+</slide>
+
+
+
+<slide class="row-fluid">
+  <div class="col-sm-12">
+    <h3>How come?</h3>
+    <br/>
+    <div>
+      <div class="listingblock">
+<div class="content">
+<pre mode="cypher"  class="highlight pre-scrollable programlisting cm-s-neo code runnable standalone-example ng-binding" data-lang="cypher" lang="cypher"><!--code class="cypher language-cypher"-->match (a:Album) - [:RELEASED_BY] -> (k {name: 'Antilopen Gang'}), (a) - [:HAS] -> (g)
+return a, g<!--/code--></pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre mode="cypher"  class="highlight pre-scrollable programlisting cm-s-neo code runnable standalone-example ng-binding" data-lang="cypher" lang="cypher"><!--code class="cypher language-cypher"-->MATCH (s:Artist {name: 'Antilopen Gang'})
+match (s)<-[:RELEASED_BY]-()-[:HAS]->(g:Genre)<-[:HAS]-()-[:RELEASED_BY]->(a)
+WHERE a<>s
+RETURN a.name, g.name<!--/code--></pre>
+</div>
+</div>
+	</div>
+  </div>
+</slide>
+
+
+
+<slide class="row-fluid">
+  <div class="col-sm-12">
+    <h3>Similarity</h3>
+    <br/>
+    <div>
+      <div class="listingblock">
+<div class="content">
+<pre mode="cypher"  class="highlight pre-scrollable programlisting cm-s-neo code runnable standalone-example ng-binding" data-lang="cypher" lang="cypher"><!--code class="cypher language-cypher"-->MATCH (a1:Artist {name: 'Antilopen Gang'})<-[:RELEASED_BY]-(a)-[:HAS]->(genre1)
+WITH a1, collect(id(genre1)) AS a1Genres
+MATCH (a2:Artist)<-[:RELEASED_BY]-(a)-[:HAS]->(genre2) WHERE a1 <> a2
+WITH a1, a1Genres, a2, collect(id(genre2)) AS a2Genres
+WITH  a1.name AS from,
+      a2.name AS to,
+      algo.similarity.jaccard(a1Genres, a2Genres) AS similarity
+      WHERE similarity > 0
+      RETURN *
+ORDER BY similarity DESC<!--/code--></pre>
+</div>
+</div>
+	</div>
+  </div>
+</slide>
+  </carousel>
+</article>

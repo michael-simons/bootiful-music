@@ -255,7 +255,7 @@ var cypher
     + " ORDER BY recommended.name";
 var associatedArtists = session.query(ArtistEntity.class, cypher, parameters);
 
-// Then recommendations based on similar subgenres
+// Then recommendations based on similar microgenres
 cypher
     = " MATCH (src:Artist),"
     + "       (src)-[:FOUNDED_IN|:BORN_IN]-&gt;(country:Country),"
