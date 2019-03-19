@@ -1,0 +1,349 @@
+2019-03-19 13:46:25,345 trenzalore quarkus-demo-1.0-SNAPSHOT-runner[21496] INFO  [io.quarkus] (main) Quarkus 0.11.0 started in 0.020s. Listening on: http://127.0.0.1:8080
+2019-03-19 13:46:25,376 trenzalore quarkus-demo-1.0-SNAPSHOT-runner[21496] INFO  [io.quarkus] (main) Installed features: [cdi, resteasy, resteasy-jsonb]
+2019-03-19 13:46:31,894 trenzalore quarkus-demo-1.0-SNAPSHOT-runner[21496] ERROR [io.und.request] (XNIO-1 task-1) UT005023: Exception handling request to /artists/by-name/Queen: org.jboss.resteasy.spi.UnhandledException: java.lang.IllegalArgumentException: Invalid parameters: 'noSsl' in URI 'bolt://localhost:7687?noSsl'
+	at org.jboss.resteasy.core.ExceptionHandler.handleApplicationException(ExceptionHandler.java:103)
+	at org.jboss.resteasy.core.ExceptionHandler.handleException(ExceptionHandler.java:323)
+	at org.jboss.resteasy.core.SynchronousDispatcher.writeException(SynchronousDispatcher.java:209)
+	at org.jboss.resteasy.core.SynchronousDispatcher.invoke(SynchronousDispatcher.java:495)
+	at org.jboss.resteasy.core.SynchronousDispatcher.lambda$invoke$4(SynchronousDispatcher.java:252)
+	at org.jboss.resteasy.core.SynchronousDispatcher.lambda$preprocess$0(SynchronousDispatcher.java:153)
+	at org.jboss.resteasy.core.interception.jaxrs.PreMatchContainerRequestContext.filter(PreMatchContainerRequestContext.java:362)
+	at org.jboss.resteasy.core.SynchronousDispatcher.preprocess(SynchronousDispatcher.java:156)
+	at org.jboss.resteasy.core.SynchronousDispatcher.invoke(SynchronousDispatcher.java:238)
+	at org.jboss.resteasy.plugins.server.servlet.ServletContainerDispatcher.service(ServletContainerDispatcher.java:229)
+	at io.quarkus.resteasy.runtime.ResteasyFilter$ResteasyResponseWrapper.sendError(ResteasyFilter.java:72)
+	at io.undertow.servlet.handlers.DefaultServlet.doGet(DefaultServlet.java:173)
+	at javax.servlet.http.HttpServlet.service(HttpServlet.java:686)
+	at javax.servlet.http.HttpServlet.service(HttpServlet.java:791)
+	at io.undertow.servlet.handlers.ServletHandler.handleRequest(ServletHandler.java:74)
+	at io.undertow.servlet.handlers.FilterHandler$FilterChainImpl.doFilter(FilterHandler.java:129)
+	at io.quarkus.resteasy.runtime.ResteasyFilter.doFilter(ResteasyFilter.java:43)
+	at io.undertow.servlet.core.ManagedFilter.doFilter(ManagedFilter.java:61)
+	at io.undertow.servlet.handlers.FilterHandler$FilterChainImpl.doFilter(FilterHandler.java:131)
+	at io.undertow.servlet.handlers.FilterHandler.handleRequest(FilterHandler.java:84)
+	at io.undertow.servlet.handlers.security.ServletSecurityRoleHandler.handleRequest(ServletSecurityRoleHandler.java:62)
+	at io.undertow.servlet.handlers.ServletChain$1.handleRequest(ServletChain.java:68)
+	at io.undertow.servlet.handlers.ServletDispatchingHandler.handleRequest(ServletDispatchingHandler.java:36)
+	at io.undertow.servlet.handlers.security.SSLInformationAssociationHandler.handleRequest(SSLInformationAssociationHandler.java:132)
+	at io.undertow.servlet.handlers.security.ServletAuthenticationCallHandler.handleRequest(ServletAuthenticationCallHandler.java:57)
+	at io.undertow.server.handlers.PredicateHandler.handleRequest(PredicateHandler.java:43)
+	at io.undertow.security.handlers.AbstractConfidentialityHandler.handleRequest(AbstractConfidentialityHandler.java:46)
+	at io.undertow.servlet.handlers.security.ServletConfidentialityConstraintHandler.handleRequest(ServletConfidentialityConstraintHandler.java:64)
+	at io.undertow.security.handlers.AuthenticationMechanismsHandler.handleRequest(AuthenticationMechanismsHandler.java:60)
+	at io.undertow.servlet.handlers.security.CachedAuthenticatedSessionHandler.handleRequest(CachedAuthenticatedSessionHandler.java:77)
+	at io.undertow.security.handlers.AbstractSecurityContextAssociationHandler.handleRequest(AbstractSecurityContextAssociationHandler.java:43)
+	at io.undertow.server.handlers.PredicateHandler.handleRequest(PredicateHandler.java:43)
+	at io.undertow.server.handlers.PredicateHandler.handleRequest(PredicateHandler.java:43)
+	at io.undertow.servlet.handlers.ServletInitialHandler.handleFirstRequest(ServletInitialHandler.java:292)
+	at io.undertow.servlet.handlers.ServletInitialHandler.access$100(ServletInitialHandler.java:81)
+	at io.undertow.servlet.handlers.ServletInitialHandler$2.call(ServletInitialHandler.java:138)
+	at io.undertow.servlet.handlers.ServletInitialHandler$2.call(ServletInitialHandler.java:135)
+	at io.undertow.servlet.core.ServletRequestContextThreadSetupAction$1.call(ServletRequestContextThreadSetupAction.java:48)
+	at io.undertow.servlet.core.ContextClassLoaderSetupAction$1.call(ContextClassLoaderSetupAction.java:43)
+	at io.quarkus.undertow.runtime.UndertowDeploymentTemplate$7$1$1.call(UndertowDeploymentTemplate.java:415)
+	at io.undertow.servlet.handlers.ServletInitialHandler.dispatchRequest(ServletInitialHandler.java:272)
+	at io.undertow.servlet.handlers.ServletInitialHandler.access$000(ServletInitialHandler.java:81)
+	at io.undertow.servlet.handlers.ServletInitialHandler$1.handleRequest(ServletInitialHandler.java:104)
+	at io.undertow.server.Connectors.executeRootHandler(Connectors.java:364)
+	at io.undertow.server.HttpServerExchange$1.run(HttpServerExchange.java:830)
+	at org.jboss.threads.ContextClassLoaderSavingRunnable.run(ContextClassLoaderSavingRunnable.java:35)
+	at org.jboss.threads.EnhancedQueueExecutor.safeRun(EnhancedQueueExecutor.java:1998)
+	at org.jboss.threads.EnhancedQueueExecutor$ThreadBody.doRunTask(EnhancedQueueExecutor.java:1525)
+	at org.jboss.threads.EnhancedQueueExecutor$ThreadBody.run(EnhancedQueueExecutor.java:1382)
+	at java.lang.Thread.run(Thread.java:748)
+	at com.oracle.svm.core.thread.JavaThreads.threadStartRoutine(JavaThreads.java:473)
+	at com.oracle.svm.core.posix.thread.PosixJavaThreads.pthreadStartRoutine(PosixJavaThreads.java:193)
+Caused by: java.lang.IllegalArgumentException: Invalid parameters: 'noSsl' in URI 'bolt://localhost:7687?noSsl'
+	at org.neo4j.driver.internal.cluster.RoutingContext.parseParameters(RoutingContext.java:76)
+	at org.neo4j.driver.internal.cluster.RoutingContext.<init>(RoutingContext.java:41)
+	at org.neo4j.driver.internal.DriverFactory.newInstance(DriverFactory.java:80)
+	at org.neo4j.driver.v1.GraphDatabase.driver(GraphDatabase.java:136)
+	at org.neo4j.driver.v1.GraphDatabase.driver(GraphDatabase.java:119)
+	at org.neo4j.driver.v1.GraphDatabase.driver(GraphDatabase.java:94)
+	at ac.simons.music.quarkus.config.DriverProducer.driver(DriverProducer.java:15)
+	at ac.simons.music.quarkus.config.DriverProducer_ProducerMethod_driver_d8d9b165dd894a95b1d9fbf2b28d93b68c9eaaa0_Bean.create(Unknown Source)
+	at ac.simons.music.quarkus.config.DriverProducer_ProducerMethod_driver_d8d9b165dd894a95b1d9fbf2b28d93b68c9eaaa0_Bean.create(Unknown Source)
+	at io.quarkus.arc.AbstractSharedContext.createInstanceHandle(AbstractSharedContext.java:89)
+	at io.quarkus.arc.AbstractSharedContext.lambda$new$0(AbstractSharedContext.java:34)
+	at io.quarkus.arc.ComputingCache$CacheFunction.lambda$apply$0(ComputingCache.java:114)
+	at io.quarkus.arc.LazyValue.get(LazyValue.java:42)
+	at io.quarkus.arc.ComputingCache.getValue(ComputingCache.java:56)
+	at io.quarkus.arc.AbstractSharedContext.get(AbstractSharedContext.java:40)
+	at ac.simons.music.quarkus.config.DriverProducer_ProducerMethod_driver_d8d9b165dd894a95b1d9fbf2b28d93b68c9eaaa0_ClientProxy.delegate(Unknown Source)
+	at ac.simons.music.quarkus.config.DriverProducer_ProducerMethod_driver_d8d9b165dd894a95b1d9fbf2b28d93b68c9eaaa0_ClientProxy.session(Unknown Source)
+	at ac.simons.music.quarkus.domain.ArtistServicePlain.findByName(ArtistServicePlain.java:48)
+	at ac.simons.music.quarkus.domain.ArtistServicePlain_ClientProxy.findByName(Unknown Source)
+	at ac.simons.music.quarkus.domain.ArtistServicePlain.findByName(ArtistServicePlain.java:32)
+	at ac.simons.music.quarkus.ArtistResource.byName(ArtistResource.java:23)
+	at java.lang.reflect.Method.invoke(Method.java:498)
+	at org.jboss.resteasy.core.MethodInjectorImpl.invoke(MethodInjectorImpl.java:152)
+	at org.jboss.resteasy.core.MethodInjectorImpl.lambda$invoke$3(MethodInjectorImpl.java:123)
+	at java.util.concurrent.CompletableFuture.uniApply(CompletableFuture.java:602)
+	at java.util.concurrent.CompletableFuture.uniApplyStage(CompletableFuture.java:614)
+	at java.util.concurrent.CompletableFuture.thenApply(CompletableFuture.java:1983)
+	at java.util.concurrent.CompletableFuture.thenApply(CompletableFuture.java:110)
+	at org.jboss.resteasy.core.MethodInjectorImpl.invoke(MethodInjectorImpl.java:123)
+	at org.jboss.resteasy.core.ResourceMethodInvoker.internalInvokeOnTarget(ResourceMethodInvoker.java:543)
+	at org.jboss.resteasy.core.ResourceMethodInvoker.invokeOnTargetAfterFilter(ResourceMethodInvoker.java:418)
+	at org.jboss.resteasy.core.ResourceMethodInvoker.lambda$invokeOnTarget$2(ResourceMethodInvoker.java:372)
+	at org.jboss.resteasy.core.interception.jaxrs.PreMatchContainerRequestContext.filter(PreMatchContainerRequestContext.java:362)
+	at org.jboss.resteasy.core.ResourceMethodInvoker.invokeOnTarget(ResourceMethodInvoker.java:374)
+	at org.jboss.resteasy.core.ResourceMethodInvoker.invoke(ResourceMethodInvoker.java:343)
+	at org.jboss.resteasy.core.ResourceMethodInvoker.lambda$invoke$1(ResourceMethodInvoker.java:317)
+	at java.util.concurrent.CompletableFuture.uniComposeStage(CompletableFuture.java:981)
+	at java.util.concurrent.CompletableFuture.thenCompose(CompletableFuture.java:2124)
+	at java.util.concurrent.CompletableFuture.thenCompose(CompletableFuture.java:110)
+	at org.jboss.resteasy.core.ResourceMethodInvoker.invoke(ResourceMethodInvoker.java:317)
+	at org.jboss.resteasy.core.SynchronousDispatcher.invoke(SynchronousDispatcher.java:476)
+	... 48 more
+
+2019-03-19 13:46:43,219 trenzalore quarkus-demo-1.0-SNAPSHOT-runner[21496] INFO  [io.quarkus] (main) Quarkus stopped in 0.001s
+2019-03-19 14:14:34,253 unknown-host quarkus-demo-1.0-SNAPSHOT-runner[22409] INFO  [io.quarkus] (main) Quarkus 0.11.0 started in 0.009s. Listening on: http://127.0.0.1:8080
+2019-03-19 14:14:34,255 unknown-host quarkus-demo-1.0-SNAPSHOT-runner[22409] INFO  [io.quarkus] (main) Installed features: [cdi, resteasy, resteasy-jsonb]
+2019-03-19 14:14:45,343 unknown-host quarkus-demo-1.0-SNAPSHOT-runner[22409] INFO  [Driver] (XNIO-1 task-1) Direct driver instance 1040862387 created for server address localhost:7687
+2019-03-19 14:14:45,345 unknown-host quarkus-demo-1.0-SNAPSHOT-runner[22409] WARNING [org.neo.dri.int.sha.io.net.uti.con.DefaultPromise] (globalEventExecutor-1-1) An exception was thrown by org.neo4j.driver.internal.async.ChannelConnectedListener.operationComplete(): java.lang.IllegalStateException: channel not registered to an event loop
+	at org.neo4j.driver.internal.shaded.io.netty.channel.AbstractChannel.eventLoop(AbstractChannel.java:162)
+	at org.neo4j.driver.internal.shaded.io.netty.channel.DefaultChannelPromise.executor(DefaultChannelPromise.java:60)
+	at org.neo4j.driver.internal.shaded.io.netty.util.concurrent.DefaultPromise.notifyListeners(DefaultPromise.java:417)
+	at org.neo4j.driver.internal.shaded.io.netty.util.concurrent.DefaultPromise.setFailure(DefaultPromise.java:112)
+	at org.neo4j.driver.internal.shaded.io.netty.channel.DefaultChannelPromise.setFailure(DefaultChannelPromise.java:89)
+	at org.neo4j.driver.internal.async.ChannelConnectedListener.operationComplete(ChannelConnectedListener.java:70)
+	at org.neo4j.driver.internal.async.ChannelConnectedListener.operationComplete(ChannelConnectedListener.java:37)
+	at org.neo4j.driver.internal.shaded.io.netty.util.concurrent.DefaultPromise.notifyListener0(DefaultPromise.java:511)
+	at org.neo4j.driver.internal.shaded.io.netty.util.concurrent.DefaultPromise.notifyListeners0(DefaultPromise.java:504)
+	at org.neo4j.driver.internal.shaded.io.netty.util.concurrent.DefaultPromise.notifyListenersNow(DefaultPromise.java:483)
+	at org.neo4j.driver.internal.shaded.io.netty.util.concurrent.DefaultPromise.access$000(DefaultPromise.java:33)
+	at org.neo4j.driver.internal.shaded.io.netty.util.concurrent.DefaultPromise$1.run(DefaultPromise.java:435)
+	at org.neo4j.driver.internal.shaded.io.netty.util.concurrent.GlobalEventExecutor$TaskRunner.run(GlobalEventExecutor.java:248)
+	at org.neo4j.driver.internal.shaded.io.netty.util.concurrent.FastThreadLocalRunnable.run(FastThreadLocalRunnable.java:30)
+	at java.lang.Thread.run(Thread.java:748)
+	at com.oracle.svm.core.thread.JavaThreads.threadStartRoutine(JavaThreads.java:473)
+	at com.oracle.svm.core.posix.thread.PosixJavaThreads.pthreadStartRoutine(PosixJavaThreads.java:193)
+
+2019-03-19 14:15:28,768 unknown-host quarkus-demo-1.0-SNAPSHOT-runner[22488] INFO  [io.quarkus] (main) Quarkus 0.11.0 started in 0.009s. Listening on: http://127.0.0.1:8080
+2019-03-19 14:15:28,771 unknown-host quarkus-demo-1.0-SNAPSHOT-runner[22488] INFO  [io.quarkus] (main) Installed features: [cdi, resteasy, resteasy-jsonb]
+2019-03-19 14:15:32,225 unknown-host quarkus-demo-1.0-SNAPSHOT-runner[22488] INFO  [Driver] (XNIO-1 task-1) Direct driver instance 534430696 created for server address localhost:7687
+2019-03-19 14:15:32,226 unknown-host quarkus-demo-1.0-SNAPSHOT-runner[22488] WARNING [org.neo.dri.int.sha.io.net.uti.con.DefaultPromise] (globalEventExecutor-1-1) An exception was thrown by org.neo4j.driver.internal.async.ChannelConnectedListener.operationComplete(): java.lang.IllegalStateException: channel not registered to an event loop
+	at org.neo4j.driver.internal.shaded.io.netty.channel.AbstractChannel.eventLoop(AbstractChannel.java:162)
+	at org.neo4j.driver.internal.shaded.io.netty.channel.DefaultChannelPromise.executor(DefaultChannelPromise.java:60)
+	at org.neo4j.driver.internal.shaded.io.netty.util.concurrent.DefaultPromise.notifyListeners(DefaultPromise.java:417)
+	at org.neo4j.driver.internal.shaded.io.netty.util.concurrent.DefaultPromise.setFailure(DefaultPromise.java:112)
+	at org.neo4j.driver.internal.shaded.io.netty.channel.DefaultChannelPromise.setFailure(DefaultChannelPromise.java:89)
+	at org.neo4j.driver.internal.async.ChannelConnectedListener.operationComplete(ChannelConnectedListener.java:70)
+	at org.neo4j.driver.internal.async.ChannelConnectedListener.operationComplete(ChannelConnectedListener.java:37)
+	at org.neo4j.driver.internal.shaded.io.netty.util.concurrent.DefaultPromise.notifyListener0(DefaultPromise.java:511)
+	at org.neo4j.driver.internal.shaded.io.netty.util.concurrent.DefaultPromise.notifyListeners0(DefaultPromise.java:504)
+	at org.neo4j.driver.internal.shaded.io.netty.util.concurrent.DefaultPromise.notifyListenersNow(DefaultPromise.java:483)
+	at org.neo4j.driver.internal.shaded.io.netty.util.concurrent.DefaultPromise.access$000(DefaultPromise.java:33)
+	at org.neo4j.driver.internal.shaded.io.netty.util.concurrent.DefaultPromise$1.run(DefaultPromise.java:435)
+	at org.neo4j.driver.internal.shaded.io.netty.util.concurrent.GlobalEventExecutor$TaskRunner.run(GlobalEventExecutor.java:248)
+	at org.neo4j.driver.internal.shaded.io.netty.util.concurrent.FastThreadLocalRunnable.run(FastThreadLocalRunnable.java:30)
+	at java.lang.Thread.run(Thread.java:748)
+	at com.oracle.svm.core.thread.JavaThreads.threadStartRoutine(JavaThreads.java:473)
+	at com.oracle.svm.core.posix.thread.PosixJavaThreads.pthreadStartRoutine(PosixJavaThreads.java:193)
+
+2019-03-19 14:27:52,947 unknown-host quarkus-demo-1.0-SNAPSHOT-runner[22860] INFO  [io.quarkus] (main) Quarkus 0.11.0 started in 0.036s. Listening on: http://127.0.0.1:8080
+2019-03-19 14:27:52,991 unknown-host quarkus-demo-1.0-SNAPSHOT-runner[22860] INFO  [io.quarkus] (main) Installed features: [cdi, resteasy, resteasy-jsonb]
+2019-03-19 14:27:55,597 unknown-host quarkus-demo-1.0-SNAPSHOT-runner[22860] INFO  [Driver] (XNIO-1 task-1) Direct driver instance 1633194162 created for server address localhost:7687
+2019-03-19 14:27:55,598 unknown-host quarkus-demo-1.0-SNAPSHOT-runner[22860] WARNING [org.neo.dri.int.sha.io.net.uti.con.DefaultPromise] (globalEventExecutor-1-1) An exception was thrown by org.neo4j.driver.internal.async.ChannelConnectedListener.operationComplete(): java.lang.IllegalStateException: channel not registered to an event loop
+	at org.neo4j.driver.internal.shaded.io.netty.channel.AbstractChannel.eventLoop(AbstractChannel.java:162)
+	at org.neo4j.driver.internal.shaded.io.netty.channel.DefaultChannelPromise.executor(DefaultChannelPromise.java:60)
+	at org.neo4j.driver.internal.shaded.io.netty.util.concurrent.DefaultPromise.notifyListeners(DefaultPromise.java:417)
+	at org.neo4j.driver.internal.shaded.io.netty.util.concurrent.DefaultPromise.setFailure(DefaultPromise.java:112)
+	at org.neo4j.driver.internal.shaded.io.netty.channel.DefaultChannelPromise.setFailure(DefaultChannelPromise.java:89)
+	at org.neo4j.driver.internal.async.ChannelConnectedListener.operationComplete(ChannelConnectedListener.java:70)
+	at org.neo4j.driver.internal.async.ChannelConnectedListener.operationComplete(ChannelConnectedListener.java:37)
+	at org.neo4j.driver.internal.shaded.io.netty.util.concurrent.DefaultPromise.notifyListener0(DefaultPromise.java:511)
+	at org.neo4j.driver.internal.shaded.io.netty.util.concurrent.DefaultPromise.notifyListeners0(DefaultPromise.java:504)
+	at org.neo4j.driver.internal.shaded.io.netty.util.concurrent.DefaultPromise.notifyListenersNow(DefaultPromise.java:483)
+	at org.neo4j.driver.internal.shaded.io.netty.util.concurrent.DefaultPromise.access$000(DefaultPromise.java:33)
+	at org.neo4j.driver.internal.shaded.io.netty.util.concurrent.DefaultPromise$1.run(DefaultPromise.java:435)
+	at org.neo4j.driver.internal.shaded.io.netty.util.concurrent.GlobalEventExecutor$TaskRunner.run(GlobalEventExecutor.java:248)
+	at org.neo4j.driver.internal.shaded.io.netty.util.concurrent.FastThreadLocalRunnable.run(FastThreadLocalRunnable.java:30)
+	at java.lang.Thread.run(Thread.java:748)
+	at com.oracle.svm.core.thread.JavaThreads.threadStartRoutine(JavaThreads.java:473)
+	at com.oracle.svm.core.posix.thread.PosixJavaThreads.pthreadStartRoutine(PosixJavaThreads.java:193)
+
+2019-03-19 20:02:51,153 unknown-host quarkus-demo-1.0-SNAPSHOT-runner[28220] INFO  [io.quarkus] (main) Quarkus 0.11.0 started in 0.199s. Listening on: http://127.0.0.1:8080
+2019-03-19 20:02:51,186 unknown-host quarkus-demo-1.0-SNAPSHOT-runner[28220] INFO  [io.quarkus] (main) Installed features: [cdi, resteasy, resteasy-jsonb]
+2019-03-19 20:02:58,470 unknown-host quarkus-demo-1.0-SNAPSHOT-runner[28220] INFO  [Driver] (XNIO-1 task-1) Direct driver instance 588143619 created for server address localhost:7687
+2019-03-19 20:02:58,479 unknown-host quarkus-demo-1.0-SNAPSHOT-runner[28220] WARNING [org.neo.dri.int.sha.io.net.uti.con.DefaultPromise] (globalEventExecutor-1-1) An exception was thrown by org.neo4j.driver.internal.async.ChannelConnectedListener.operationComplete(): java.lang.IllegalStateException: channel not registered to an event loop
+	at org.neo4j.driver.internal.shaded.io.netty.channel.AbstractChannel.eventLoop(AbstractChannel.java:162)
+	at org.neo4j.driver.internal.shaded.io.netty.channel.DefaultChannelPromise.executor(DefaultChannelPromise.java:60)
+	at org.neo4j.driver.internal.shaded.io.netty.util.concurrent.DefaultPromise.notifyListeners(DefaultPromise.java:417)
+	at org.neo4j.driver.internal.shaded.io.netty.util.concurrent.DefaultPromise.setFailure(DefaultPromise.java:112)
+	at org.neo4j.driver.internal.shaded.io.netty.channel.DefaultChannelPromise.setFailure(DefaultChannelPromise.java:89)
+	at org.neo4j.driver.internal.async.ChannelConnectedListener.operationComplete(ChannelConnectedListener.java:70)
+	at org.neo4j.driver.internal.async.ChannelConnectedListener.operationComplete(ChannelConnectedListener.java:37)
+	at org.neo4j.driver.internal.shaded.io.netty.util.concurrent.DefaultPromise.notifyListener0(DefaultPromise.java:511)
+	at org.neo4j.driver.internal.shaded.io.netty.util.concurrent.DefaultPromise.notifyListeners0(DefaultPromise.java:504)
+	at org.neo4j.driver.internal.shaded.io.netty.util.concurrent.DefaultPromise.notifyListenersNow(DefaultPromise.java:483)
+	at org.neo4j.driver.internal.shaded.io.netty.util.concurrent.DefaultPromise.access$000(DefaultPromise.java:33)
+	at org.neo4j.driver.internal.shaded.io.netty.util.concurrent.DefaultPromise$1.run(DefaultPromise.java:435)
+	at org.neo4j.driver.internal.shaded.io.netty.util.concurrent.GlobalEventExecutor$TaskRunner.run(GlobalEventExecutor.java:248)
+	at org.neo4j.driver.internal.shaded.io.netty.util.concurrent.FastThreadLocalRunnable.run(FastThreadLocalRunnable.java:30)
+	at java.lang.Thread.run(Thread.java:748)
+	at com.oracle.svm.core.thread.JavaThreads.threadStartRoutine(JavaThreads.java:473)
+	at com.oracle.svm.core.posix.thread.PosixJavaThreads.pthreadStartRoutine(PosixJavaThreads.java:193)
+
+2019-03-19 20:08:03,072 unknown-host quarkus-demo-1.0-SNAPSHOT-runner[28585] INFO  [io.quarkus] (main) Quarkus 0.11.0 started in 0.094s. Listening on: http://127.0.0.1:8080
+2019-03-19 20:08:03,096 unknown-host quarkus-demo-1.0-SNAPSHOT-runner[28585] INFO  [io.quarkus] (main) Installed features: [cdi, resteasy, resteasy-jsonb]
+2019-03-19 20:08:06,638 unknown-host quarkus-demo-1.0-SNAPSHOT-runner[28585] INFO  [Driver] (XNIO-1 task-1) Direct driver instance 1258201445 created for server address localhost:7687
+2019-03-19 20:08:06,660 unknown-host quarkus-demo-1.0-SNAPSHOT-runner[28585] WARNING [org.neo.dri.int.sha.io.net.uti.con.DefaultPromise] (globalEventExecutor-1-1) An exception was thrown by org.neo4j.driver.internal.async.ChannelConnectedListener.operationComplete(): java.lang.IllegalStateException: channel not registered to an event loop
+	at org.neo4j.driver.internal.shaded.io.netty.channel.AbstractChannel.eventLoop(AbstractChannel.java:162)
+	at org.neo4j.driver.internal.shaded.io.netty.channel.DefaultChannelPromise.executor(DefaultChannelPromise.java:60)
+	at org.neo4j.driver.internal.shaded.io.netty.util.concurrent.DefaultPromise.notifyListeners(DefaultPromise.java:417)
+	at org.neo4j.driver.internal.shaded.io.netty.util.concurrent.DefaultPromise.setFailure(DefaultPromise.java:112)
+	at org.neo4j.driver.internal.shaded.io.netty.channel.DefaultChannelPromise.setFailure(DefaultChannelPromise.java:89)
+	at org.neo4j.driver.internal.async.ChannelConnectedListener.operationComplete(ChannelConnectedListener.java:70)
+	at org.neo4j.driver.internal.async.ChannelConnectedListener.operationComplete(ChannelConnectedListener.java:37)
+	at org.neo4j.driver.internal.shaded.io.netty.util.concurrent.DefaultPromise.notifyListener0(DefaultPromise.java:511)
+	at org.neo4j.driver.internal.shaded.io.netty.util.concurrent.DefaultPromise.notifyListeners0(DefaultPromise.java:504)
+	at org.neo4j.driver.internal.shaded.io.netty.util.concurrent.DefaultPromise.notifyListenersNow(DefaultPromise.java:483)
+	at org.neo4j.driver.internal.shaded.io.netty.util.concurrent.DefaultPromise.access$000(DefaultPromise.java:33)
+	at org.neo4j.driver.internal.shaded.io.netty.util.concurrent.DefaultPromise$1.run(DefaultPromise.java:435)
+	at org.neo4j.driver.internal.shaded.io.netty.util.concurrent.GlobalEventExecutor$TaskRunner.run(GlobalEventExecutor.java:248)
+	at org.neo4j.driver.internal.shaded.io.netty.util.concurrent.FastThreadLocalRunnable.run(FastThreadLocalRunnable.java:30)
+	at java.lang.Thread.run(Thread.java:748)
+	at com.oracle.svm.core.thread.JavaThreads.threadStartRoutine(JavaThreads.java:473)
+	at com.oracle.svm.core.posix.thread.PosixJavaThreads.pthreadStartRoutine(PosixJavaThreads.java:193)
+
+2019-03-19 20:09:27,724 unknown-host quarkus-demo-1.0-SNAPSHOT-runner[28832] INFO  [io.quarkus] (main) Quarkus 0.11.0 started in 0.007s. Listening on: http://127.0.0.1:8080
+2019-03-19 20:09:27,725 unknown-host quarkus-demo-1.0-SNAPSHOT-runner[28832] INFO  [io.quarkus] (main) Installed features: [cdi, resteasy, resteasy-jsonb]
+2019-03-19 20:09:35,478 unknown-host quarkus-demo-1.0-SNAPSHOT-runner[28832] INFO  [Driver] (XNIO-1 task-1) Direct driver instance 1795758260 created for server address localhost:7687
+2019-03-19 20:09:35,479 unknown-host quarkus-demo-1.0-SNAPSHOT-runner[28832] WARNING [org.neo.dri.int.sha.io.net.uti.con.DefaultPromise] (globalEventExecutor-1-1) An exception was thrown by org.neo4j.driver.internal.async.ChannelConnectedListener.operationComplete(): java.lang.IllegalStateException: channel not registered to an event loop
+	at org.neo4j.driver.internal.shaded.io.netty.channel.AbstractChannel.eventLoop(AbstractChannel.java:162)
+	at org.neo4j.driver.internal.shaded.io.netty.channel.DefaultChannelPromise.executor(DefaultChannelPromise.java:60)
+	at org.neo4j.driver.internal.shaded.io.netty.util.concurrent.DefaultPromise.notifyListeners(DefaultPromise.java:417)
+	at org.neo4j.driver.internal.shaded.io.netty.util.concurrent.DefaultPromise.setFailure(DefaultPromise.java:112)
+	at org.neo4j.driver.internal.shaded.io.netty.channel.DefaultChannelPromise.setFailure(DefaultChannelPromise.java:89)
+	at org.neo4j.driver.internal.async.ChannelConnectedListener.operationComplete(ChannelConnectedListener.java:70)
+	at org.neo4j.driver.internal.async.ChannelConnectedListener.operationComplete(ChannelConnectedListener.java:37)
+	at org.neo4j.driver.internal.shaded.io.netty.util.concurrent.DefaultPromise.notifyListener0(DefaultPromise.java:511)
+	at org.neo4j.driver.internal.shaded.io.netty.util.concurrent.DefaultPromise.notifyListeners0(DefaultPromise.java:504)
+	at org.neo4j.driver.internal.shaded.io.netty.util.concurrent.DefaultPromise.notifyListenersNow(DefaultPromise.java:483)
+	at org.neo4j.driver.internal.shaded.io.netty.util.concurrent.DefaultPromise.access$000(DefaultPromise.java:33)
+	at org.neo4j.driver.internal.shaded.io.netty.util.concurrent.DefaultPromise$1.run(DefaultPromise.java:435)
+	at org.neo4j.driver.internal.shaded.io.netty.util.concurrent.GlobalEventExecutor$TaskRunner.run(GlobalEventExecutor.java:248)
+	at org.neo4j.driver.internal.shaded.io.netty.util.concurrent.FastThreadLocalRunnable.run(FastThreadLocalRunnable.java:30)
+	at java.lang.Thread.run(Thread.java:748)
+	at com.oracle.svm.core.thread.JavaThreads.threadStartRoutine(JavaThreads.java:473)
+	at com.oracle.svm.core.posix.thread.PosixJavaThreads.pthreadStartRoutine(PosixJavaThreads.java:193)
+
+2019-03-19 20:10:08,165 unknown-host quarkus-demo-1.0-SNAPSHOT-runner[28892] INFO  [io.quarkus] (main) Quarkus 0.11.0 started in 0.006s. Listening on: http://127.0.0.1:8080
+2019-03-19 20:10:08,167 unknown-host quarkus-demo-1.0-SNAPSHOT-runner[28892] INFO  [io.quarkus] (main) Installed features: [cdi, resteasy, resteasy-jsonb]
+2019-03-19 20:10:10,232 unknown-host quarkus-demo-1.0-SNAPSHOT-runner[28892] INFO  [Driver] (XNIO-1 task-1) Direct driver instance 1460796757 created for server address localhost:7687
+2019-03-19 20:10:10,232 unknown-host quarkus-demo-1.0-SNAPSHOT-runner[28892] WARNING [org.neo.dri.int.sha.io.net.uti.con.DefaultPromise] (globalEventExecutor-1-1) An exception was thrown by org.neo4j.driver.internal.async.ChannelConnectedListener.operationComplete(): java.lang.IllegalStateException: channel not registered to an event loop
+	at org.neo4j.driver.internal.shaded.io.netty.channel.AbstractChannel.eventLoop(AbstractChannel.java:162)
+	at org.neo4j.driver.internal.shaded.io.netty.channel.DefaultChannelPromise.executor(DefaultChannelPromise.java:60)
+	at org.neo4j.driver.internal.shaded.io.netty.util.concurrent.DefaultPromise.notifyListeners(DefaultPromise.java:417)
+	at org.neo4j.driver.internal.shaded.io.netty.util.concurrent.DefaultPromise.setFailure(DefaultPromise.java:112)
+	at org.neo4j.driver.internal.shaded.io.netty.channel.DefaultChannelPromise.setFailure(DefaultChannelPromise.java:89)
+	at org.neo4j.driver.internal.async.ChannelConnectedListener.operationComplete(ChannelConnectedListener.java:70)
+	at org.neo4j.driver.internal.async.ChannelConnectedListener.operationComplete(ChannelConnectedListener.java:37)
+	at org.neo4j.driver.internal.shaded.io.netty.util.concurrent.DefaultPromise.notifyListener0(DefaultPromise.java:511)
+	at org.neo4j.driver.internal.shaded.io.netty.util.concurrent.DefaultPromise.notifyListeners0(DefaultPromise.java:504)
+	at org.neo4j.driver.internal.shaded.io.netty.util.concurrent.DefaultPromise.notifyListenersNow(DefaultPromise.java:483)
+	at org.neo4j.driver.internal.shaded.io.netty.util.concurrent.DefaultPromise.access$000(DefaultPromise.java:33)
+	at org.neo4j.driver.internal.shaded.io.netty.util.concurrent.DefaultPromise$1.run(DefaultPromise.java:435)
+	at org.neo4j.driver.internal.shaded.io.netty.util.concurrent.GlobalEventExecutor$TaskRunner.run(GlobalEventExecutor.java:248)
+	at org.neo4j.driver.internal.shaded.io.netty.util.concurrent.FastThreadLocalRunnable.run(FastThreadLocalRunnable.java:30)
+	at java.lang.Thread.run(Thread.java:748)
+	at com.oracle.svm.core.thread.JavaThreads.threadStartRoutine(JavaThreads.java:473)
+	at com.oracle.svm.core.posix.thread.PosixJavaThreads.pthreadStartRoutine(PosixJavaThreads.java:193)
+
+2019-03-19 20:11:49,826 trenzalore quarkus-demo-1.0-SNAPSHOT-runner.jar[28982] DEBUG [org.xnio] (main) XNIO version 3.6.5.Final
+2019-03-19 20:11:49,920 trenzalore quarkus-demo-1.0-SNAPSHOT-runner.jar[28982] DEBUG [org.xni.nio] (main) XNIO NIO Implementation Version 3.6.5.Final
+2019-03-19 20:11:50,101 trenzalore quarkus-demo-1.0-SNAPSHOT-runner.jar[28982] DEBUG [org.jbo.threads] (main) JBoss Threads version 3.0.0.Alpha4
+2019-03-19 20:11:50,207 trenzalore quarkus-demo-1.0-SNAPSHOT-runner.jar[28982] INFO  [io.quarkus] (main) Quarkus 0.11.0 started in 1.288s. Listening on: http://127.0.0.1:8080
+2019-03-19 20:11:50,211 trenzalore quarkus-demo-1.0-SNAPSHOT-runner.jar[28982] INFO  [io.quarkus] (main) Installed features: [cdi, resteasy, resteasy-jsonb]
+2019-03-19 20:11:53,819 trenzalore quarkus-demo-1.0-SNAPSHOT-runner.jar[28982] INFO  [Driver] (XNIO-1 task-1) Direct driver instance 422675330 created for server address localhost:7687
+2019-03-19 20:11:59,793 trenzalore quarkus-demo-1.0-SNAPSHOT-runner.jar[28982] INFO  [io.quarkus] (main) Quarkus stopped in 0.020s
+2019-03-19 20:16:12,817 unknown-host quarkus-demo-1.0-SNAPSHOT-runner[29161] INFO  [io.quarkus] (main) Quarkus 0.11.0 started in 0.020s. Listening on: http://127.0.0.1:8080
+2019-03-19 20:16:12,819 unknown-host quarkus-demo-1.0-SNAPSHOT-runner[29161] INFO  [io.quarkus] (main) Installed features: [cdi, resteasy, resteasy-jsonb]
+2019-03-19 20:16:15,749 unknown-host quarkus-demo-1.0-SNAPSHOT-runner[29161] INFO  [Driver] (XNIO-1 task-1) Direct driver instance 825650211 created for server address localhost:7687
+2019-03-19 20:16:15,749 unknown-host quarkus-demo-1.0-SNAPSHOT-runner[29161] WARNING [org.neo.dri.int.sha.io.net.uti.con.DefaultPromise] (globalEventExecutor-1-1) An exception was thrown by org.neo4j.driver.internal.async.ChannelConnectedListener.operationComplete(): java.lang.IllegalStateException: channel not registered to an event loop
+	at org.neo4j.driver.internal.shaded.io.netty.channel.AbstractChannel.eventLoop(AbstractChannel.java:162)
+	at org.neo4j.driver.internal.shaded.io.netty.channel.DefaultChannelPromise.executor(DefaultChannelPromise.java:60)
+	at org.neo4j.driver.internal.shaded.io.netty.util.concurrent.DefaultPromise.notifyListeners(DefaultPromise.java:417)
+	at org.neo4j.driver.internal.shaded.io.netty.util.concurrent.DefaultPromise.setFailure(DefaultPromise.java:112)
+	at org.neo4j.driver.internal.shaded.io.netty.channel.DefaultChannelPromise.setFailure(DefaultChannelPromise.java:89)
+	at org.neo4j.driver.internal.async.ChannelConnectedListener.operationComplete(ChannelConnectedListener.java:70)
+	at org.neo4j.driver.internal.async.ChannelConnectedListener.operationComplete(ChannelConnectedListener.java:37)
+	at org.neo4j.driver.internal.shaded.io.netty.util.concurrent.DefaultPromise.notifyListener0(DefaultPromise.java:511)
+	at org.neo4j.driver.internal.shaded.io.netty.util.concurrent.DefaultPromise.notifyListeners0(DefaultPromise.java:504)
+	at org.neo4j.driver.internal.shaded.io.netty.util.concurrent.DefaultPromise.notifyListenersNow(DefaultPromise.java:483)
+	at org.neo4j.driver.internal.shaded.io.netty.util.concurrent.DefaultPromise.access$000(DefaultPromise.java:33)
+	at org.neo4j.driver.internal.shaded.io.netty.util.concurrent.DefaultPromise$1.run(DefaultPromise.java:435)
+	at org.neo4j.driver.internal.shaded.io.netty.util.concurrent.GlobalEventExecutor$TaskRunner.run(GlobalEventExecutor.java:248)
+	at org.neo4j.driver.internal.shaded.io.netty.util.concurrent.FastThreadLocalRunnable.run(FastThreadLocalRunnable.java:30)
+	at java.lang.Thread.run(Thread.java:748)
+	at com.oracle.svm.core.thread.JavaThreads.threadStartRoutine(JavaThreads.java:473)
+	at com.oracle.svm.core.posix.thread.PosixJavaThreads.pthreadStartRoutine(PosixJavaThreads.java:193)
+
+2019-03-19 20:34:18,209 unknown-host quarkus-demo-1.0-SNAPSHOT-runner[30217] INFO  [io.quarkus] (main) Quarkus 0.11.0 started in 0.011s. Listening on: http://127.0.0.1:8080
+2019-03-19 20:34:18,211 unknown-host quarkus-demo-1.0-SNAPSHOT-runner[30217] INFO  [io.quarkus] (main) Installed features: [cdi, resteasy, resteasy-jsonb]
+2019-03-19 20:34:23,838 unknown-host quarkus-demo-1.0-SNAPSHOT-runner[30217] INFO  [Driver] (XNIO-1 task-1) Direct driver instance 536036277 created for server address localhost:7687
+2019-03-19 20:34:23,839 unknown-host quarkus-demo-1.0-SNAPSHOT-runner[30217] WARNING [org.neo.dri.int.sha.io.net.uti.con.DefaultPromise] (globalEventExecutor-1-1) An exception was thrown by org.neo4j.driver.internal.async.ChannelConnectedListener.operationComplete(): java.lang.IllegalStateException: channel not registered to an event loop
+	at org.neo4j.driver.internal.shaded.io.netty.channel.AbstractChannel.eventLoop(AbstractChannel.java:162)
+	at org.neo4j.driver.internal.shaded.io.netty.channel.DefaultChannelPromise.executor(DefaultChannelPromise.java:60)
+	at org.neo4j.driver.internal.shaded.io.netty.util.concurrent.DefaultPromise.notifyListeners(DefaultPromise.java:417)
+	at org.neo4j.driver.internal.shaded.io.netty.util.concurrent.DefaultPromise.setFailure(DefaultPromise.java:112)
+	at org.neo4j.driver.internal.shaded.io.netty.channel.DefaultChannelPromise.setFailure(DefaultChannelPromise.java:89)
+	at org.neo4j.driver.internal.async.ChannelConnectedListener.operationComplete(ChannelConnectedListener.java:70)
+	at org.neo4j.driver.internal.async.ChannelConnectedListener.operationComplete(ChannelConnectedListener.java:37)
+	at org.neo4j.driver.internal.shaded.io.netty.util.concurrent.DefaultPromise.notifyListener0(DefaultPromise.java:511)
+	at org.neo4j.driver.internal.shaded.io.netty.util.concurrent.DefaultPromise.notifyListeners0(DefaultPromise.java:504)
+	at org.neo4j.driver.internal.shaded.io.netty.util.concurrent.DefaultPromise.notifyListenersNow(DefaultPromise.java:483)
+	at org.neo4j.driver.internal.shaded.io.netty.util.concurrent.DefaultPromise.access$000(DefaultPromise.java:33)
+	at org.neo4j.driver.internal.shaded.io.netty.util.concurrent.DefaultPromise$1.run(DefaultPromise.java:435)
+	at org.neo4j.driver.internal.shaded.io.netty.util.concurrent.GlobalEventExecutor$TaskRunner.run(GlobalEventExecutor.java:248)
+	at org.neo4j.driver.internal.shaded.io.netty.util.concurrent.FastThreadLocalRunnable.run(FastThreadLocalRunnable.java:30)
+	at java.lang.Thread.run(Thread.java:748)
+	at com.oracle.svm.core.thread.JavaThreads.threadStartRoutine(JavaThreads.java:473)
+	at com.oracle.svm.core.posix.thread.PosixJavaThreads.pthreadStartRoutine(PosixJavaThreads.java:193)
+
+2019-03-19 20:35:22,471 unknown-host quarkus-demo-1.0-SNAPSHOT-runner[30294] INFO  [io.quarkus] (main) Quarkus 0.11.0 started in 0.013s. Listening on: http://127.0.0.1:8080
+2019-03-19 20:35:22,473 unknown-host quarkus-demo-1.0-SNAPSHOT-runner[30294] INFO  [io.quarkus] (main) Installed features: [cdi, resteasy, resteasy-jsonb]
+2019-03-19 20:35:24,788 unknown-host quarkus-demo-1.0-SNAPSHOT-runner[30294] INFO  [Driver] (XNIO-1 task-1) Direct driver instance 246763292 created for server address localhost:7687
+2019-03-19 20:35:24,790 unknown-host quarkus-demo-1.0-SNAPSHOT-runner[30294] WARNING [org.neo.dri.int.sha.io.net.uti.con.DefaultPromise] (globalEventExecutor-1-1) An exception was thrown by org.neo4j.driver.internal.async.ChannelConnectedListener.operationComplete(): java.lang.IllegalStateException: channel not registered to an event loop
+	at org.neo4j.driver.internal.shaded.io.netty.channel.AbstractChannel.eventLoop(AbstractChannel.java:162)
+	at org.neo4j.driver.internal.shaded.io.netty.channel.DefaultChannelPromise.executor(DefaultChannelPromise.java:60)
+	at org.neo4j.driver.internal.shaded.io.netty.util.concurrent.DefaultPromise.notifyListeners(DefaultPromise.java:417)
+	at org.neo4j.driver.internal.shaded.io.netty.util.concurrent.DefaultPromise.setFailure(DefaultPromise.java:112)
+	at org.neo4j.driver.internal.shaded.io.netty.channel.DefaultChannelPromise.setFailure(DefaultChannelPromise.java:89)
+	at org.neo4j.driver.internal.async.ChannelConnectedListener.operationComplete(ChannelConnectedListener.java:70)
+	at org.neo4j.driver.internal.async.ChannelConnectedListener.operationComplete(ChannelConnectedListener.java:37)
+	at org.neo4j.driver.internal.shaded.io.netty.util.concurrent.DefaultPromise.notifyListener0(DefaultPromise.java:511)
+	at org.neo4j.driver.internal.shaded.io.netty.util.concurrent.DefaultPromise.notifyListeners0(DefaultPromise.java:504)
+	at org.neo4j.driver.internal.shaded.io.netty.util.concurrent.DefaultPromise.notifyListenersNow(DefaultPromise.java:483)
+	at org.neo4j.driver.internal.shaded.io.netty.util.concurrent.DefaultPromise.access$000(DefaultPromise.java:33)
+	at org.neo4j.driver.internal.shaded.io.netty.util.concurrent.DefaultPromise$1.run(DefaultPromise.java:435)
+	at org.neo4j.driver.internal.shaded.io.netty.util.concurrent.GlobalEventExecutor$TaskRunner.run(GlobalEventExecutor.java:248)
+	at org.neo4j.driver.internal.shaded.io.netty.util.concurrent.FastThreadLocalRunnable.run(FastThreadLocalRunnable.java:30)
+	at java.lang.Thread.run(Thread.java:748)
+	at com.oracle.svm.core.thread.JavaThreads.threadStartRoutine(JavaThreads.java:473)
+	at com.oracle.svm.core.posix.thread.PosixJavaThreads.pthreadStartRoutine(PosixJavaThreads.java:193)
+
+2019-03-19 20:38:50,119 unknown-host quarkus-demo-1.0-SNAPSHOT-runner[30457] INFO  [io.quarkus] (main) Quarkus 0.11.0 started in 0.022s. Listening on: http://127.0.0.1:8080
+2019-03-19 20:38:50,122 unknown-host quarkus-demo-1.0-SNAPSHOT-runner[30457] INFO  [io.quarkus] (main) Installed features: [cdi, resteasy, resteasy-jsonb]
+2019-03-19 20:38:57,596 unknown-host quarkus-demo-1.0-SNAPSHOT-runner[30457] INFO  [Driver] (XNIO-1 task-1) Direct driver instance 1181889262 created for server address localhost:7687
+2019-03-19 20:38:57,598 unknown-host quarkus-demo-1.0-SNAPSHOT-runner[30457] WARNING [org.neo.dri.int.sha.io.net.uti.con.DefaultPromise] (globalEventExecutor-1-1) An exception was thrown by org.neo4j.driver.internal.async.ChannelConnectedListener.operationComplete(): java.lang.IllegalStateException: channel not registered to an event loop
+	at org.neo4j.driver.internal.shaded.io.netty.channel.AbstractChannel.eventLoop(AbstractChannel.java:162)
+	at org.neo4j.driver.internal.shaded.io.netty.channel.DefaultChannelPromise.executor(DefaultChannelPromise.java:60)
+	at org.neo4j.driver.internal.shaded.io.netty.util.concurrent.DefaultPromise.notifyListeners(DefaultPromise.java:417)
+	at org.neo4j.driver.internal.shaded.io.netty.util.concurrent.DefaultPromise.setFailure(DefaultPromise.java:112)
+	at org.neo4j.driver.internal.shaded.io.netty.channel.DefaultChannelPromise.setFailure(DefaultChannelPromise.java:89)
+	at org.neo4j.driver.internal.async.ChannelConnectedListener.operationComplete(ChannelConnectedListener.java:70)
+	at org.neo4j.driver.internal.async.ChannelConnectedListener.operationComplete(ChannelConnectedListener.java:37)
+	at org.neo4j.driver.internal.shaded.io.netty.util.concurrent.DefaultPromise.notifyListener0(DefaultPromise.java:511)
+	at org.neo4j.driver.internal.shaded.io.netty.util.concurrent.DefaultPromise.notifyListeners0(DefaultPromise.java:504)
+	at org.neo4j.driver.internal.shaded.io.netty.util.concurrent.DefaultPromise.notifyListenersNow(DefaultPromise.java:483)
+	at org.neo4j.driver.internal.shaded.io.netty.util.concurrent.DefaultPromise.access$000(DefaultPromise.java:33)
+	at org.neo4j.driver.internal.shaded.io.netty.util.concurrent.DefaultPromise$1.run(DefaultPromise.java:435)
+	at org.neo4j.driver.internal.shaded.io.netty.util.concurrent.GlobalEventExecutor$TaskRunner.run(GlobalEventExecutor.java:248)
+	at org.neo4j.driver.internal.shaded.io.netty.util.concurrent.FastThreadLocalRunnable.run(FastThreadLocalRunnable.java:30)
+	at java.lang.Thread.run(Thread.java:748)
+	at com.oracle.svm.core.thread.JavaThreads.threadStartRoutine(JavaThreads.java:473)
+	at com.oracle.svm.core.posix.thread.PosixJavaThreads.pthreadStartRoutine(PosixJavaThreads.java:193)
+
