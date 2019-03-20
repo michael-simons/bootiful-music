@@ -282,3 +282,5 @@ $(document).ready(function () {
         displayVenues();
     }
 });
+
+hljs.initHighlightingOnLoad();

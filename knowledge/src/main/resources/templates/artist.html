@@ -237,7 +237,7 @@
             </p>
         </div>
         <div class="col-12 collapse" id="recommendedArtistsQuery">
-            <pre>
+            <pre><code class="java">
 // First recommended artists that are not related on the first level with the given artist but might be of interest.
 var cypher
     = " MATCH (src:Artist)"
@@ -275,7 +275,7 @@ cypher
     + "                 decade.value + ' ' + country.name + '  ' + genre.name AS reason"
     + " ORDER BY recommended.name";
 var recommendedArtists = session.query(cypher, parameters);
-            </pre>
+            </code></pre>
         </div>
     </div>
 

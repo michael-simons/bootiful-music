@@ -45,7 +45,7 @@
                    aria-expanded="false" aria-controls="microgenreQuery" th:text="#{common.show-query}">Placeholder</a>
             </p>
             <div class="collapse" id="microgenreQuery">
-            <pre>
+            <pre><code class="java">
 @Query(value
 	= " MATCH (a:Album)-[:CONTAINS]-&gt;(track)-[pc:HAS_BEEN_PLAYED_IN]-&gt;(),"
 	+ "       (a)-[:RELEASED_BY]-&gt;(artist)"
@@ -61,7 +61,7 @@
 	+ "         albums"
 )
 List&lt;Microgenre&gt; findAllMicrogrenes();
-            </pre>
+            </code></pre>
             </div>
         </div>
     </div>
