@@ -77,11 +77,6 @@
 </div>
 <div class="listingblock">
 <div class="content">
-<pre mode="cypher"  class="highlight pre-scrollable programlisting cm-s-neo code runnable standalone-example ng-binding" data-lang="cypher" lang="cypher"><!--code class="cypher language-cypher"-->CREATE CONSTRAINT ON (a:Artist) ASSERT a.name IS UNIQUE<!--/code--></pre>
-</div>
-</div>
-<div class="listingblock">
-<div class="content">
 <pre mode="cypher"  class="highlight pre-scrollable programlisting cm-s-neo code runnable standalone-example ng-binding" data-lang="cypher" lang="cypher"><!--code class="cypher language-cypher"-->WITH "jdbc:postgresql://localhost:5432/bootiful-music?currentSchema=dev&user=statsdb-dev&password=dev" as url,
      "SELECT DISTINCT a.name as artist_name, t.album, g.name as genre_name, t.year
       FROM tracks t JOIN artists a ON a.id = t.artist_id JOIN genres g ON g.id = t.genre_id
@@ -113,23 +108,22 @@ MERGE (album) - [:RELEASED_IN] -> (year)<!--/code--></pre>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre mode="cypher"  class="highlight pre-scrollable programlisting cm-s-neo code runnable standalone-example ng-binding" data-lang="cypher" lang="cypher"><!--code class="cypher language-cypher"-->WITH "jdbc:postgresql://localhost:5432/bootiful-music?currentSchema=dev&user=statsdb-dev&password=dev" as url,
-     "
-       SELECT a.name as artist_name, t.album as album_name, t.name as track_name, t.disc_number as disc_number, t.track_number as track_number
-       FROM tracks t JOIN artists a ON a.id = t.artist_id  JOIN genres g ON g.id = t.genre_id
-       WHERE t.compilation = 'f'
-     " as sql
-CALL apoc.load.jdbc(url,sql) YIELD row
-MATCH (album:Album {name: row.album_name}) - [:RELEASED_BY] -> (artist:Artist {name: row.artist_name})
-OPTIONAL MATCH (possibleTrack:Track {name: row.track_name}) <- [:CONTAINS] - (:Album) - [:RELEASED_BY] -> (artist)
-FOREACH( _ IN CASE WHEN possibleTrack IS NULL THEN ['create_track_and_add_relation'] ELSE [] END |
-  CREATE (newTrack:Track {name: row.track_name, createdAt: localdatetime()})
-  MERGE (album) - [:CONTAINS {disc_number: row.disc_number, track_number: row.track_number}] -> (newTrack)
-)
-FOREACH( _ IN CASE WHEN possibleTrack IS NOT NULL THEN ['add_relation'] ELSE [] END |
-  MERGE (album) - [:CONTAINS {disc_number: row.disc_number, track_number: row.track_number}] -> (possibleTrack)
-)
-return album<!--/code--></pre>
+<pre mode="cypher"  class="highlight pre-scrollable programlisting cm-s-neo code runnable standalone-example ng-binding" data-lang="cypher" lang="cypher"><!--code class="cypher language-cypher"-->CALL apoc.periodic.iterate('CALL apoc.load.jdbc(
+   "jdbc:postgresql://localhost:5432/bootiful-music?currentSchema=dev&user=statsdb-dev&password=dev",
+
+   "SELECT a.name as artist_name, t.album as album_name, t.name as track_name, t.disc_number as disc_number, t.track_number as track_number
+      FROM tracks t JOIN artists a ON a.id = t.artist_id  JOIN genres g ON g.id = t.genre_id
+     WHERE t.compilation = \'f\' and t.name like \'We Will Rock You%\'") YIELD row return row',
+
+   "MATCH (album:Album {name: row.album_name}) - [:RELEASED_BY] -> (artist:Artist {name: row.artist_name})
+    OPTIONAL MATCH (possibleTrack:Track {name: row.track_name}) <- [:CONTAINS] - (:Album) - [:RELEASED_BY] -> (artist)
+    FOREACH( _ IN CASE WHEN possibleTrack IS NULL THEN ['create_track_and_add_relation'] ELSE [] END |
+      CREATE (newTrack:Track {name: row.track_name, createdAt: localdatetime()})
+      MERGE (album) - [:CONTAINS {disc_number: row.disc_number, track_number: row.track_number}] -> (newTrack)
+    )
+    FOREACH( _ IN CASE WHEN possibleTrack IS NOT NULL THEN ['add_relation'] ELSE [] END |
+      MERGE (album) - [:CONTAINS {disc_number: row.disc_number, track_number: row.track_number}] -> (possibleTrack)
+    )", {batchSize:1})<!--/code--></pre>
 </div>
 </div>
 	</div>
