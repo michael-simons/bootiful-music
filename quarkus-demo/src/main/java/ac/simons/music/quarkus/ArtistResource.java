@@ -13,8 +13,11 @@ import javax.ws.rs.core.MediaType;
 @Path("/artists")
 public class ArtistResource {
 
-	@Inject
-	ArtistService artistService;
+	private final ArtistService artistService;
+
+	public ArtistResource(ArtistService artistService) {
+		this.artistService = artistService;
+	}
 
 	@GET
 	@Path("/by-name/{name}")

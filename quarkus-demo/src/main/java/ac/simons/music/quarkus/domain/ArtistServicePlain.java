@@ -32,8 +32,11 @@ import org.neo4j.driver.Value;
 @ApplicationScoped
 public class ArtistServicePlain implements ArtistService {
 
-	@Inject
-	Driver driver;
+	private final Driver driver;
+
+	public ArtistServicePlain(Driver driver) {
+		this.driver = driver;
+	}
 
 	public List<ArtistEntity> findByName(String name) {
 		try (Session s = driver.session()) {
