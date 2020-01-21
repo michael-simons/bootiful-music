@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 the original author or authors.
+ * Copyright 2018-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,7 @@ import static java.util.stream.Collectors.toList;
 import java.time.LocalDate;
 import java.util.List;
 
+import org.neo4j.ogm.types.spatial.GeographicPoint2d;
 import org.springframework.data.geo.Point;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
@@ -71,7 +72,7 @@ public class TourController {
 
 		private final LocalDate visitedAt;
 
-		private final Point location;
+		private final GeographicPoint2d location;
 
 		public String getLabel() {
 			return String.format("%s (%s)", this.name, this.visitedAt.toString());

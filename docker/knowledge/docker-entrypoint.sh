@@ -21,4 +21,4 @@ file_env() {
 file_env 'NEO4J_AUTH'
 IFS='/' read -r -a username_and_password <<< "$NEO4J_AUTH"
 
-SPRING_DATA_NEO4J_USERNAME="${username_and_password[0]}" SPRING_DATA_NEO4J_PASSWORD="${username_and_password[1]}" exec java -jar app.jar
+ORG_NEO4J_DRIVER_AUTHENTICATION_USERNAME="${username_and_password[0]}" ORG_NEO4J_DRIVER_AUTHENTICATION_PASSWORD="${username_and_password[1]}" exec java -jar app.jar

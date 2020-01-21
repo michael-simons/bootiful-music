@@ -17,7 +17,7 @@ package ac.simons.music.knowledge.domain;
 
 import static org.assertj.core.api.Assertions.*;
 
-import java.time.Year;
+import java.util.List;
 
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -25,7 +25,7 @@ import org.neo4j.driver.AuthTokens;
 import org.neo4j.driver.Driver;
 import org.neo4j.driver.GraphDatabase;
 import org.neo4j.driver.springframework.boot.autoconfigure.Neo4jDriverAutoConfiguration;
-import org.neo4j.ogm.session.Session;
+import org.neo4j.ogm.types.spatial.GeographicPoint2d;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.ImportAutoConfiguration;
 import org.springframework.boot.test.autoconfigure.data.neo4j.DataNeo4jTest;
@@ -38,19 +38,19 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 /**
  * @author Michael J. Simons
  */
-@Testcontainers(disabledWithoutDocker = true)
+@Testcontainers
 @DataNeo4jTest
 @ImportAutoConfiguration(Neo4jDriverAutoConfiguration.class)
-class CountryRepositoryTest {
+public class MusicVenueRepositoryTest {
 
 	@Container
 	private static final Neo4jContainer neo4jContainer = new Neo4jContainer()
 		.withAdminPassword(null);
 
-	private final CountryRepository countryRepository;
+	private final MusicVenueRepository musicVenueRepository;
 
-	CountryRepositoryTest(@Autowired CountryRepository countryRepository) {
-		this.countryRepository = countryRepository;
+	MusicVenueRepositoryTest(@Autowired MusicVenueRepository musicVenueRepository) {
+		this.musicVenueRepository = musicVenueRepository;
 	}
 
 	@BeforeAll
@@ -58,9 +58,9 @@ class CountryRepositoryTest {
 		try (var session = driver.session()) {
 			session.writeTransaction(work ->
 				work.run(""
-					+ "MERGE (a:ArtistEntity:Band {name: 'Die Ärzte'}) - [:FOUNDED_IN] ->  (:Country {code: 'DE', name:'Germany'}) "
-					+ "MERGE (bestie:Album {name: 'Die Bestie in Menschengestalt', releasedIn: 1993}) - [:RELEASED_BY] -> (a) "
-					+ "MERGE (drei10:Album {name: '13', releasedIn: 1998}) - [:RELEASED_BY] -> (a)")
+					+ "create (mv:MusicVenue {name: 'Deutschlandhalle'})\n"
+					+ " set mv.location = point({latitude: 52.500278, longitude: 13.269722})\n"
+					+ " return mv;")
 			);
 		} catch (Exception e) {
 			fail(e.getMessage());
@@ -68,18 +68,13 @@ class CountryRepositoryTest {
 	}
 
 	@Test
-	void getStatisticsForCountryShouldWork() {
-		var statistics = this.countryRepository.getStatisticsFor(new CountryEntity("DE"));
-		assertThat(statistics)
-			.hasSize(2)
-			.satisfies(c -> {
-				assertThat(c.getYear()).isEqualTo(Year.of(1993));
-				assertThat(c.getAlbums()).containsExactly("Die Bestie in Menschengestalt");
-			}, atIndex(0))
-			.satisfies(c -> {
-				assertThat(c.getYear()).isEqualTo(Year.of(1998));
-				assertThat(c.getAlbums()).containsExactly("13");
-			}, atIndex(1));
+	void mappingShouldWork() {
+		List<MusicVenueEntity> musicVenueEntity = musicVenueRepository.findAllByName("Deutschlandhalle");
+
+		assertThat(musicVenueEntity)
+			.hasSize(1)
+			.extracting(MusicVenueEntity::getLocation)
+			.containsExactly(new GeographicPoint2d(52.500278, 13.269722));
 	}
 
 	@TestConfiguration
@@ -90,4 +85,5 @@ class CountryRepositoryTest {
 			return GraphDatabase.driver(neo4jContainer.getBoltUrl(), AuthTokens.none());
 		}
 	}
+
 }

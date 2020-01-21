@@ -47,7 +47,7 @@ services:
       environment:
         - NEO4J_AUTH_FILE=/run/secrets/knowledgedb_auth_file
         - SPRING_MAIN_BANNER_MODE=off
-        - SPRING_DATA_NEO4J_URI=bolt://knowledgedb:7687
+        - ORG_NEO4J_DRIVER_URI=bolt://knowledgedb:7687
       secrets:
         - knowledgedb_auth_file
       links:

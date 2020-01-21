@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 the original author or authors.
+ * Copyright 2018-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,7 +15,11 @@
  */
 package ac.simons.music.knowledge.domain;
 
-import static org.neo4j.ogm.annotation.Relationship.INCOMING;
+import static org.neo4j.ogm.annotation.Relationship.*;
+
+import ac.simons.music.knowledge.support.AbstractAuditableBaseEntity;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -29,12 +33,6 @@ import org.neo4j.ogm.annotation.NodeEntity;
 import org.neo4j.ogm.annotation.Relationship;
 import org.neo4j.ogm.annotation.RelationshipEntity;
 import org.neo4j.ogm.annotation.StartNode;
-import org.neo4j.ogm.annotation.typeconversion.Convert;
-
-import ac.simons.music.knowledge.support.AbstractAuditableBaseEntity;
-import ac.simons.music.knowledge.support.NoOpLocalDateConversion;
-import lombok.Getter;
-import lombok.Setter;
 
 /**
  * @author Michael J. Simons
@@ -78,7 +76,6 @@ public class TourEntity extends AbstractAuditableBaseEntity {
 		@EndNode
 		private MusicVenueEntity venue;
 
-		@Convert(NoOpLocalDateConversion.class)
 		@Getter
 		private LocalDate visitedAt;
 

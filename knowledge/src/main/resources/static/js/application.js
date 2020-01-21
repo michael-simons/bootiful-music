@@ -243,7 +243,7 @@ function displayVenues() {
                 const venues = hasDetailedInformation ? response.venues : response;
                 const markers = venues.map(function (mv) {
                     let marker = new ol.Feature({
-                        geometry: new ol.geom.Point(ol.proj.fromLonLat([mv.location.x, mv.location.y])),
+                        geometry: new ol.geom.Point(ol.proj.fromLonLat([mv.location.longitude, mv.location.latitude])),
                         name: mv.label !== undefined ? mv.label : mv.name
                     });
                     marker.setStyle(starStyle);

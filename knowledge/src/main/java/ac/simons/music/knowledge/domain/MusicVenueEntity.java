@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 the original author or authors.
+ * Copyright 2018-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,15 +16,13 @@
 package ac.simons.music.knowledge.domain;
 
 import ac.simons.music.knowledge.support.AbstractAuditableBaseEntity;
-import ac.simons.music.knowledge.support.NativePointConverter;
 import lombok.Getter;
 import lombok.Setter;
 
 import org.neo4j.ogm.annotation.Index;
 import org.neo4j.ogm.annotation.NodeEntity;
 import org.neo4j.ogm.annotation.Relationship;
-import org.neo4j.ogm.annotation.typeconversion.Convert;
-import org.springframework.data.geo.Point;
+import org.neo4j.ogm.types.spatial.GeographicPoint2d;
 
 /**
  * @author Michael J. Simons
@@ -35,14 +33,13 @@ public class MusicVenueEntity extends AbstractAuditableBaseEntity {
 	@Index
 	private String name;
 
-	@Convert(NativePointConverter.class)
-	private Point location;
+	private GeographicPoint2d location;
 
 	@Relationship("IS_LOCATED_IN")
 	@Setter
 	private CountryEntity foundedIn;
 
-	public MusicVenueEntity(String name, Point location) {
+	public MusicVenueEntity(String name, GeographicPoint2d location) {
 		this.name = name;
 		this.location = location;
 	}
