@@ -44,7 +44,7 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 class CountryRepositoryTest {
 
 	@Container
-	private static final Neo4jContainer neo4jContainer = new Neo4jContainer()
+	private static final Neo4jContainer neo4jContainer = new Neo4jContainer("neo4j:3.5.14")
 		.withAdminPassword(null);
 
 	private final CountryRepository countryRepository;

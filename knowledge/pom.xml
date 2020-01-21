@@ -24,7 +24,7 @@
 		<java.version>11</java.version>
 		<jquery.version>3.3.1</jquery.version>
 		<highlightjs.version>9.8.0</highlightjs.version>
-		<neo4j.version>3.5.11</neo4j.version>
+		<neo4j.version>3.5.14</neo4j.version>
 		<neo4j-java-driver-spring-boot-starter.version>4.0.0</neo4j-java-driver-spring-boot-starter.version>
 		<openlayers.version>5.2.0</openlayers.version>
 		<testcontainers.version>1.12.4</testcontainers.version>
