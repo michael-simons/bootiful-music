@@ -18,6 +18,7 @@ package ac.simons.music.knowledge;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.actuate.autoconfigure.neo4j.Neo4jHealthContributorAutoConfiguration;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.autoconfigure.domain.EntityScan;
 import org.springframework.data.neo4j.annotation.EnableNeo4jAuditing;
 import org.springframework.scheduling.annotation.EnableAsync;
 
@@ -27,6 +28,7 @@ import org.springframework.scheduling.annotation.EnableAsync;
 @SpringBootApplication(exclude = Neo4jHealthContributorAutoConfiguration.class) // The driver starter has a better health endpoint
 @EnableNeo4jAuditing
 @EnableAsync
+@EntityScan(basePackages = "ac.simons.music.knowledge.domain")
 public class KnowledgeApplication {
 
 	public static void main(String[] args) {

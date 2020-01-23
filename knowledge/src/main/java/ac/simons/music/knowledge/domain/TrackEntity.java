@@ -49,7 +49,7 @@ public class TrackEntity extends AbstractAuditableBaseEntity {
 	private Set<SoloArtistEntity> featuring = new HashSet<>();
 
 	public TrackEntity(String name) {
-		this(name, Set.of());
+		this(name, Collections.emptySet());
 	}
 
 	@PersistenceConstructor
