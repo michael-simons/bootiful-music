@@ -6,10 +6,10 @@ ENV TINI_VERSION=v0.18.0
 ADD https://github.com/krallin/tini/releases/download/${TINI_VERSION}/tini /usr/bin/tini
 RUN chmod +x /usr/bin/tini
 
-ENV NEO4J_SHA256=8d02047f3196c23849f7b6dda605b98098dbdc694747f1708e119715af3d3e06 \
-    NEO4J_TARBALL=neo4j-enterprise-3.5.14-unix.tar.gz \
+ENV NEO4J_SHA256=1f8c60e01e8bcdb5c6921341bd4a783c08a748cabb3348d4e4d2f104544232ca \
+    NEO4J_TARBALL=neo4j-enterprise-3.5.17-unix.tar.gz \
     NEO4J_EDITION=enterprise
-ARG NEO4J_URI=http://dist.neo4j.org/neo4j-enterprise-3.5.14-unix.tar.gz
+ARG NEO4J_URI=http://dist.neo4j.org/neo4j-enterprise-3.5.17-unix.tar.gz
 ARG NEO4J_APOC_URI=https://github.com/neo4j-contrib/neo4j-apoc-procedures/releases/download/3.5.0.7/apoc-3.5.0.7-all.jar
 ARG NEO4J_ALGO_URI=https://github.com/neo4j-contrib/neo4j-graph-algorithms/releases/download/3.5.4.0/graph-algorithms-algo-3.5.4.0.jar
 
